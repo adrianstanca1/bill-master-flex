@@ -112,6 +112,8 @@ export default function Dashboard() {
     return allowed.has(h) ? h : "overview";
   })();
 
+  const [tab, setTab] = useState(defaultTab);
+
   // Sync filter with ?q= and focus INV when landing on #invoices
   useEffect(() => {
     const setFromURL = () => {
@@ -153,8 +155,12 @@ export default function Dashboard() {
             <button
               className="button button-sm sm:!px-4 sm:!py-2"
               onClick={() => {
-                numberInputRef.current?.focus();
-                numberInputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+                setTab('invoices');
+                window.location.hash = 'invoices';
+                setTimeout(() => {
+                  numberInputRef.current?.focus();
+                  numberInputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+                }, 0);
               }}
             >
               New Invoice
@@ -171,7 +177,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-      <Tabs defaultValue={defaultTab}>
+      <Tabs value={tab} onValueChange={(v)=>{ setTab(v); window.location.hash = v; if (v === 'invoices') setTimeout(()=> numberInputRef.current?.focus(), 0); }}>
         <TabsList className="mb-4 flex flex-wrap gap-2">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="invoices">Invoices</TabsTrigger>
