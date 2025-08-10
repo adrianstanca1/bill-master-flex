@@ -17,6 +17,7 @@ interface InvoiceFormProps {
   control: Control<FormValues>;
   onSaveDefaults: () => void;
   onPreview: () => void;
+  onSaveBackend: () => void;
 }
 
 export function InvoiceForm({ 
@@ -25,7 +26,8 @@ export function InvoiceForm({
   append, 
   remove, 
   onSaveDefaults, 
-  onPreview 
+  onPreview,
+  onSaveBackend,
 }: InvoiceFormProps) {
   return (
     <div className="space-y-6">
@@ -38,6 +40,9 @@ export function InvoiceForm({
         <div className="flex gap-3">
           <Button variant="outline" onClick={onSaveDefaults}>
             Save Defaults
+          </Button>
+          <Button variant="secondary" onClick={onSaveBackend}>
+            Save to Supabase
           </Button>
           <Button onClick={onPreview} className="bg-gradient-primary">
             Preview Invoice

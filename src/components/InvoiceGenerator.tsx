@@ -8,6 +8,7 @@ import { InvoiceForm } from './InvoiceForm';
 import { InvoiceTotals } from './InvoiceTotals';
 import { InvoicePreview } from './InvoicePreview';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from "@/integrations/supabase/client";
 
 const itemSchema = z.object({
   description: z.string().min(1, 'Description is required'),
@@ -118,13 +119,40 @@ export function InvoiceGenerator() {
     });
   }
 
-  function handlePreview() {
-    setShowPreview(true);
-  }
+function handlePreview() {
+  setShowPreview(true);
+}
 
-  function handleClosePreview() {
-    setShowPreview(false);
+async function handleSaveBackend() {
+  try {
+    const settings = JSON.parse(localStorage.getItem('as-settings') || '{}');
+    const companyId = settings?.companyId;
+    if (!companyId) {
+      toast({ title: "Missing company", description: "Set a company ID in Settings first.", variant: "destructive" });
+      return;
+    }
+    const body = {
+      endpoint: "invoices",
+      companyId,
+      client: values.client,
+      number: values.invoice.number,
+      dueDate: values.invoice.dueDate,
+      items: values.items,
+      reverseVAT: values.vatMode === 'REVERSE_CHARGE_20',
+      retentionApplied: (values.retentionPercent || 0) > 0,
+    };
+    const { data, error } = await supabase.functions.invoke("accounting", { body });
+    if (error) throw error as any;
+    toast({ title: "Invoice saved", description: `ID: ${ (data as any)?.invoiceId || 'created' }` });
+  } catch (e: any) {
+    console.error(e);
+    toast({ title: "Failed to save invoice", description: e?.message || String(e), variant: "destructive" });
   }
+}
+
+function handleClosePreview() {
+  setShowPreview(false);
+}
 
   if (showPreview) {
     return (
@@ -149,6 +177,7 @@ export function InvoiceGenerator() {
               control={control}
               onSaveDefaults={saveDefaults}
               onPreview={handlePreview}
+              onSaveBackend={handleSaveBackend}
             />
           </div>
           <div className="lg:col-span-1">

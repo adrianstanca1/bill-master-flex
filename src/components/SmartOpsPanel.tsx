@@ -63,6 +63,8 @@ function TenderSearchTab() {
   const [country, setCountry] = useState(() => { try { return (JSON.parse(localStorage.getItem("as-settings")||"{}")?.country) || "UK"; } catch { return "UK"; } });
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<any>(null);
+  const [govLoading, setGovLoading] = useState(false);
+  const [govResults, setGovResults] = useState<any>(null);
 
   async function search() {
     setLoading(true);
@@ -79,12 +81,28 @@ function TenderSearchTab() {
     }
   }
 
+  async function searchGov() {
+    setGovLoading(true);
+    setGovResults(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("tenders", { body: { keyword: query, location: country } });
+      if (error) throw error;
+      setGovResults(data);
+    } catch (e) {
+      console.error(e);
+      setGovResults({ error: "Failed to fetch UK tenders" });
+    } finally {
+      setGovLoading(false);
+    }
+  }
+
   return (
     <div className="grid gap-2">
-      <div className="grid md:grid-cols-4 gap-2">
+      <div className="grid md:grid-cols-5 gap-2">
         <input className="input md:col-span-2" placeholder="Query" value={query} onChange={(e) => setQuery(e.target.value)} />
         <input className="input" placeholder="Country" value={country} onChange={(e) => setCountry(e.target.value)} />
         <button className="button" onClick={search} disabled={loading}>{loading ? "Searching…" : "Search"}</button>
+        <button className="button-secondary" onClick={searchGov} disabled={govLoading}>{govLoading ? "Fetching…" : "Find UK Tenders (Gov)"}</button>
       </div>
       {results?.results && (
         <ul className="text-sm list-disc pl-5">
@@ -92,6 +110,18 @@ function TenderSearchTab() {
             <li key={i}><a className="underline" href={r.url} target="_blank" rel="noreferrer">{r.title}</a></li>
           ))}
         </ul>
+      )}
+      {govResults && (
+        <div className="bg-gray-900 rounded-md p-3 text-sm space-y-2">
+          {govResults.summary && <div className="whitespace-pre-wrap">{govResults.summary}</div>}
+          {Array.isArray(govResults.rawTenders) && (
+            <ul className="list-disc pl-5">
+              {govResults.rawTenders.map((t: any, i: number) => (
+                <li key={i}><a className="underline" href={t.url} target="_blank" rel="noreferrer">{t.title}{t.deadline ? ` — ${t.deadline}` : ""}</a></li>
+              ))}
+            </ul>
+          )}
+        </div>
       )}
     </div>
   );
