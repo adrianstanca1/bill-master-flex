@@ -113,4 +113,65 @@
     border-color: hsl(var(--emerald));
     box-shadow: 0 0 0 2px hsl(var(--emerald) / 0.1);
   }
+
+  /* Unified app primitives using design tokens */
+  .card {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
+    padding: 1rem;
+    box-shadow: var(--shadow-card);
+    transition: var(--transition-fast);
+  }
+  .card:hover { background: hsl(var(--surface-hover)); }
+
+  .input {
+    background: hsl(var(--input));
+    color: hsl(var(--foreground));
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
+    padding: 0.5rem 0.75rem;
+    outline: none;
+    transition: var(--transition-fast);
+  }
+  .input::placeholder { color: hsl(var(--text-muted)); }
+  .input:focus {
+    border-color: hsl(var(--emerald));
+    box-shadow: 0 0 0 3px hsl(var(--emerald) / 0.18);
+  }
+  textarea.input { min-height: 42px; }
+
+  .button {
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    border-radius: var(--radius);
+    padding: 0.5rem 0.9rem;
+    font-weight: 600;
+    border: 1px solid transparent;
+    transition: var(--transition-fast);
+  }
+  .button:hover { background: hsl(var(--emerald-dark)); }
+  .button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .button-secondary {
+    background: transparent;
+    color: hsl(var(--foreground));
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
+    padding: 0.5rem 0.9rem;
+    transition: var(--transition-fast);
+  }
+  .button-secondary:hover { background: hsl(var(--surface-hover)); }
+
+  .table { width: 100%; border-collapse: collapse; }
+  .table th, .table td { padding: 0.5rem 0.75rem; border-bottom: 1px solid hsl(var(--border)); }
+}
+
+@layer utilities {
+  /* Improve contrast where gray utilities were used */
+  .bg-gray-900 { background-color: hsl(var(--surface)) !important; }
+  .text-gray-200 { color: hsl(var(--foreground)) !important; }
+  .text-gray-300 { color: hsl(var(--text-secondary)) !important; }
+  .text-gray-400 { color: hsl(var(--text-muted)) !important; }
+  .underline { text-decoration-color: hsl(var(--emerald)) !important; }
 }
