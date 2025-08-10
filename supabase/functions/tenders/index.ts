@@ -24,7 +24,7 @@ function extractTendersFromHtml(html: string) {
     const href = match[1];
     const text = match[2].replace(/<[^>]+>/g, "").trim();
     if (!href || !text) continue;
-    if (!\/Notice\//i.test(href)) continue; // contracts finder notice pages
+    if (!href.toLowerCase().includes("/notice/")) continue; // contracts finder notice pages
     const full = href.startsWith("http")
       ? href
       : `https://www.contractsfinder.service.gov.uk${href}`;
