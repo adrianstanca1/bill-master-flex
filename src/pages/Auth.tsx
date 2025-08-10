@@ -36,7 +36,9 @@ export default function Auth() {
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        navigate(redirectTo, { replace: true });
+        // After sign-in, route to setup if not onboarded yet
+        const onboarded = (()=>{ try { return !!(JSON.parse(localStorage.getItem("as-settings")||"{}")?.onboarded); } catch { return false; } })();
+        navigate(onboarded ? redirectTo : "/setup", { replace: true });
       }
     } catch (err: any) {
       toast({ title: "Auth error", description: err?.message || "Failed", variant: "destructive" });

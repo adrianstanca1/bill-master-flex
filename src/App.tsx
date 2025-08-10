@@ -11,6 +11,7 @@ import Dashboard from "./pages/Dashboard";
 import Invoices from "./pages/Invoices";
 import Settings from "./pages/Settings";
 import ToolSetup from "./pages/ToolSetup";
+import Setup from "./pages/Setup";
 import Auth from "./pages/Auth";
 import AuthStatus from "@/components/AuthStatus";
 import { RequireAuth } from "@/components/RequireAuth";
@@ -28,7 +29,7 @@ const App = () => (
             <div className="container mx-auto flex items-center gap-3 justify-between">
               <div className="flex items-center gap-3">
                 <SidebarTrigger className="mr-2" />
-                <span className="text-sm text-muted-foreground">Menu</span>
+                {(() => { try { const s = JSON.parse(localStorage.getItem("as-settings")||"{}"); return s?.logoDataUrl ? (<img src={s.logoDataUrl} alt="Logo" className="h-6 w-auto rounded-sm border" />) : (<span className="text-sm text-muted-foreground">Menu</span>); } catch { return (<span className="text-sm text-muted-foreground">Menu</span>); } })()}
               </div>
               <AuthStatus />
             </div>
@@ -43,6 +44,7 @@ const App = () => (
                 <Route path="/invoices" element={<RequireAuth><Invoices /></RequireAuth>} />
                 <Route path="/settings" element={<RequireAuth><Settings /></RequireAuth>} />
                 <Route path="/tool-setup" element={<RequireAuth><ToolSetup /></RequireAuth>} />
+                <Route path="/setup" element={<RequireAuth><Setup /></RequireAuth>} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

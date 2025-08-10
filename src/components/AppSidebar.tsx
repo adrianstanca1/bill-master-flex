@@ -14,10 +14,11 @@ import {
 
 const items = [
   { title: "Home", url: "/", icon: Home },
+  { title: "Setup", url: "/setup", icon: SettingsIcon },
   { title: "Dashboard", url: "/dashboard", icon: Gauge },
   { title: "Invoices", url: "/invoices", icon: FileText },
   { title: "Tenders", url: "/dashboard#tenders", icon: Briefcase },
-  { title: "Important information for tool setup", url: "/tool-setup", icon: Info },
+  { title: "Tool Setup", url: "/tool-setup", icon: Info },
   { title: "Settings", url: "/settings", icon: SettingsIcon },
 ];
 
