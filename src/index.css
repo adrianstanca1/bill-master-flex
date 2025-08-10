@@ -165,7 +165,24 @@
 
   .table { width: 100%; border-collapse: collapse; }
   .table th, .table td { padding: 0.5rem 0.75rem; border-bottom: 1px solid hsl(var(--border)); }
+
+  /* Ensure dropdowns/menus are opaque and on top */
+  [data-radix-popper-content-wrapper] { z-index: 60 !important; }
+  [data-radix-popper-content-wrapper] > div {
+    background: hsl(var(--popover)) !important;
+    color: hsl(var(--popover-foreground));
+    border: 1px solid hsl(var(--border));
+    box-shadow: var(--shadow-card);
+  }
+
+  /* Native select dropdown fix on Safari/iOS */
+  select.input {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: none;
+  }
 }
+
 
 @layer utilities {
   /* Improve contrast where gray utilities were used */
