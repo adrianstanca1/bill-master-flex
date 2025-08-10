@@ -15,6 +15,23 @@ export default function Auth() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        setTimeout(() => {
+          const onboarded = (()=>{ try { return !!(JSON.parse(localStorage.getItem("as-settings")||"{}")?.onboarded); } catch { return false; } })();
+          navigate(onboarded ? redirectTo : "/setup", { replace: true });
+        }, 0);
+      }
+    });
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        const onboarded = (()=>{ try { return !!(JSON.parse(localStorage.getItem("as-settings")||"{}")?.onboarded); } catch { return false; } })();
+        navigate(onboarded ? redirectTo : "/setup", { replace: true });
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [navigate, redirectTo]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
