@@ -46,7 +46,14 @@ export default function AgentChat() {
       const { data, error } = await supabase.functions.invoke("agent", {
         body: { message: text, invoices },
       });
-      if (error) throw error;
+      if (error) {
+        console.error(error);
+        setMessages((m) => [
+          ...m,
+          { role: "assistant", content: `Agent unavailable: ${error.message || "Function error"}. Please ensure AI keys are configured.` },
+        ]);
+        return;
+      }
       setMessages((m) => [
         ...m,
         { role: "assistant", content: (data as any)?.reply || "…" },
