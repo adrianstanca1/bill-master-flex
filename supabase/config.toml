@@ -28,4 +28,4 @@ verify_jwt = true
 verify_jwt = false
 
 [functions.tenders]
-verify_jwt = false
+verify_jwt = true
