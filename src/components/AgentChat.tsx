@@ -83,6 +83,7 @@ export default function AgentChat() {
         <input
           className="input"
           placeholder="Ask about overdue totals, draft emails, cash flow…"
+          aria-label="Chat input"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => {

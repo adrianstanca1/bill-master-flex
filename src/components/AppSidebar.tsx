@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Gauge, FileText, Home, Briefcase } from "lucide-react";
+import { Gauge, FileText, Home, Briefcase, Settings as SettingsIcon } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -17,6 +17,7 @@ const items = [
   { title: "Dashboard", url: "/dashboard", icon: Gauge },
   { title: "Invoices", url: "/invoices", icon: FileText },
   { title: "Tenders", url: "/dashboard#tenders", icon: Briefcase },
+  { title: "Settings", url: "/settings", icon: SettingsIcon },
 ];
 
 export function AppSidebar() {
@@ -38,7 +39,7 @@ export function AppSidebar() {
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild isActive={currentPath === item.url}>
-                    <NavLink to={item.url} end className={getNavCls}>
+                    <NavLink to={item.url} end>
                       <item.icon className="mr-2 h-4 w-4" />
                       {!collapsed && <span>{item.title}</span>}
                     </NavLink>

@@ -115,7 +115,7 @@ export default function Dashboard() {
     <main className="grid gap-6">
       <h1 className="text-2xl font-bold">Invoice Dashboard</h1>
 
-      <section className="card">
+      <section className="card animate-fade-in">
         <h2 className="text-lg font-semibold mb-4">Business Overview</h2>
         <div className="grid sm:grid-cols-4 gap-4">
           <KPITile label="Outstanding" value={`£${kpi.outstanding.toFixed(2)}`} />
@@ -128,7 +128,7 @@ export default function Dashboard() {
         </div>
       </section>
 
-      <section className="card">
+      <section className="card animate-fade-in">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-semibold">Invoice Tracker</h2>
           <button
@@ -238,7 +238,7 @@ export default function Dashboard() {
         </table>
       </section>
 
-      <section className="card">
+      <section className="card animate-fade-in">
         <h2 className="text-lg font-semibold mb-3">AI Agent</h2>
         <p className="text-sm text-gray-300 mb-3">
           Ask things like: <em>“Who is overdue and by how much?”</em>, <em>“Draft a polite payment reminder to {"{client}"}”</em>, <em>“Projected cash flow this month?”</em>
@@ -246,19 +246,19 @@ export default function Dashboard() {
         <AgentChat />
       </section>
 
-      <section className="card">
+      <section className="card animate-fade-in">
         <h2 className="text-lg font-semibold mb-3">SmartOps Panel (UK Construction)</h2>
         <p className="text-sm text-gray-300 mb-3">Run a health scan, search tenders, generate quotes, and get VAT/CIS advice.</p>
         <SmartOpsPanel />
       </section>
 
-      <section className="card">
+      <section className="card animate-fade-in" id="tenders">
         <h2 className="text-lg font-semibold mb-3">TenderBot (Website Scraper)</h2>
         <p className="text-sm text-gray-300 mb-3">Crawl tender portals and extract pages using Firecrawl.</p>
         <TenderBot />
       </section>
 
-      <section className="card">
+      <section className="card animate-fade-in">
         <h2 className="text-lg font-semibold mb-3">RAMS Generator</h2>
         <p className="text-sm text-gray-300 mb-3">Generate a printable RAMS document for your project.</p>
         <RamsGenerator />

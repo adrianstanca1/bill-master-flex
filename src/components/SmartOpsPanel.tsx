@@ -23,7 +23,7 @@ export default function SmartOpsPanel() {
 }
 
 function ScanTab() {
-  const [companyId, setCompanyId] = useState(""); // TODO: replace with real company selection after onboarding
+  const [companyId, setCompanyId] = useState(() => { try { return (JSON.parse(localStorage.getItem("as-settings")||"{}")?.companyId) || ""; } catch { return ""; } }); // TODO: replace with real company selection after onboarding
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
 
@@ -60,7 +60,7 @@ function ScanTab() {
 
 function TenderSearchTab() {
   const [query, setQuery] = useState("construction");
-  const [country, setCountry] = useState("UK");
+  const [country, setCountry] = useState(() => { try { return (JSON.parse(localStorage.getItem("as-settings")||"{}")?.country) || "UK"; } catch { return "UK"; } });
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<any>(null);
 
@@ -100,7 +100,7 @@ function TenderSearchTab() {
 function QuoteTab() {
   const [title, setTitle] = useState("Small refurb job");
   const [withMaterials, setWithMaterials] = useState(true);
-  const [margin, setMargin] = useState(20);
+  const [margin, setMargin] = useState(() => { try { return Number(JSON.parse(localStorage.getItem("as-settings")||"{}")?.targetMargin ?? 20); } catch { return 20; } });
   const [loading, setLoading] = useState(false);
   const [quote, setQuote] = useState<any>(null);
 
@@ -141,9 +141,9 @@ function QuoteTab() {
 
 function TaxTab() {
   const [turnover, setTurnover] = useState(75000);
-  const [scheme, setScheme] = useState("standard");
-  const [reverseCharge, setReverseCharge] = useState(true);
-  const [cis, setCis] = useState(true);
+  const [scheme, setScheme] = useState(() => { try { return (JSON.parse(localStorage.getItem("as-settings")||"{}")?.vatScheme) || "standard"; } catch { return "standard"; } });
+  const [reverseCharge, setReverseCharge] = useState(() => { try { return !!(JSON.parse(localStorage.getItem("as-settings")||"{}")?.reverseCharge ?? true); } catch { return true; } });
+  const [cis, setCis] = useState(() => { try { return !!(JSON.parse(localStorage.getItem("as-settings")||"{}")?.cis ?? true); } catch { return true; } });
   const [loading, setLoading] = useState(false);
   const [advice, setAdvice] = useState<string>("");
 
