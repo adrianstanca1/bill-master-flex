@@ -1,14 +1,28 @@
 import React, { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function TenderBot() {
   const [url, setUrl] = useState("");
   const [mode, setMode] = useState<"crawl" | "scrape">("crawl");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
+  const { toast } = useToast();
 
   async function handleRun() {
     if (!url) return;
+    // Basic https URL validation
+    try {
+      const u = new URL(url);
+      if (u.protocol !== "https:") {
+        toast({ title: "Use a secure URL", description: "Only https URLs are allowed.", variant: "destructive" });
+        return;
+      }
+    } catch {
+      toast({ title: "Invalid URL", description: "Please enter a valid website URL.", variant: "destructive" });
+      return;
+    }
+
     setLoading(true);
     setResult(null);
     try {
@@ -17,9 +31,11 @@ export default function TenderBot() {
       });
       if (error) throw error;
       setResult(data);
-    } catch (e) {
+      toast({ title: "TenderBot finished", description: "Results loaded below." });
+    } catch (e: any) {
       console.error(e);
       setResult({ error: "Failed to run TenderBot" });
+      toast({ title: "TenderBot failed", description: e?.message || "Could not complete the request.", variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -30,6 +46,8 @@ export default function TenderBot() {
       <div className="grid md:grid-cols-5 gap-2">
         <input
           className="input md:col-span-3"
+          type="url"
+          inputMode="url"
           placeholder="https://example.com/tenders"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
@@ -38,7 +56,7 @@ export default function TenderBot() {
           <option value="crawl">Crawl (site-wide)</option>
           <option value="scrape">Scrape (single page)</option>
         </select>
-        <button className="button" onClick={handleRun} disabled={loading}>
+        <button className="button" onClick={handleRun} disabled={loading} aria-busy={loading} aria-live="polite">
           {loading ? "Running…" : "Run TenderBot"}
         </button>
       </div>
