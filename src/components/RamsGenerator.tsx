@@ -35,9 +35,10 @@ export default function RamsGenerator() {
       });
       if (error) throw error;
       setHtml(DOMPurify.sanitize((data as any)?.html || ""));
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      setHtml("<p>Failed to generate RAMS.</p>");
+      const msg = e?.message?.includes("JWT") || e?.message?.includes("401") ? "Please sign in to use the RAMS generator." : "Failed to generate RAMS.";
+      setHtml(`<p>${msg}</p>`);
     } finally {
       setLoading(false);
     }
