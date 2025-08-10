@@ -5,6 +5,7 @@ import RamsGenerator from "@/components/RamsGenerator";
 import SmartOpsPanel from "@/components/SmartOpsPanel";
 import FunctionDiagnostics from "@/components/FunctionDiagnostics";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import SEO from "@/components/SEO";
 
 type InvoiceRow = {
   number: string;
@@ -52,25 +53,6 @@ export default function Dashboard() {
   const [filter, setFilter] = useState<string>("");
   const numberInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    document.title = "Dashboard | AS Invoice Generator";
-    const m = document.querySelector('meta[name="description"]');
-    if (m) m.setAttribute("content", "Invoice dashboard with KPIs and AI agent.");
-    else {
-      const meta = document.createElement("meta");
-      meta.name = "description";
-      meta.content = "Invoice dashboard with KPIs and AI agent.";
-      document.head.appendChild(meta);
-    }
-    const link = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
-    if (link) link.href = window.location.href;
-    else {
-      const l = document.createElement("link");
-      l.rel = "canonical";
-      l.href = window.location.href;
-      document.head.appendChild(l);
-    }
-  }, []);
 
   useEffect(() => {
     const data: InvoiceRow[] = readInvoices();
@@ -159,19 +141,24 @@ export default function Dashboard() {
   }, [defaultTab]);
 
   return (
-    <main className="grid gap-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Business Dashboard</h1>
-        <div className="flex gap-2">
-          <button
-            className="button"
-            onClick={() => {
-              numberInputRef.current?.focus();
-              numberInputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-            }}
-          >
-            New Invoice
-          </button>
+    <>
+      <SEO
+        title="Dashboard | AS Invoice Generator"
+        description="Invoice dashboard with KPIs and AI tools for UK construction."
+      />
+      <main className="grid gap-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold">Business Dashboard</h1>
+          <div className="flex gap-2">
+            <button
+              className="button"
+              onClick={() => {
+                numberInputRef.current?.focus();
+                numberInputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+              }}
+            >
+              New Invoice
+            </button>
           <button
             className="button-secondary"
             onClick={() => {
@@ -369,7 +356,8 @@ export default function Dashboard() {
           </section>
         </TabsContent>
       </Tabs>
-    </main>
+      </main>
+    </>
   );
 }
 

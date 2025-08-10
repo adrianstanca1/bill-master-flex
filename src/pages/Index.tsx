@@ -1,37 +1,32 @@
-import React, { useEffect } from "react";
+import React from "react";
 import AgentChat from "@/components/AgentChat";
 import SmartOpsPanel from "@/components/SmartOpsPanel";
 import { Link } from "react-router-dom";
+import SEO from "@/components/SEO";
 
 const Index = () => {
-  useEffect(() => {
-    document.title = "UK Construction Business Dashboard";
-    const desc = "Homepage dashboard with AI coaches for pricing, tenders, VAT/CIS and admin.";
-    const m = document.querySelector('meta[name="description"]');
-    if (m) m.setAttribute("content", desc);
-    else {
-      const meta = document.createElement("meta");
-      meta.name = "description";
-      meta.content = desc;
-      document.head.appendChild(meta);
-    }
-    const link = document.querySelector('link[rel=\"canonical\"]') as HTMLLinkElement | null;
-    if (link) link.href = window.location.href;
-    else {
-      const l = document.createElement("link");
-      l.rel = "canonical";
-      l.href = window.location.href;
-      document.head.appendChild(l);
-    }
-  }, []);
 
   return (
     <>
+      <SEO
+        title="UK Construction Business Dashboard"
+        description="AI-powered dashboard for invoicing, tenders, quotes, and VAT/CIS."
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "UK Construction Business Dashboard",
+          potentialAction: {
+            "@type": "SearchAction",
+            target: (typeof window !== "undefined" ? window.location.origin : "") + "/dashboard#invoices?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        }}
+      />
       <header className="container mx-auto py-8">
         <h1 className="text-3xl font-bold tracking-tight">UK Construction Business Dashboard</h1>
         <p className="mt-2 text-text-secondary max-w-3xl">
           Your all‑in‑one home for invoicing, pricing suggestions, tender discovery, VAT/CIS advice,
-          and admin automation. Powered by on‑device AI agents to save you time and money.
+          and admin automation. Powered by AI agents to save you time and money.
         </p>
         <nav className="mt-4 flex gap-3">
           <Link to="/dashboard" className="button">Open Operations Dashboard</Link>

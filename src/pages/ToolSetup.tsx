@@ -1,22 +1,12 @@
-import React, { useEffect } from "react";
+import React from "react";
 import FunctionDiagnostics from "@/components/FunctionDiagnostics";
 import { Link } from "react-router-dom";
+import SEO from "@/components/SEO";
 
 export default function ToolSetup() {
-  useEffect(() => {
-    document.title = "Tool Setup | Important information";
-    const m = document.querySelector('meta[name="description"]');
-    if (m) m.setAttribute("content", "Important setup info for AI tools and edge functions.");
-    else {
-      const meta = document.createElement("meta");
-      meta.name = "description";
-      meta.content = "Important setup info for AI tools and edge functions.";
-      document.head.appendChild(meta);
-    }
-  }, []);
-
   return (
     <main className="container mx-auto grid gap-6 animate-fade-in">
+      <SEO title="Tool Setup | AI functions & keys" description="Configure API keys and verify edge functions." noindex />
       <header className="pt-6">
         <h1 className="text-2xl font-bold">Important information for tool setup</h1>
         <p className="text-text-secondary">Configure required API keys and settings for each function.</p>

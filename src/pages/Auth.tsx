@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
+import SEO from "@/components/SEO";
 
 export default function Auth() {
   const { toast } = useToast();
@@ -14,12 +15,6 @@ export default function Auth() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    document.title = mode === "signin" ? "Sign in" : "Create account";
-    const m = document.querySelector('meta[name="description"]');
-    const desc = "Secure sign in/up for your dashboard";
-    if (m) m.setAttribute("content", desc);
-  }, [mode]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -49,6 +44,7 @@ export default function Auth() {
 
   return (
     <main className="container max-w-md mx-auto py-10">
+      <SEO title={mode === "signin" ? "Sign in" : "Create account"} description="Secure sign in/up for your dashboard" noindex />
       <h1 className="text-2xl font-bold mb-6">{mode === "signin" ? "Sign in" : "Create account"}</h1>
       <section className="card">
         <form className="grid gap-3" onSubmit={submit}>

@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { applyUserTheme, loadTheme, saveTheme, ThemePreset, ThemeSettings } from "@/lib/theme";
+import SEO from "@/components/SEO";
 
 const LS = "as-settings";
 
@@ -38,17 +39,7 @@ export default function Setup() {
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
   useEffect(() => {
-    document.title = "Setup | Personalize your workspace";
-    const m = document.querySelector('meta[name="description"]');
-    const desc = "Set up company info, VAT scheme, and choose your visual style.";
-    if (m) m.setAttribute("content", desc);
-    else {
-      const meta = document.createElement("meta");
-      meta.name = "description";
-      meta.content = desc;
-      document.head.appendChild(meta);
-    }
-    // Load existing settings
+    // Load existing settings only
     try {
       const raw = localStorage.getItem(LS);
       if (raw) setData({ ...defaults, ...(JSON.parse(raw) as SettingsData) });
@@ -87,6 +78,7 @@ export default function Setup() {
 
   return (
     <main className="container mx-auto grid gap-6 animate-fade-in">
+      <SEO title="Setup | Personalize your workspace" description="Set up company info, VAT scheme, and choose your visual style." noindex />
       <header className="pt-6">
         <h1 className="text-2xl font-bold">Welcome! Let’s personalize your workspace</h1>
         <p className="text-text-secondary">These settings power SmartOps, Quotes, and Tax tools. You can change them anytime.</p>
@@ -135,7 +127,7 @@ export default function Setup() {
             <input className="input" type="file" accept="image/*" onChange={(e)=>onLogoChange(e.target.files?.[0])} />
             { (data.logoDataUrl || logoPreview) && (
               <div className="mt-2">
-                <img src={data.logoDataUrl || logoPreview || ""} alt="Company logo preview" className="max-h-24 rounded-md border" />
+                <img src={data.logoDataUrl || logoPreview || ""} alt="Company logo preview" className="max-h-24 rounded-md border" loading="lazy" />
               </div>
             )}
           </div>

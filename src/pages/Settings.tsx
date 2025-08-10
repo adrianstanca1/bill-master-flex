@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import SEO from "@/components/SEO";
 
 const LS = "as-settings";
 
@@ -27,7 +28,6 @@ export default function Settings() {
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    document.title = "Settings | UK Construction";
     try {
       const raw = localStorage.getItem(LS);
       if (raw) setData({ ...defaults, ...(JSON.parse(raw) as SettingsData) });
@@ -42,6 +42,7 @@ export default function Settings() {
 
   return (
     <main className="container mx-auto grid gap-6 animate-fade-in">
+      <SEO title="Settings | UK Construction" description="Manage company, VAT/CIS, and defaults for quotes and tax." noindex />
       <header className="pt-6">
         <h1 className="text-2xl font-bold">Company Settings</h1>
         <p className="text-text-secondary">These settings pre-fill SmartOps, Quotes and Tax tabs.</p>
