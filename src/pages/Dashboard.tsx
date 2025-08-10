@@ -5,6 +5,11 @@ import RamsGenerator from "@/components/RamsGenerator";
 import SmartOpsPanel from "@/components/SmartOpsPanel";
 import FunctionDiagnostics from "@/components/FunctionDiagnostics";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from "recharts";
+import { Link } from "react-router-dom";
 import SEO from "@/components/SEO";
 
 type InvoiceRow = {
@@ -105,6 +110,74 @@ export default function Dashboard() {
     writeInvoices(updated);
   }
 
+  const { toast } = useToast();
+  const [reminderOpen, setReminderOpen] = useState(false);
+  const [reminderIdx, setReminderIdx] = useState<number | null>(null);
+  const [reminderMsg, setReminderMsg] = useState("");
+  const [generating, setGenerating] = useState(false);
+
+  const chartData = useMemo(() => {
+    const byMonth: Record<string, { month: string; Outstanding: number; Paid: number }> = {};
+    for (const r of rows) {
+      const d = r.dueDate || "";
+      const month = d && d.length >= 7 ? d.slice(0, 7) : "No date";
+      if (!byMonth[month]) byMonth[month] = { month, Outstanding: 0, Paid: 0 };
+      if (r.status === "paid") byMonth[month].Paid += r.total || 0;
+      else byMonth[month].Outstanding += r.total || 0;
+    }
+    return Object.values(byMonth).sort((a, b) => a.month.localeCompare(b.month));
+  }, [rows]);
+
+  function exportCSV() {
+    const headers = ["number", "client", "total", "dueDate", "status"];
+    const lines = [headers.join(",")].concat(
+      rows.map((r) =>
+        [r.number, r.client, r.total, r.dueDate || "", r.status]
+          .map((v) => `"${String(v).replace(/"/g, '""')}"`)
+          .join(",")
+      )
+    );
+    const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "invoices.csv";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast?.({ title: "Exported", description: "Invoices exported to CSV." });
+  }
+
+  function openReminder(i: number) {
+    const r = rows[i];
+    if (!r) return;
+    const daysLate = isOverdue(r) && r.dueDate
+      ? Math.max(0, Math.ceil((Date.now() - new Date(r.dueDate).getTime()) / 86400000))
+      : 0;
+    const draft = `Subject: Invoice ${r.number} – Payment Reminder\n\nHi ${r.client},\n\nI hope you are well. This is a friendly reminder that invoice ${r.number} for £${(r.total || 0).toFixed(2)}${r.dueDate ? ` was due on ${r.dueDate}` : ""}.${daysLate ? ` It is now ${daysLate} day(s) overdue.` : ""}\n\nCould you please confirm when payment will be made? Thank you.\n\nKind regards,\nAccounts Team`;
+    setReminderIdx(i);
+    setReminderMsg(draft);
+    setReminderOpen(true);
+  }
+
+  async function generateReminder() {
+    if (reminderIdx == null) return;
+    try {
+      setGenerating(true);
+      const r = rows[reminderIdx];
+      const message = `Draft a concise, polite payment reminder email in British English for the construction trade. Include a subject and email body. Invoice ${r.number}, client ${r.client}, amount £${(r.total || 0).toFixed(2)}, ${r.dueDate ? `due on ${r.dueDate}` : "no due date"}.`;
+      const { data, error } = await supabase.functions.invoke("advisor", { body: { message, context: { type: "payment-reminder" } } });
+      if (error) throw error as any;
+      const reply = (data as any)?.reply || (data as any)?.message || JSON.stringify(data);
+      setReminderMsg(reply);
+    } catch (e: any) {
+      toast?.({ title: "Generate failed", description: e?.message || "Error", variant: "destructive" });
+    } finally {
+      setGenerating(false);
+    }
+  }
+
   const defaultTab = (() => {
     if (typeof window === "undefined") return "overview";
     const h = window.location.hash.replace('#', '');
@@ -165,6 +238,8 @@ export default function Dashboard() {
             >
               New Invoice
             </button>
+            <Link to="/invoices" className="button-secondary button-secondary-sm sm:!px-4 sm:!py-2">Open Invoice Generator</Link>
+            <button className="button-secondary button-secondary-sm sm:!px-4 sm:!py-2" onClick={exportCSV}>Export CSV</button>
             <button
               className="button-secondary button-secondary-sm sm:!px-4 sm:!py-2"
               onClick={() => {
@@ -202,6 +277,18 @@ export default function Dashboard() {
             </div>
             <div className="mt-4 text-sm text-gray-300">
               Next due: {kpi.nextDue ? `${kpi.nextDue.client} (${kpi.nextDue.dueDate})` : "—"}
+            </div>
+            <div className="mt-6 h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData}>
+                  <XAxis dataKey="month" stroke="currentColor" />
+                  <YAxis stroke="currentColor" />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="Outstanding" fill="hsl(var(--emerald))" />
+                  <Bar dataKey="Paid" fill="hsl(var(--secondary))" />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </section>
         </TabsContent>
@@ -296,16 +383,19 @@ export default function Dashboard() {
                     >
                       {r.status}
                     </td>
-                    <td className="text-right flex gap-2 justify-end">
-                      {r.status !== "paid" && (
-                        <button className="button" onClick={() => markPaid(i)}>
-                          Mark paid
+                      <td className="text-right flex gap-2 justify-end">
+                        <button className="button-secondary" onClick={() => openReminder(i)}>
+                          Remind
                         </button>
-                      )}
-                      <button className="button-secondary" onClick={() => removeRow(i)}>
-                        Delete
-                      </button>
-                    </td>
+                        {r.status !== "paid" && (
+                          <button className="button" onClick={() => markPaid(i)}>
+                            Mark paid
+                          </button>
+                        )}
+                        <button className="button-secondary" onClick={() => removeRow(i)}>
+                          Delete
+                        </button>
+                      </td>
                   </tr>
                 ))}
                 {filteredRows.length === 0 && (
@@ -361,6 +451,21 @@ export default function Dashboard() {
             <FunctionDiagnostics />
           </section>
         </TabsContent>
+        <Dialog open={reminderOpen} onOpenChange={setReminderOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Payment Reminder</DialogTitle>
+              <DialogDescription>Generate or edit a reminder email. Copy and send from your email client.</DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-3">
+              <textarea className="input h-40" value={reminderMsg} onChange={(e)=>setReminderMsg(e.target.value)} />
+              <div className="flex justify-end gap-2">
+                <button className="button-secondary" onClick={()=>{ navigator.clipboard.writeText(reminderMsg); toast?.({ title: "Copied", description: "Reminder copied to clipboard." }); }}>Copy</button>
+                <button className="button" disabled={generating} onClick={generateReminder}>{generating ? "Generating…" : "Generate with AI"}</button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </Tabs>
       </main>
     </>
