@@ -24,7 +24,7 @@ export default function ToolSetup() {
 
       <section className="card">
         <h2 className="text-lg font-semibold mb-2">AI Functions requiring OpenAI</h2>
-        <p className="text-sm text-text-secondary mb-2">agent, quote-bot, tax-bot, rams</p>
+        <p className="text-sm text-text-secondary mb-2">agent, advisor, quote-bot, tax-bot, rams</p>
         <ul className="text-sm text-text-secondary list-disc pl-5 space-y-1">
           <li>Requires a valid OPENAI_API_KEY stored as a Supabase Secret.</li>
           <li>Sign in before invoking these functions.</li>
@@ -33,6 +33,8 @@ export default function ToolSetup() {
           </li>
           <li>
             Check logs: <a className="link" href={`https://supabase.com/dashboard/project/tjgbyygllssqsywxpxqe/functions/agent/logs`} target="_blank" rel="noreferrer">Agent Logs</a>
+            {" • "}
+            <a className="link" href={`https://supabase.com/dashboard/project/tjgbyygllssqsywxpxqe/functions/advisor/logs`} target="_blank" rel="noreferrer">Advisor Logs</a>
             {" • "}
             <a className="link" href={`https://supabase.com/dashboard/project/tjgbyygllssqsywxpxqe/functions/rams/logs`} target="_blank" rel="noreferrer">RAMS Logs</a>
           </li>

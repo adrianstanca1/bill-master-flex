@@ -25,6 +25,7 @@ export default function FunctionDiagnostics() {
 
     const tasks: Promise<Result>[] = [
       call("agent", () => supabase.functions.invoke("agent", { body: { message: "Health check", invoices: [] } })),
+      call("advisor", () => supabase.functions.invoke("advisor", { body: { message: "Health check", context: {} } })),
       call("quote-bot", () => supabase.functions.invoke("quote-bot", { body: { title: "Test", withMaterials: true, targetMargin: 0.2 } })),
       call("tax-bot", () => supabase.functions.invoke("tax-bot", { body: { turnover12m: 10000, vatScheme: "standard", reverseCharge: true, cis: true } })),
       call("tender-search", () => supabase.functions.invoke("tender-search", { body: { query: "roofing", country: settings?.country || "UK", industry: settings?.industry || "construction" } })),
@@ -40,7 +41,7 @@ export default function FunctionDiagnostics() {
 
   function getSuggestion(name: string, detail?: string) {
     const d = (detail || '').toLowerCase();
-    if (["agent","quote-bot","tax-bot","rams"].includes(name) && (d.includes("incorrect api key") || d.includes("openai") || d.includes("401"))) {
+    if (["agent","advisor","quote-bot","tax-bot","rams"].includes(name) && (d.includes("incorrect api key") || d.includes("openai") || d.includes("401"))) {
       return "Set a valid OPENAI_API_KEY in Supabase and try again.";
     }
     if (name === "tenderbot" && (d.includes("unauthorized") || d.includes("invalid token") || d.includes("firecrawl"))) {
