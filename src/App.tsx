@@ -26,7 +26,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <SidebarProvider>
-          <header className="h-12 flex items-center border-b">
+          <header className="sticky top-0 z-40 h-12 flex items-center border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="container mx-auto flex items-center gap-3 justify-between">
               <div className="flex items-center gap-3">
                 <SidebarTrigger className="mr-2" />
