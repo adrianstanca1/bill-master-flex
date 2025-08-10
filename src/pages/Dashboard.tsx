@@ -123,7 +123,40 @@ export default function Dashboard() {
     writeInvoices(updated);
   }
 
-  const defaultTab = (typeof window !== "undefined" && window.location.hash === "#tenders") ? "tenders" : "overview";
+  const defaultTab = (() => {
+    if (typeof window === "undefined") return "overview";
+    const h = window.location.hash.replace('#', '');
+    const allowed = new Set(["overview", "invoices", "ai", "smartops", "tenders", "rams", "diag"]);
+    return allowed.has(h) ? h : "overview";
+  })();
+
+  // Sync filter with ?q= and focus INV when landing on #invoices
+  useEffect(() => {
+    const setFromURL = () => {
+      const params = new URLSearchParams(window.location.search);
+      setFilter(params.get("q") || "");
+    };
+    setFromURL();
+
+    const onPop = () => setFromURL();
+    const onHash = () => {
+      if (window.location.hash.replace('#','') === 'invoices') {
+        numberInputRef.current?.focus();
+      }
+    };
+    window.addEventListener("popstate", onPop);
+    window.addEventListener("hashchange", onHash);
+    return () => {
+      window.removeEventListener("popstate", onPop);
+      window.removeEventListener("hashchange", onHash);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (defaultTab === 'invoices') {
+      numberInputRef.current?.focus();
+    }
+  }, [defaultTab]);
 
   return (
     <main className="grid gap-6">

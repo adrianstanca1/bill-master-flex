@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import Index from "./pages/Index";
@@ -32,7 +32,27 @@ const App = () => (
                 <SidebarTrigger className="mr-2" />
                 {(() => { try { const s = JSON.parse(localStorage.getItem("as-settings")||"{}"); return s?.logoDataUrl ? (<img src={s.logoDataUrl} alt="Logo" className="h-6 w-auto rounded-sm border" />) : (<span className="text-sm text-muted-foreground">Menu</span>); } catch { return (<span className="text-sm text-muted-foreground">Menu</span>); } })()}
               </div>
-              <AuthStatus />
+              <div className="flex-1 hidden md:flex items-center justify-center px-4">
+                <input
+                  type="search"
+                  placeholder="Search invoices, clients, tenders…"
+                  aria-label="Global search"
+                  className="input w-full max-w-md"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      const v = (e.currentTarget as HTMLInputElement).value.trim();
+                      if (v) {
+                        window.history.pushState({}, '', `/dashboard#invoices?q=${encodeURIComponent(v)}`);
+                        window.dispatchEvent(new Event('popstate'));
+                      }
+                    }
+                  }}
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <Link to="/dashboard#invoices" className="button">New</Link>
+                <AuthStatus />
+              </div>
             </div>
           </header>
           <div className="flex min-h-screen w-full">
