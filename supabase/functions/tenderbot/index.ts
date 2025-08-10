@@ -30,10 +30,23 @@ serve(async (req) => {
       });
     }
 
-    const endpoint = mode === "scrape" ? "https://api.firecrawl.dev/v1/scrape" : "https://api.firecrawl.dev/v1/crawl";
-    const payload = mode === "scrape"
-      ? { url, formats: ["markdown", "html"] }
-      : { url, limit, scrapeOptions: { formats: ["markdown", "html"] } };
+    // Validate URL and parameters
+    let parsed: URL;
+    try {
+      parsed = new URL(url);
+    } catch {
+      return new Response(JSON.stringify({ error: "Invalid URL" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    if (parsed.protocol !== "https:") {
+      return new Response(JSON.stringify({ error: "Only https URLs are allowed" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    const safeLimit = Math.max(1, Math.min(Number(limit) || 1, 50));
+    const safeMode = mode === "scrape" ? "scrape" : "crawl";
+
+    const endpoint = safeMode === "scrape" ? "https://api.firecrawl.dev/v1/scrape" : "https://api.firecrawl.dev/v1/crawl";
+    const payload = safeMode === "scrape"
+      ? { url: parsed.toString(), formats: ["markdown", "html"] }
+      : { url: parsed.toString(), limit: safeLimit, scrapeOptions: { formats: ["markdown", "html"] } };
 
     console.log("Firecrawl request", { endpoint, mode, url, limit });
 

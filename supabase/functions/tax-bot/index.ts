@@ -18,7 +18,15 @@ serve(async (req) => {
 
     const { turnover12m = 0, vatScheme = "standard", reverseCharge = true, cis = true, notes = "" } = await req.json();
 
-    const prompt = `You are TaxBot, a UK tax/VAT assistant for construction. Given: turnover12m=${turnover12m}, vatScheme=${vatScheme}, reverseCharge=${reverseCharge}, cis=${cis}. Provide:
+    const turnover = Number(turnover12m);
+    if (!Number.isFinite(turnover) || turnover < 0 || turnover > 100000000) {
+      return new Response(JSON.stringify({ error: "Invalid turnover12m" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    if (typeof vatScheme !== "string" || vatScheme.length > 50) {
+      return new Response(JSON.stringify({ error: "Invalid vatScheme" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    const prompt = `You are TaxBot, a UK tax/VAT assistant for construction. Given: turnover12m=${turnover}, vatScheme=${vatScheme}, reverseCharge=${reverseCharge}, cis=${cis}. Provide:
 - VAT obligations and reverse charge applicability (CIS)
 - Threshold warnings (VAT registration £90k, cash accounting, flat-rate option)
 - Next actions and deadlines

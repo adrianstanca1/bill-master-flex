@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import DOMPurify from "dompurify";
 
 export default function RamsGenerator() {
   const [name, setName] = useState("");
@@ -33,7 +34,7 @@ export default function RamsGenerator() {
         body: { project },
       });
       if (error) throw error;
-      setHtml((data as any)?.html || "");
+      setHtml(DOMPurify.sanitize((data as any)?.html || ""));
     } catch (e) {
       console.error(e);
       setHtml("<p>Failed to generate RAMS.</p>");
@@ -46,7 +47,7 @@ export default function RamsGenerator() {
     if (!html) return;
     const win = window.open("", "_blank");
     if (!win) return;
-    win.document.write(html);
+    win.document.write(DOMPurify.sanitize(html));
     win.document.close();
     win.focus();
     win.print();
@@ -68,7 +69,7 @@ export default function RamsGenerator() {
 
       {html && (
         <div className="bg-gray-900 rounded-md p-3 max-h-[400px] overflow-auto">
-          <div dangerouslySetInnerHTML={{ __html: html }} />
+          <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(html) }} />
         </div>
       )}
     </div>

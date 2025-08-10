@@ -11,9 +11,10 @@ serve(async (req) => {
 
   try {
     const { query, country = "UK", industry = "construction" } = await req.json();
-    if (!query) {
-      return new Response(JSON.stringify({ error: "query is required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    if (!query || typeof query !== "string" || query.length < 2 || query.length > 100) {
+      return new Response(JSON.stringify({ error: "query is required (2-100 chars)" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
+
 
     // Known UK tender portals search URLs
     const endpoints = [

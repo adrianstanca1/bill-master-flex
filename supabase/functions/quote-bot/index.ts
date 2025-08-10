@@ -18,6 +18,15 @@ serve(async (req) => {
 
     const { title = "Quote", withMaterials = true, targetMargin = 0.2, context = {} } = await req.json();
 
+    // Basic input validation
+    if (typeof title !== "string" || title.length < 1 || title.length > 200) {
+      return new Response(JSON.stringify({ error: "Invalid title" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    const margin = Number(targetMargin);
+    if (!Number.isFinite(margin) || margin < 0 || margin > 0.9) {
+      return new Response(JSON.stringify({ error: "Invalid targetMargin" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     const prompt = `Create a structured UK construction quote. Inputs: title=${title}, withMaterials=${withMaterials}, targetMargin=${targetMargin}. Return JSON with items:[{name, qty, unit, material:boolean, unit_cost, line_total}], subtotal, margin_applied, total, notes. Use fair market costs and British English.`;
 
     const aiRes = await fetch("https://api.openai.com/v1/chat/completions", {

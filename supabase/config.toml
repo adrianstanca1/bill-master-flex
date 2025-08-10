@@ -1,22 +1,22 @@
 project_id = "tjgbyygllssqsywxpxqe"
 
 [functions.agent]
-verify_jwt = false
+verify_jwt = true
 
 [functions.tenderbot]
-verify_jwt = false
+verify_jwt = true
 
 [functions.rams]
-verify_jwt = false
+verify_jwt = true
 
 [functions.smartops]
-verify_jwt = false
+verify_jwt = true
 
 [functions.quote-bot]
-verify_jwt = false
+verify_jwt = true
 
 [functions.tax-bot]
-verify_jwt = false
+verify_jwt = true
 
 [functions.tender-search]
-verify_jwt = false
+verify_jwt = true

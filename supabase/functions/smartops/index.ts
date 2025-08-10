@@ -8,23 +8,29 @@ const corsHeaders = {
 };
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
-const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY");
 const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
       return new Response(JSON.stringify({ error: "Missing Supabase env" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
-    const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      global: { headers: { Authorization: req.headers.get("Authorization") || "" } }
+    });
 
     const body = await req.json().catch(() => ({}));
     const companyId: string | undefined = body.companyId;
 
     if (!companyId) {
       return new Response(JSON.stringify({ error: "companyId is required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    const uuidRe = /^[0-9a-fA-F-]{36}$/;
+    if (!uuidRe.test(companyId)) {
+      return new Response(JSON.stringify({ error: "Invalid companyId format" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     // Fetch key datasets

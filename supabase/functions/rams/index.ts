@@ -7,6 +7,7 @@ const corsHeaders = {
 };
 
 const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+const system = `You are a RAMS generator for UK construction. Output clean, printable HTML only with semantic sections and a single H1. Allowed tags: h1,h2,h3,h4,p,ul,ol,li,table,thead,tbody,tr,th,td,strong,em,div,section,header,footer,article. No scripts, iframes, forms, or external assets. Use British English and clear headings: Project Overview, Scope, Responsibilities, Risk Assessment, Method Statements, PPE, Emergency Procedures.`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {

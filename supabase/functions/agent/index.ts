@@ -33,8 +33,9 @@ serve(async (req) => {
 
     const { message, invoices } = await req.json();
 
-    const rows: InvoiceRow[] = Array.isArray(invoices) ? invoices : [];
-    const text: string = typeof message === "string" ? message : "";
+    // Input guardrails
+    const rows: InvoiceRow[] = Array.isArray(invoices) ? invoices.slice(0, 200) : [];
+    const text: string = typeof message === "string" ? String(message).slice(0, 2000) : "";
 
     // Compute quick stats for better replies and lower tokens
     const today = new Date();
