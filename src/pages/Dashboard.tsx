@@ -1,9 +1,10 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import AgentChat from "@/components/AgentChat";
 import TenderBot from "@/components/TenderBot";
 import RamsGenerator from "@/components/RamsGenerator";
 import SmartOpsPanel from "@/components/SmartOpsPanel";
 import FunctionDiagnostics from "@/components/FunctionDiagnostics";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 type InvoiceRow = {
   number: string;
@@ -48,6 +49,9 @@ export default function Dashboard() {
     status: "sent",
   });
 
+  const [filter, setFilter] = useState<string>("");
+  const numberInputRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
     document.title = "Dashboard | AS Invoice Generator";
     const m = document.querySelector('meta[name="description"]');
@@ -90,6 +94,13 @@ export default function Dashboard() {
     return { outstanding, overdue, overdueCount: overdueList.length, nextDue };
   }, [rows]);
 
+  const filteredRows = useMemo(() => {
+    const term = filter.trim().toLowerCase();
+    if (!term) return rows;
+    return rows.filter((r) => [r.number, r.client, r.status, r.dueDate || "", String(r.total)]
+      .some((v) => String(v).toLowerCase().includes(term)));
+  }, [rows, filter]);
+
   function addRow() {
     if (!newRow.number || !newRow.client)
       return alert("Invoice number and client required.");
@@ -112,26 +123,22 @@ export default function Dashboard() {
     writeInvoices(updated);
   }
 
+  const defaultTab = (typeof window !== "undefined" && window.location.hash === "#tenders") ? "tenders" : "overview";
+
   return (
     <main className="grid gap-6">
-      <h1 className="text-2xl font-bold">Invoice Dashboard</h1>
-
-      <section className="card animate-fade-in">
-        <h2 className="text-lg font-semibold mb-4">Business Overview</h2>
-        <div className="grid sm:grid-cols-4 gap-4">
-          <KPITile label="Outstanding" value={`£${kpi.outstanding.toFixed(2)}`} />
-          <KPITile label="Overdue" value={`£${kpi.overdue.toFixed(2)}`} />
-          <KPITile label="Overdue Invoices" value={`${kpi.overdueCount}`} />
-          <KPITile
-            label="Next Due"
-            value={kpi.nextDue ? `${kpi.nextDue.client} (${kpi.nextDue.dueDate})` : "—"}
-          />
-        </div>
-      </section>
-
-      <section className="card animate-fade-in">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-semibold">Invoice Tracker</h2>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Business Dashboard</h1>
+        <div className="flex gap-2">
+          <button
+            className="button"
+            onClick={() => {
+              numberInputRef.current?.focus();
+              numberInputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+            }}
+          >
+            New Invoice
+          </button>
           <button
             className="button-secondary"
             onClick={() => {
@@ -142,134 +149,193 @@ export default function Dashboard() {
             Clear All
           </button>
         </div>
+      </div>
 
-        <div className="grid md:grid-cols-5 gap-2 mb-3">
-          <input
-            className="input"
-            placeholder="INV number"
-            value={newRow.number}
-            onChange={(e) => setNewRow({ ...newRow, number: e.target.value })}
-          />
-          <input
-            className="input"
-            placeholder="Client"
-            value={newRow.client}
-            onChange={(e) => setNewRow({ ...newRow, client: e.target.value })}
-          />
-          <input
-            className="input"
-            type="number"
-            step="0.01"
-            placeholder="Total (£)"
-            value={newRow.total}
-            onChange={(e) => setNewRow({ ...newRow, total: Number(e.target.value) })}
-          />
-          <input
-            className="input"
-            type="date"
-            value={newRow.dueDate || ""}
-            onChange={(e) => setNewRow({ ...newRow, dueDate: e.target.value })}
-          />
-          <div className="flex gap-2">
-            <select
-              className="input"
-              value={newRow.status}
-              onChange={(e) =>
-                setNewRow({ ...newRow, status: e.target.value as InvoiceRow["status"] })
-              }
-            >
-              <option value="draft">Draft</option>
-              <option value="sent">Sent</option>
-              <option value="paid">Paid</option>
-              <option value="overdue">Overdue</option>
-            </select>
-            <button className="button" onClick={addRow}>
-              Add
-            </button>
-          </div>
-        </div>
+      <Tabs defaultValue={defaultTab}>
+        <TabsList className="mb-4 flex flex-wrap gap-2">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="invoices">Invoices</TabsTrigger>
+          <TabsTrigger value="ai">AI</TabsTrigger>
+          <TabsTrigger value="smartops">SmartOps</TabsTrigger>
+          <TabsTrigger value="tenders">Tenders</TabsTrigger>
+          <TabsTrigger value="rams">RAMS</TabsTrigger>
+          <TabsTrigger value="diag">Diagnostics</TabsTrigger>
+        </TabsList>
 
-        <table className="table">
-          <thead>
-            <tr className="text-left">
-              <th>Invoice</th>
-              <th>Client</th>
-              <th>Total (£)</th>
-              <th>Due</th>
-              <th>Status</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((r, i) => (
-              <tr key={i}>
-                <td>{r.number}</td>
-                <td>{r.client}</td>
-                <td>{r.total.toFixed(2)}</td>
-                <td>{r.dueDate || "—"}</td>
-                <td className={
-                  r.status === "overdue"
-                    ? "text-red-400"
-                    : r.status === "paid"
-                    ? "text-emerald-400"
-                    : "text-gray-300"
-                }>
-                  {r.status}
-                </td>
-                <td className="text-right flex gap-2 justify-end">
-                  {r.status !== "paid" && (
-                    <button className="button" onClick={() => markPaid(i)}>
-                      Mark paid
-                    </button>
-                  )}
-                  <button className="button-secondary" onClick={() => removeRow(i)}>
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {rows.length === 0 && (
-              <tr>
-                <td colSpan={6} className="text-gray-400 py-4">
-                  No invoices yet. Add a few above.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </section>
+        <TabsContent value="overview" className="space-y-6">
+          <section className="card animate-fade-in">
+            <h2 className="text-lg font-semibold mb-4">Business Overview</h2>
+            <div className="grid sm:grid-cols-4 gap-4">
+              <KPITile label="Outstanding" value={`£${kpi.outstanding.toFixed(2)}`} />
+              <KPITile label="Overdue" value={`£${kpi.overdue.toFixed(2)}`} />
+              <KPITile label="Overdue Invoices" value={`${kpi.overdueCount}`} />
+              <KPITile
+                label="Next Due"
+                value={kpi.nextDue ? `${kpi.nextDue.client} (${kpi.nextDue.dueDate})` : "—"}
+              />
+            </div>
+            <div className="mt-4 text-sm text-gray-300">
+              Next due: {kpi.nextDue ? `${kpi.nextDue.client} (${kpi.nextDue.dueDate})` : "—"}
+            </div>
+          </section>
+        </TabsContent>
 
-      <section className="card animate-fade-in">
-        <h2 className="text-lg font-semibold mb-3">AI Agent</h2>
-        <p className="text-sm text-gray-300 mb-3">
-          Ask things like: <em>“Who is overdue and by how much?”</em>, <em>“Draft a polite payment reminder to {"{client}"}”</em>, <em>“Projected cash flow this month?”</em>
-        </p>
-        <AgentChat />
-      </section>
+        <TabsContent value="invoices" className="space-y-4" id="invoices">
+          <section className="card animate-fade-in">
+            <h2 className="text-lg font-semibold mb-3">Invoice Tracker</h2>
 
-      <section className="card animate-fade-in">
-        <h2 className="text-lg font-semibold mb-3">SmartOps Panel (UK Construction)</h2>
-        <p className="text-sm text-gray-300 mb-3">Run a health scan, search tenders, generate quotes, and get VAT/CIS advice.</p>
-        <SmartOpsPanel />
-      </section>
+            <div className="grid md:grid-cols-5 gap-2 mb-3">
+              <input
+                className="input"
+                placeholder="INV number"
+                ref={numberInputRef}
+                value={newRow.number}
+                onChange={(e) => setNewRow({ ...newRow, number: e.target.value })}
+              />
+              <input
+                className="input"
+                placeholder="Client"
+                value={newRow.client}
+                onChange={(e) => setNewRow({ ...newRow, client: e.target.value })}
+              />
+              <input
+                className="input"
+                type="number"
+                step="0.01"
+                placeholder="Total (£)"
+                value={newRow.total}
+                onChange={(e) => setNewRow({ ...newRow, total: Number(e.target.value) })}
+              />
+              <input
+                className="input"
+                type="date"
+                value={newRow.dueDate || ""}
+                onChange={(e) => setNewRow({ ...newRow, dueDate: e.target.value })}
+              />
+              <div className="flex gap-2">
+                <select
+                  className="input"
+                  value={newRow.status}
+                  onChange={(e) =>
+                    setNewRow({ ...newRow, status: e.target.value as InvoiceRow["status"] })
+                  }
+                >
+                  <option value="draft">Draft</option>
+                  <option value="sent">Sent</option>
+                  <option value="paid">Paid</option>
+                  <option value="overdue">Overdue</option>
+                </select>
+                <button className="button" onClick={addRow} aria-label="Add invoice">
+                  Add
+                </button>
+              </div>
+            </div>
 
-      <section className="card animate-fade-in" id="tenders">
-        <h2 className="text-lg font-semibold mb-3">TenderBot (Website Scraper)</h2>
-        <p className="text-sm text-gray-300 mb-3">Crawl tender portals and extract pages using Firecrawl.</p>
-        <TenderBot />
-      </section>
+            <div className="flex items-center justify-between mb-3">
+              <input
+                className="input w-full md:w-80"
+                placeholder="Filter invoices..."
+                aria-label="Filter invoices"
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+              />
+            </div>
 
-      <section className="card animate-fade-in">
-        <h2 className="text-lg font-semibold mb-3">RAMS Generator</h2>
-        <p className="text-sm text-gray-300 mb-3">Generate a printable RAMS document for your project.</p>
-        <RamsGenerator />
-      </section>
+            <table className="table">
+              <thead>
+                <tr className="text-left">
+                  <th>Invoice</th>
+                  <th>Client</th>
+                  <th>Total (£)</th>
+                  <th>Due</th>
+                  <th>Status</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredRows.map((r, i) => (
+                  <tr key={i}>
+                    <td>{r.number}</td>
+                    <td>{r.client}</td>
+                    <td>{r.total.toFixed(2)}</td>
+                    <td>{r.dueDate || "—"}</td>
+                    <td
+                      className={
+                        r.status === "overdue"
+                          ? "text-red-400"
+                          : r.status === "paid"
+                          ? "text-emerald-400"
+                          : "text-gray-300"
+                      }
+                    >
+                      {r.status}
+                    </td>
+                    <td className="text-right flex gap-2 justify-end">
+                      {r.status !== "paid" && (
+                        <button className="button" onClick={() => markPaid(i)}>
+                          Mark paid
+                        </button>
+                      )}
+                      <button className="button-secondary" onClick={() => removeRow(i)}>
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+                {filteredRows.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="text-gray-400 py-4">
+                      No invoices found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </section>
+        </TabsContent>
 
-      <section className="card animate-fade-in">
-        <h2 className="text-lg font-semibold mb-3">Function Diagnostics</h2>
-        <p className="text-sm text-gray-300 mb-3">Quickly verify all Edge Functions are reachable and returning data.</p>
-        <FunctionDiagnostics />
-      </section>
+        <TabsContent value="ai" className="space-y-4">
+          <section className="card animate-fade-in">
+            <h2 className="text-lg font-semibold mb-3">AI Agent</h2>
+            <p className="text-sm text-gray-300 mb-3">
+              Ask things like: <em>“Who is overdue and by how much?”</em>, <em>“Draft a polite payment reminder to {"{client}"}”</em>, <em>“Projected cash flow this month?”</em>
+            </p>
+            <AgentChat />
+          </section>
+        </TabsContent>
+
+        <TabsContent value="smartops" className="space-y-4">
+          <section className="card animate-fade-in">
+            <h2 className="text-lg font-semibold mb-3">SmartOps Panel (UK Construction)</h2>
+            <p className="text-sm text-gray-300 mb-3">Run a health scan, search tenders, generate quotes, and get VAT/CIS advice.</p>
+            <SmartOpsPanel />
+          </section>
+        </TabsContent>
+
+        <TabsContent value="tenders" className="space-y-4" id="tenders">
+          <section className="card animate-fade-in">
+            <h2 className="text-lg font-semibold mb-3">TenderBot (Website Scraper)</h2>
+            <p className="text-sm text-gray-300 mb-3">Crawl tender portals and extract pages using Firecrawl.</p>
+            <TenderBot />
+          </section>
+        </TabsContent>
+
+        <TabsContent value="rams" className="space-y-4">
+          <section className="card animate-fade-in">
+            <h2 className="text-lg font-semibold mb-3">RAMS Generator</h2>
+            <p className="text-sm text-gray-300 mb-3">Generate a printable RAMS document for your project.</p>
+            <RamsGenerator />
+          </section>
+        </TabsContent>
+
+        <TabsContent value="diag" className="space-y-4">
+          <section className="card animate-fade-in">
+            <h2 className="text-lg font-semibold mb-3">Function Diagnostics</h2>
+            <p className="text-sm text-gray-300 mb-3">Quickly verify all Edge Functions are reachable and returning data.</p>
+            <FunctionDiagnostics />
+          </section>
+        </TabsContent>
+      </Tabs>
     </main>
   );
 }
