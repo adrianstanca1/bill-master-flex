@@ -745,6 +745,10 @@ export type Database = {
         Args: { _checklist_id: string }
         Returns: boolean
       }
+      is_company_admin: {
+        Args: { _company_id: string }
+        Returns: boolean
+      }
       is_company_member: {
         Args: { _company_id: string }
         Returns: boolean
