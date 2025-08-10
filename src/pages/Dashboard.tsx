@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from "recharts";
 import { Link } from "react-router-dom";
 import SEO from "@/components/SEO";
-
+import CISCalculator from "@/components/CISCalculator";
 type InvoiceRow = {
   number: string;
   client: string;
@@ -161,27 +161,45 @@ export default function Dashboard() {
     setReminderOpen(true);
   }
 
-  async function generateReminder() {
-    if (reminderIdx == null) return;
-    try {
-      setGenerating(true);
-      const r = rows[reminderIdx];
-      const message = `Draft a concise, polite payment reminder email in British English for the construction trade. Include a subject and email body. Invoice ${r.number}, client ${r.client}, amount £${(r.total || 0).toFixed(2)}, ${r.dueDate ? `due on ${r.dueDate}` : "no due date"}.`;
-      const { data, error } = await supabase.functions.invoke("advisor", { body: { message, context: { type: "payment-reminder" } } });
-      if (error) throw error as any;
-      const reply = (data as any)?.reply || (data as any)?.message || JSON.stringify(data);
-      setReminderMsg(reply);
-    } catch (e: any) {
-      toast?.({ title: "Generate failed", description: e?.message || "Error", variant: "destructive" });
-    } finally {
-      setGenerating(false);
-    }
+async function generateReminder() {
+  if (reminderIdx == null) return;
+  try {
+    setGenerating(true);
+    const r = rows[reminderIdx];
+    const message = `Draft a concise, polite payment reminder email in British English for the construction trade. Include a subject and email body. Invoice ${r.number}, client ${r.client}, amount £${(r.total || 0).toFixed(2)}, ${r.dueDate ? `due on ${r.dueDate}` : "no due date"}.`;
+    const { data, error } = await supabase.functions.invoke("advisor", { body: { message, context: { type: "payment-reminder" } } });
+    if (error) throw error as any;
+    const reply = (data as any)?.reply || (data as any)?.message || JSON.stringify(data);
+    setReminderMsg(reply);
+  } catch (e: any) {
+    toast?.({ title: "Generate failed", description: e?.message || "Error", variant: "destructive" });
+  } finally {
+    setGenerating(false);
   }
+}
+
+function remindAllOverdue() {
+  const overdueList = rows.filter((r) => r.status === "overdue" || isOverdue(r));
+  if (!overdueList.length) {
+    toast?.({ title: "No overdue invoices", description: "You're all clear!" });
+    return;
+  }
+  const parts = overdueList.map((r) => {
+    const daysLate = r.dueDate
+      ? Math.max(0, Math.ceil((Date.now() - new Date(r.dueDate).getTime()) / 86400000))
+      : 0;
+    return `Subject: Invoice ${r.number} – Payment Reminder\n\nHi ${r.client},\n\nThis is a friendly reminder that invoice ${r.number} for £${(r.total || 0).toFixed(2)}${r.dueDate ? ` was due on ${r.dueDate}` : ""}.${daysLate ? ` It is now ${daysLate} day(s) overdue.` : ""}\n\nCould you please confirm when payment will be made? Thank you.\n\nKind regards,\nAccounts Team`;
+  });
+  setReminderIdx(null);
+  setReminderMsg(parts.join("\n\n---\n\n"));
+  setReminderOpen(true);
+  toast?.({ title: "Drafted reminders", description: `${overdueList.length} overdue invoice(s) ready to copy.` });
+}
 
   const defaultTab = (() => {
     if (typeof window === "undefined") return "overview";
     const h = window.location.hash.replace('#', '');
-    const allowed = new Set(["overview", "invoices", "ai", "smartops", "tenders", "rams", "diag"]);
+    const allowed = new Set(["overview", "invoices", "ai", "smartops", "tenders", "rams", "tools", "diag"]);
     return allowed.has(h) ? h : "overview";
   })();
 
@@ -260,6 +278,7 @@ export default function Dashboard() {
           <TabsTrigger value="smartops">SmartOps</TabsTrigger>
           <TabsTrigger value="tenders">Tenders</TabsTrigger>
           <TabsTrigger value="rams">RAMS</TabsTrigger>
+          <TabsTrigger value="tools">Tools</TabsTrigger>
           <TabsTrigger value="diag">Diagnostics</TabsTrigger>
         </TabsList>
 
@@ -344,7 +363,7 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-3 gap-2">
               <input
                 className="input w-full md:w-80"
                 placeholder="Filter invoices..."
@@ -352,6 +371,11 @@ export default function Dashboard() {
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
               />
+              <div className="flex items-center gap-2">
+                <button className="button-secondary" onClick={remindAllOverdue} aria-label="Remind all overdue">
+                  Remind overdue
+                </button>
+              </div>
             </div>
 
             <table className="table">
@@ -441,6 +465,25 @@ export default function Dashboard() {
             <h2 className="text-lg font-semibold mb-3">RAMS Generator</h2>
             <p className="text-sm text-gray-300 mb-3">Generate a printable RAMS document for your project.</p>
             <RamsGenerator />
+          </section>
+        </TabsContent>
+
+        <TabsContent value="tools" className="space-y-4">
+          <section className="card animate-fade-in">
+            <h2 className="text-lg font-semibold mb-3">Construction Tools</h2>
+            <div className="grid lg:grid-cols-2 gap-4">
+              <div>
+                <CISCalculator />
+              </div>
+              <article className="bg-gray-900 rounded-md p-4">
+                <h3 className="font-semibold mb-2">Quick Links</h3>
+                <ul className="list-disc list-inside text-sm text-gray-300 space-y-1">
+                  <li><button className="underline" onClick={()=>{ setTab('rams'); window.location.hash = 'rams'; }}>RAMS Generator</button></li>
+                  <li><button className="underline" onClick={()=>{ setTab('tenders'); window.location.hash = 'tenders'; }}>TenderBot</button></li>
+                  <li><button className="underline" onClick={()=>{ setTab('smartops'); window.location.hash = 'smartops'; }}>SmartOps Panel</button></li>
+                </ul>
+              </article>
+            </div>
           </section>
         </TabsContent>
 
