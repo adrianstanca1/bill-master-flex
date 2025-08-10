@@ -59,18 +59,13 @@ serve(async (req) => {
 
     const system = `You are a precise but friendly finance assistant for a small business.\n\nGoals:\n- Analyze provided invoices (local-only data from the user)\n- Answer questions about overdue totals, next due dates, and cash flow\n- When asked, draft short, polite client emails (British English)\n- Keep answers concise. Use GBP formatting like £1,234.56.\n\nRules:\n- If data is missing, state assumptions clearly.\n- Never invent invoices that aren't in the list.\n- Prefer bullet points for lists.\n`;
 
-    const userContent = [
-      { type: "text", text: `User question: ${text}` },
-      { type: "text", text: `Quick stats: ${JSON.stringify(stats)}` },
-      { type: "text", text: `Invoices JSON: ${JSON.stringify(rows)}` },
-      { type: "text", text: `Today (UTC): ${new Date().toISOString().slice(0,10)}` },
-    ];
+    const userText = `User question: ${text}\n\nQuick stats: ${JSON.stringify(stats)}\n\nInvoices JSON: ${JSON.stringify(rows)}\n\nToday (UTC): ${new Date().toISOString().slice(0,10)}`;
 
     const payload = {
       model: "gpt-4o-mini",
       messages: [
         { role: "system", content: system },
-        { role: "user", content: userContent as any },
+        { role: "user", content: userText },
       ],
       temperature: 0.3,
     };
