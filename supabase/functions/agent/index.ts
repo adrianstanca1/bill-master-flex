@@ -62,7 +62,7 @@ serve(async (req) => {
     const userText = `User question: ${text}\n\nQuick stats: ${JSON.stringify(stats)}\n\nInvoices JSON: ${JSON.stringify(rows)}\n\nToday (UTC): ${new Date().toISOString().slice(0,10)}`;
 
     const payload = {
-      model: "gpt-4o-mini",
+      model: "gpt-4o",
       messages: [
         { role: "system", content: system },
         { role: "user", content: userText },

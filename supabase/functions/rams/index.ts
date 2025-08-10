@@ -30,32 +30,11 @@ serve(async (req) => {
       });
     }
 
-    const system = `You are an expert UK construction safety consultant. Generate a professional RAMS (Risk Assessment & Method Statement) as semantic, printable HTML. Use British English, concise language, and include:
-
-- Title block with Project Name, Location, Date
-- Project Overview (brief)
-- Responsibilities
-- Hazard Identification & Control Measures table (Hazard | Risk | Control Measures)
-- Method Statement (step-by-step)
-- PPE Requirements
-- Emergency Procedures
-- Residual Risks
-- Sign-off section (Supervisor, Date)
-
-Use basic inline CSS for print readability (A4): max-width 800px, readable fonts, headings, table with borders, zebra rows.`;
-
-    const user = {
-      role: "user",
-      content: [
-        { type: "text", text: `Project details: ${JSON.stringify(project)}` },
-      ],
-    } as const;
-
     const payload = {
-      model: "gpt-4o-mini",
+      model: "gpt-4o",
       messages: [
         { role: "system", content: system },
-        user,
+        { role: "user", content: `Project details: ${JSON.stringify(project)}` },
       ],
       temperature: 0.4,
     };

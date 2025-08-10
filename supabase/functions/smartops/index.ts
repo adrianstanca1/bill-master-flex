@@ -61,7 +61,7 @@ serve(async (req) => {
       const aiRes = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: { Authorization: `Bearer ${OPENAI_API_KEY}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ model: "gpt-4o-mini", temperature: 0.3, messages: [ { role: "system", content: "You are a proactive UK construction business advisor." }, { role: "user", content: prompt } ] })
+        body: JSON.stringify({ model: "gpt-4o", temperature: 0.3, messages: [ { role: "system", content: "You are a proactive UK construction business advisor." }, { role: "user", content: prompt } ] })
       });
       if (aiRes.ok) {
         const data = await aiRes.json();

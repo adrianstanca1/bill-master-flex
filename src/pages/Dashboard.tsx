@@ -3,6 +3,7 @@ import AgentChat from "@/components/AgentChat";
 import TenderBot from "@/components/TenderBot";
 import RamsGenerator from "@/components/RamsGenerator";
 import SmartOpsPanel from "@/components/SmartOpsPanel";
+import FunctionDiagnostics from "@/components/FunctionDiagnostics";
 
 type InvoiceRow = {
   number: string;
@@ -262,6 +263,12 @@ export default function Dashboard() {
         <h2 className="text-lg font-semibold mb-3">RAMS Generator</h2>
         <p className="text-sm text-gray-300 mb-3">Generate a printable RAMS document for your project.</p>
         <RamsGenerator />
+      </section>
+
+      <section className="card animate-fade-in">
+        <h2 className="text-lg font-semibold mb-3">Function Diagnostics</h2>
+        <p className="text-sm text-gray-300 mb-3">Quickly verify all Edge Functions are reachable and returning data.</p>
+        <FunctionDiagnostics />
       </section>
     </main>
   );
