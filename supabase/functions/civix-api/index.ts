@@ -186,13 +186,65 @@ async function handleCreateProject(supabase: any, userId: string, raw: any) {
       project_manager_user_id: v.projectManagerId || null,
       company_id: companyId,
     })
-    .select("id")
+    .select("id, name, project_manager_user_id")
     .maybeSingle();
 
   if (error) return json({ error: error.message }, 400);
   if (!inserted) return json({ error: "Insert failed" }, 400);
 
-  return json({ id: inserted.id, message: "Project created" }, 201);
+  // Auto-generate baseline schedules based on simple heuristics
+  const pname = (v.name || "").toLowerCase();
+  const startDate = v.startDate || new Date().toISOString().slice(0, 10);
+  const assignedTo = v.projectManagerId || inserted.project_manager_user_id || null;
+
+  const seeds: Array<{ taskName: string; frequency: string; time: string; checklistTemplateId?: string | null }> = [
+    { taskName: "Toolbox Talk", frequency: "daily", time: "08:00", checklistTemplateId: null },
+  ];
+  if (pname.includes("scaffold")) {
+    seeds.push({ taskName: "Scaffold Inspection", frequency: "weekly", time: "09:00", checklistTemplateId: null });
+  }
+  if (pname.includes("roof")) {
+    seeds.push({ taskName: "Daily Fall Protection Check", frequency: "daily", time: "08:15", checklistTemplateId: null });
+  }
+
+  let created = 0;
+  for (const s of seeds) {
+    const { data: schedule, error: schErr } = await supabase
+      .from("schedules")
+      .insert({
+        company_id: companyId,
+        cadence: s.frequency,
+        scope: "project",
+        created_by: userId,
+        criteria: {
+          projectId: inserted.id,
+          checklistTemplateId: s.checklistTemplateId || null,
+          assignedTo,
+          startDate,
+          time: s.time,
+          taskName: s.taskName,
+        },
+      })
+      .select("id")
+      .maybeSingle();
+    if (schErr || !schedule) continue;
+
+    const { error: tErr } = await supabase
+      .from("tasks")
+      .insert({
+        schedule_id: schedule.id,
+        due_on: startDate,
+        time: s.time,
+        kind: s.taskName,
+        project_id: inserted.id,
+        checklist_template_id: s.checklistTemplateId || null,
+        assigned_to: assignedTo,
+        status: "pending",
+      });
+    if (!tErr) created++;
+  }
+
+  return json({ id: inserted.id, message: "Project created", schedulesCreated: created }, 201);
 }
 
 async function handleScheduleTask(supabase: any, userId: string, raw: any) {
@@ -211,7 +263,14 @@ async function handleScheduleTask(supabase: any, userId: string, raw: any) {
       cadence: v.frequency,
       scope: "project",
       created_by: userId,
-      criteria: { projectId: v.projectId, checklistTemplateId: v.checklistTemplateId },
+      criteria: {
+        projectId: v.projectId,
+        checklistTemplateId: v.checklistTemplateId || null,
+        assignedTo: v.assignedTo || null,
+        startDate: v.startDate,
+        time: v.time || null,
+        taskName: v.taskName,
+      },
     })
     .select("id")
     .maybeSingle();
