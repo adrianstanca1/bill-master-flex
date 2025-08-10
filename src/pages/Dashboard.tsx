@@ -147,11 +147,11 @@ export default function Dashboard() {
         description="Invoice dashboard with KPIs and AI tools for UK construction."
       />
       <main className="grid gap-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Business Dashboard</h1>
-          <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <h1 className="text-xl sm:text-2xl font-bold leading-tight">Business Dashboard</h1>
+          <div className="flex flex-wrap gap-2">
             <button
-              className="button"
+              className="button button-sm sm:!px-4 sm:!py-2"
               onClick={() => {
                 numberInputRef.current?.focus();
                 numberInputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -159,17 +159,17 @@ export default function Dashboard() {
             >
               New Invoice
             </button>
-          <button
-            className="button-secondary"
-            onClick={() => {
-              localStorage.removeItem(LS_KEY);
-              setRows([]);
-            }}
-          >
-            Clear All
-          </button>
+            <button
+              className="button-secondary button-secondary-sm sm:!px-4 sm:!py-2"
+              onClick={() => {
+                localStorage.removeItem(LS_KEY);
+                setRows([]);
+              }}
+            >
+              Clear All
+            </button>
+          </div>
         </div>
-      </div>
 
       <Tabs defaultValue={defaultTab}>
         <TabsList className="mb-4 flex flex-wrap gap-2">

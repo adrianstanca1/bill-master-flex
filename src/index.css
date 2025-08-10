@@ -152,6 +152,7 @@
   }
   .button:hover { background: hsl(var(--emerald-dark)); }
   .button:disabled { opacity: 0.6; cursor: not-allowed; }
+  .button-sm { padding: 0.35rem 0.65rem; font-weight: 600; border-radius: var(--radius); }
 
   .button-secondary {
     background: transparent;
@@ -162,6 +163,7 @@
     transition: var(--transition-fast);
   }
   .button-secondary:hover { background: hsl(var(--surface-hover)); }
+  .button-secondary-sm { padding: 0.35rem 0.65rem; border-radius: var(--radius); }
 
   .table { width: 100%; border-collapse: collapse; }
   .table th, .table td { padding: 0.5rem 0.75rem; border-bottom: 1px solid hsl(var(--border)); }
