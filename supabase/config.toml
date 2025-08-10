@@ -2,3 +2,9 @@ project_id = "tjgbyygllssqsywxpxqe"
 
 [functions.agent]
 verify_jwt = false
+
+[functions.tenderbot]
+verify_jwt = false
+
+[functions.rams]
+verify_jwt = false

@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import AgentChat from "@/components/AgentChat";
+import TenderBot from "@/components/TenderBot";
+import RamsGenerator from "@/components/RamsGenerator";
 
 type InvoiceRow = {
   number: string;
@@ -238,9 +240,21 @@ export default function Dashboard() {
       <section className="card">
         <h2 className="text-lg font-semibold mb-3">AI Agent</h2>
         <p className="text-sm text-gray-300 mb-3">
-          Ask things like: <em>“Who is overdue and by how much?”</em>, <em>“Draft a polite payment reminder to {"{client}"}`”</em>, <em>“Projected cash flow this month?”</em>
+          Ask things like: <em>“Who is overdue and by how much?”</em>, <em>“Draft a polite payment reminder to {"{client}"}”</em>, <em>“Projected cash flow this month?”</em>
         </p>
         <AgentChat />
+      </section>
+
+      <section className="card">
+        <h2 className="text-lg font-semibold mb-3">TenderBot (Website Scraper)</h2>
+        <p className="text-sm text-gray-300 mb-3">Crawl tender portals and extract pages using Firecrawl.</p>
+        <TenderBot />
+      </section>
+
+      <section className="card">
+        <h2 className="text-lg font-semibold mb-3">RAMS Generator</h2>
+        <p className="text-sm text-gray-300 mb-3">Generate a printable RAMS document for your project.</p>
+        <RamsGenerator />
       </section>
     </main>
   );
