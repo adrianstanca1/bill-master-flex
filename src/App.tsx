@@ -13,6 +13,7 @@ import Settings from "./pages/Settings";
 import ToolSetup from "./pages/ToolSetup";
 import Setup from "./pages/Setup";
 import Auth from "./pages/Auth";
+import Advisor from "./pages/Advisor";
 import AuthStatus from "@/components/AuthStatus";
 import { RequireAuth } from "@/components/RequireAuth";
 
@@ -41,6 +42,7 @@ const App = () => (
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/dashboard" element={<RequireAuth><Dashboard /></RequireAuth>} />
+                <Route path="/advisor" element={<RequireAuth><Advisor /></RequireAuth>} />
                 <Route path="/invoices" element={<RequireAuth><Invoices /></RequireAuth>} />
                 <Route path="/settings" element={<RequireAuth><Settings /></RequireAuth>} />
                 <Route path="/tool-setup" element={<RequireAuth><ToolSetup /></RequireAuth>} />

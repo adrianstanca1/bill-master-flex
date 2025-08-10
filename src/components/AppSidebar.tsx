@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Gauge, FileText, Home, Briefcase, Settings as SettingsIcon, Info } from "lucide-react";
+import { Gauge, FileText, Home, Briefcase, Settings as SettingsIcon, Info, Brain } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -16,6 +16,7 @@ const items = [
   { title: "Home", url: "/", icon: Home },
   { title: "Setup", url: "/setup", icon: SettingsIcon },
   { title: "Dashboard", url: "/dashboard", icon: Gauge },
+  { title: "Advisor", url: "/advisor", icon: Brain },
   { title: "Invoices", url: "/invoices", icon: FileText },
   { title: "Tenders", url: "/dashboard#tenders", icon: Briefcase },
   { title: "Tool Setup", url: "/tool-setup", icon: Info },
