@@ -8,3 +8,15 @@ verify_jwt = false
 
 [functions.rams]
 verify_jwt = false
+
+[functions.smartops]
+verify_jwt = false
+
+[functions.quote-bot]
+verify_jwt = false
+
+[functions.tax-bot]
+verify_jwt = false
+
+[functions.tender-search]
+verify_jwt = false

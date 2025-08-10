@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import AgentChat from "@/components/AgentChat";
 import TenderBot from "@/components/TenderBot";
 import RamsGenerator from "@/components/RamsGenerator";
+import SmartOpsPanel from "@/components/SmartOpsPanel";
 
 type InvoiceRow = {
   number: string;
@@ -243,6 +244,12 @@ export default function Dashboard() {
           Ask things like: <em>“Who is overdue and by how much?”</em>, <em>“Draft a polite payment reminder to {"{client}"}”</em>, <em>“Projected cash flow this month?”</em>
         </p>
         <AgentChat />
+      </section>
+
+      <section className="card">
+        <h2 className="text-lg font-semibold mb-3">SmartOps Panel (UK Construction)</h2>
+        <p className="text-sm text-gray-300 mb-3">Run a health scan, search tenders, generate quotes, and get VAT/CIS advice.</p>
+        <SmartOpsPanel />
       </section>
 
       <section className="card">
