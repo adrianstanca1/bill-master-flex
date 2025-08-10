@@ -17,14 +17,14 @@ function buildContractsFinderUrl(keyword: string, location: string, page = 1) {
 
 function extractTendersFromHtml(html: string) {
   const tenders: Array<{ title: string; url: string; deadline?: string }> = [];
-  const anchorRegex = /<a[^>]*href=\"([^\"]+)\"[^>]*>([\s\S]*?)<\\/a>/gi;
-  let match;
+  const anchorRegex = /<a[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/gi;
+  let match: RegExpExecArray | null;
   const seen = new Set<string>();
   while ((match = anchorRegex.exec(html))) {
     const href = match[1];
     const text = match[2].replace(/<[^>]+>/g, "").trim();
     if (!href || !text) continue;
-    if (!/\\/Notice\\//i.test(href)) continue; // contracts finder notice pages
+    if (!\/Notice\//i.test(href)) continue; // contracts finder notice pages
     const full = href.startsWith("http")
       ? href
       : `https://www.contractsfinder.service.gov.uk${href}`;
@@ -35,7 +35,7 @@ function extractTendersFromHtml(html: string) {
   }
 
   // Try to find deadlines near date spans
-  const dlRegex = /<span[^>]*class=\"[^\"]*date[^\"]*\"[^>]*>([\s\S]*?)<\\/span>/gi;
+  const dlRegex = /<span[^>]*class="[^"]*date[^"]*"[^>]*>([\s\S]*?)<\/span>/gi;
   const deadlines: string[] = [];
   while ((match = dlRegex.exec(html))) {
     const d = match[1].replace(/<[^>]+>/g, "").trim();
@@ -102,7 +102,7 @@ serve(async (req) => {
     let tenders = extractTendersFromHtml(html || "");
     if (!tenders.length && markdown) {
       // fallback: parse markdown links
-      const mdLink = /\\[([^\\]]+)\\]\\(([^\\)]+)\\)/g;
+      const mdLink = /\[([^\]]+)\]\(([^)]+)\)/g;
       let m;
       const seen = new Set<string>();
       while ((m = mdLink.exec(markdown))) {
