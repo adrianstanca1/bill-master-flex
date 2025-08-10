@@ -11,6 +11,15 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    // Optional secret gate (works alongside JWT if enabled)
+    const CRON_SECRET = Deno.env.get("CRON_SECRET");
+    if (CRON_SECRET) {
+      const provided = req.headers.get("x-cron-secret") || req.headers.get("x-cron-key");
+      if (provided !== CRON_SECRET) {
+        return json({ error: "Forbidden" }, 403);
+      }
+    }
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     if (!supabaseUrl || !serviceKey) {
