@@ -1,0 +1,256 @@
+import React, { useEffect, useMemo, useState } from "react";
+import AgentChat from "@/components/AgentChat";
+
+type InvoiceRow = {
+  number: string;
+  client: string;
+  total: number;
+  dueDate?: string; // yyyy-mm-dd
+  status: "draft" | "sent" | "paid" | "overdue";
+};
+
+const LS_KEY = "as-invoices";
+
+function readInvoices(): InvoiceRow[] {
+  try {
+    return JSON.parse(localStorage.getItem(LS_KEY) || "[]");
+  } catch {
+    return [];
+  }
+}
+
+function writeInvoices(rows: InvoiceRow[]) {
+  localStorage.setItem(LS_KEY, JSON.stringify(rows));
+}
+
+function isOverdue(inv: InvoiceRow): boolean {
+  if (inv.status === "paid") return false;
+  if (!inv.dueDate) return false;
+  const today = new Date();
+  const due = new Date(inv.dueDate);
+  return (
+    due.getTime() <
+    new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime()
+  );
+}
+
+export default function Dashboard() {
+  const [rows, setRows] = useState<InvoiceRow[]>([]);
+  const [newRow, setNewRow] = useState<InvoiceRow>({
+    number: "",
+    client: "",
+    total: 0,
+    dueDate: "",
+    status: "sent",
+  });
+
+  useEffect(() => {
+    document.title = "Dashboard | AS Invoice Generator";
+    const m = document.querySelector('meta[name="description"]');
+    if (m) m.setAttribute("content", "Invoice dashboard with KPIs and AI agent.");
+    else {
+      const meta = document.createElement("meta");
+      meta.name = "description";
+      meta.content = "Invoice dashboard with KPIs and AI agent.";
+      document.head.appendChild(meta);
+    }
+    const link = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+    if (link) link.href = window.location.href;
+    else {
+      const l = document.createElement("link");
+      l.rel = "canonical";
+      l.href = window.location.href;
+      document.head.appendChild(l);
+    }
+  }, []);
+
+  useEffect(() => {
+    const data: InvoiceRow[] = readInvoices();
+    const updated: InvoiceRow[] = data.map((r) => ({
+      ...r,
+      status: (isOverdue(r) && r.status !== "paid" ? "overdue" : r.status) as InvoiceRow["status"],
+    }));
+    setRows(updated);
+    writeInvoices(updated);
+  }, []);
+
+  const kpi = useMemo(() => {
+    const outstanding = rows
+      .filter((r) => r.status !== "paid")
+      .reduce((s, r) => s + (r.total || 0), 0);
+    const overdueList = rows.filter((r) => r.status === "overdue");
+    const overdue = overdueList.reduce((s, r) => s + (r.total || 0), 0);
+    const nextDue = rows
+      .filter((r) => r.status !== "paid" && r.dueDate)
+      .sort((a, b) => (a.dueDate! < b.dueDate! ? -1 : 1))[0];
+    return { outstanding, overdue, overdueCount: overdueList.length, nextDue };
+  }, [rows]);
+
+  function addRow() {
+    if (!newRow.number || !newRow.client)
+      return alert("Invoice number and client required.");
+    const r = { ...newRow, total: Number(newRow.total || 0) };
+    const updated = [...rows, r];
+    setRows(updated);
+    writeInvoices(updated);
+    setNewRow({ number: "", client: "", total: 0, dueDate: "", status: "sent" });
+  }
+  function removeRow(idx: number) {
+    const updated = rows.slice(0, idx).concat(rows.slice(idx + 1));
+    setRows(updated);
+    writeInvoices(updated);
+  }
+  function markPaid(idx: number) {
+    const updated: InvoiceRow[] = rows.map((r, i) =>
+      i === idx ? { ...r, status: "paid" as InvoiceRow["status"] } : r
+    );
+    setRows(updated);
+    writeInvoices(updated);
+  }
+
+  return (
+    <main className="grid gap-6">
+      <h1 className="text-2xl font-bold">Invoice Dashboard</h1>
+
+      <section className="card">
+        <h2 className="text-lg font-semibold mb-4">Business Overview</h2>
+        <div className="grid sm:grid-cols-4 gap-4">
+          <KPITile label="Outstanding" value={`£${kpi.outstanding.toFixed(2)}`} />
+          <KPITile label="Overdue" value={`£${kpi.overdue.toFixed(2)}`} />
+          <KPITile label="Overdue Invoices" value={`${kpi.overdueCount}`} />
+          <KPITile
+            label="Next Due"
+            value={kpi.nextDue ? `${kpi.nextDue.client} (${kpi.nextDue.dueDate})` : "—"}
+          />
+        </div>
+      </section>
+
+      <section className="card">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-semibold">Invoice Tracker</h2>
+          <button
+            className="button-secondary"
+            onClick={() => {
+              localStorage.removeItem(LS_KEY);
+              setRows([]);
+            }}
+          >
+            Clear All
+          </button>
+        </div>
+
+        <div className="grid md:grid-cols-5 gap-2 mb-3">
+          <input
+            className="input"
+            placeholder="INV number"
+            value={newRow.number}
+            onChange={(e) => setNewRow({ ...newRow, number: e.target.value })}
+          />
+          <input
+            className="input"
+            placeholder="Client"
+            value={newRow.client}
+            onChange={(e) => setNewRow({ ...newRow, client: e.target.value })}
+          />
+          <input
+            className="input"
+            type="number"
+            step="0.01"
+            placeholder="Total (£)"
+            value={newRow.total}
+            onChange={(e) => setNewRow({ ...newRow, total: Number(e.target.value) })}
+          />
+          <input
+            className="input"
+            type="date"
+            value={newRow.dueDate || ""}
+            onChange={(e) => setNewRow({ ...newRow, dueDate: e.target.value })}
+          />
+          <div className="flex gap-2">
+            <select
+              className="input"
+              value={newRow.status}
+              onChange={(e) =>
+                setNewRow({ ...newRow, status: e.target.value as InvoiceRow["status"] })
+              }
+            >
+              <option value="draft">Draft</option>
+              <option value="sent">Sent</option>
+              <option value="paid">Paid</option>
+              <option value="overdue">Overdue</option>
+            </select>
+            <button className="button" onClick={addRow}>
+              Add
+            </button>
+          </div>
+        </div>
+
+        <table className="table">
+          <thead>
+            <tr className="text-left">
+              <th>Invoice</th>
+              <th>Client</th>
+              <th>Total (£)</th>
+              <th>Due</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r, i) => (
+              <tr key={i}>
+                <td>{r.number}</td>
+                <td>{r.client}</td>
+                <td>{r.total.toFixed(2)}</td>
+                <td>{r.dueDate || "—"}</td>
+                <td className={
+                  r.status === "overdue"
+                    ? "text-red-400"
+                    : r.status === "paid"
+                    ? "text-emerald-400"
+                    : "text-gray-300"
+                }>
+                  {r.status}
+                </td>
+                <td className="text-right flex gap-2 justify-end">
+                  {r.status !== "paid" && (
+                    <button className="button" onClick={() => markPaid(i)}>
+                      Mark paid
+                    </button>
+                  )}
+                  <button className="button-secondary" onClick={() => removeRow(i)}>
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+            {rows.length === 0 && (
+              <tr>
+                <td colSpan={6} className="text-gray-400 py-4">
+                  No invoices yet. Add a few above.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </section>
+
+      <section className="card">
+        <h2 className="text-lg font-semibold mb-3">AI Agent</h2>
+        <p className="text-sm text-gray-300 mb-3">
+          Ask things like: <em>“Who is overdue and by how much?”</em>, <em>“Draft a polite payment reminder to {"{client}"}`”</em>, <em>“Projected cash flow this month?”</em>
+        </p>
+        <AgentChat />
+      </section>
+    </main>
+  );
+}
+
+function KPITile({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="bg-gray-900 rounded-md p-4">
+      <p className="text-xs text-gray-400">{label}</p>
+      <p className="text-xl font-semibold">{value}</p>
+    </div>
+  );
+}
