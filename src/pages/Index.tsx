@@ -15,7 +15,7 @@ const Index = () => {
       meta.content = desc;
       document.head.appendChild(meta);
     }
-    const link = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+    const link = document.querySelector('link[rel=\"canonical\"]') as HTMLLinkElement | null;
     if (link) link.href = window.location.href;
     else {
       const l = document.createElement("link");
@@ -35,6 +35,7 @@ const Index = () => {
         </p>
         <nav className="mt-4 flex gap-3">
           <Link to="/dashboard" className="button">Open Operations Dashboard</Link>
+          <Link to="/invoices" className="button-secondary">Open Invoice Generator</Link>
         </nav>
       </header>
 
