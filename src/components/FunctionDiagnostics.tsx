@@ -38,6 +38,23 @@ export default function FunctionDiagnostics() {
     setLoading(false);
   }
 
+  function getSuggestion(name: string, detail?: string) {
+    const d = (detail || '').toLowerCase();
+    if (["agent","quote-bot","tax-bot","rams"].includes(name) && (d.includes("incorrect api key") || d.includes("openai") || d.includes("401"))) {
+      return "Set a valid OPENAI_API_KEY in Supabase and try again.";
+    }
+    if (name === "tenderbot" && (d.includes("unauthorized") || d.includes("invalid token") || d.includes("firecrawl"))) {
+      return "Set a valid FIRECRAWL_API_KEY in Supabase and try again.";
+    }
+    if (name === "smartops" && d.includes("no companyid")) {
+      return "Add your Company ID in Settings and re-run.";
+    }
+    if (d.includes("jwt") || d.includes("401")) {
+      return "Please sign in and re-run.";
+    }
+    return "Check function logs for details.";
+  }
+
   return (
     <div className="grid gap-2">
       <button className="button w-fit" onClick={run} disabled={loading}>
@@ -47,7 +64,7 @@ export default function FunctionDiagnostics() {
         <div className="bg-gray-900 rounded-md p-3 overflow-auto">
           <table className="table text-sm">
             <thead>
-              <tr><th>Function</th><th>Status</th><th>Detail</th></tr>
+              <tr><th>Function</th><th>Status</th><th>Detail</th><th>Solution</th></tr>
             </thead>
             <tbody>
               {results.map((r, i) => (
@@ -55,6 +72,7 @@ export default function FunctionDiagnostics() {
                   <td>{r.name}</td>
                   <td className={r.status === "OK" ? "text-emerald-400" : r.status === "SKIP" ? "text-gray-400" : "text-red-400"}>{r.status}</td>
                   <td className="break-all">{r.detail}</td>
+                  <td className="text-text-secondary">{getSuggestion(r.name, r.detail)}</td>
                 </tr>
               ))}
             </tbody>

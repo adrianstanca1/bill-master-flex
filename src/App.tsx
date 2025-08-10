@@ -10,6 +10,7 @@ import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard";
 import Invoices from "./pages/Invoices";
 import Settings from "./pages/Settings";
+import ToolSetup from "./pages/ToolSetup";
 import Auth from "./pages/Auth";
 import AuthStatus from "@/components/AuthStatus";
 import { RequireAuth } from "@/components/RequireAuth";
@@ -41,6 +42,7 @@ const App = () => (
                 <Route path="/dashboard" element={<RequireAuth><Dashboard /></RequireAuth>} />
                 <Route path="/invoices" element={<RequireAuth><Invoices /></RequireAuth>} />
                 <Route path="/settings" element={<RequireAuth><Settings /></RequireAuth>} />
+                <Route path="/tool-setup" element={<RequireAuth><ToolSetup /></RequireAuth>} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
