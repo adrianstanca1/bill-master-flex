@@ -29,3 +29,6 @@ verify_jwt = true
 
 [functions.tenders]
 verify_jwt = true
+
+[functions.quotes]
+verify_jwt = true

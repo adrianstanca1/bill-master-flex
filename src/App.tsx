@@ -16,6 +16,9 @@ import Auth from "./pages/Auth";
 import Advisor from "./pages/Advisor";
 import AuthStatus from "@/components/AuthStatus";
 import { RequireAuth } from "@/components/RequireAuth";
+import Quotes from "./pages/Quotes";
+import Variations from "./pages/Variations";
+import CRM from "./pages/CRM";
 
 const queryClient = new QueryClient();
 
@@ -64,6 +67,9 @@ const App = () => (
                 <Route path="/dashboard" element={<RequireAuth><Dashboard /></RequireAuth>} />
                 <Route path="/advisor" element={<RequireAuth><Advisor /></RequireAuth>} />
                 <Route path="/invoices" element={<RequireAuth><Invoices /></RequireAuth>} />
+                <Route path="/quotes" element={<RequireAuth><Quotes /></RequireAuth>} />
+                <Route path="/variations" element={<RequireAuth><Variations /></RequireAuth>} />
+                <Route path="/crm" element={<RequireAuth><CRM /></RequireAuth>} />
                 <Route path="/settings" element={<RequireAuth><Settings /></RequireAuth>} />
                 <Route path="/tool-setup" element={<RequireAuth><ToolSetup /></RequireAuth>} />
                 <Route path="/setup" element={<RequireAuth><Setup /></RequireAuth>} />
