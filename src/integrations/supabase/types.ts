@@ -14,6 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      asset_tracking: {
+        Row: {
+          asset_name: string
+          asset_type: string
+          assigned_to: string | null
+          company_id: string
+          condition: string | null
+          created_at: string
+          current_location: string | null
+          id: string
+          last_service_date: string | null
+          next_service_due: string | null
+          photos: Json | null
+          project_id: string | null
+          purchase_cost: number | null
+          purchase_date: string | null
+          serial_number: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          asset_name: string
+          asset_type: string
+          assigned_to?: string | null
+          company_id: string
+          condition?: string | null
+          created_at?: string
+          current_location?: string | null
+          id?: string
+          last_service_date?: string | null
+          next_service_due?: string | null
+          photos?: Json | null
+          project_id?: string | null
+          purchase_cost?: number | null
+          purchase_date?: string | null
+          serial_number?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          asset_name?: string
+          asset_type?: string
+          assigned_to?: string | null
+          company_id?: string
+          condition?: string | null
+          created_at?: string
+          current_location?: string | null
+          id?: string
+          last_service_date?: string | null
+          next_service_due?: string | null
+          photos?: Json | null
+          project_id?: string | null
+          purchase_cost?: number | null
+          purchase_date?: string | null
+          serial_number?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       checklist_responses: {
         Row: {
           checklist_id: string
@@ -222,6 +282,57 @@ export type Database = {
           },
         ]
       }
+      dayworks: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          crew_size: number | null
+          date: string
+          equipment_used: Json | null
+          id: string
+          materials_used: Json | null
+          photos: Json | null
+          progress_percentage: number | null
+          project_id: string | null
+          updated_at: string
+          weather: string | null
+          work_description: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          crew_size?: number | null
+          date?: string
+          equipment_used?: Json | null
+          id?: string
+          materials_used?: Json | null
+          photos?: Json | null
+          progress_percentage?: number | null
+          project_id?: string | null
+          updated_at?: string
+          weather?: string | null
+          work_description: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          crew_size?: number | null
+          date?: string
+          equipment_used?: Json | null
+          id?: string
+          materials_used?: Json | null
+          photos?: Json | null
+          progress_percentage?: number | null
+          project_id?: string | null
+          updated_at?: string
+          weather?: string | null
+          work_description?: string
+        }
+        Relationships: []
+      }
       expenses: {
         Row: {
           ai_tags: Json | null
@@ -315,6 +426,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          company_id: string | null
+          created_at: string
+          first_name: string | null
+          id: string
+          last_name: string | null
+          phone: string | null
+          role: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          company_id?: string | null
+          created_at?: string
+          first_name?: string | null
+          id: string
+          last_name?: string | null
+          phone?: string | null
+          role?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          company_id?: string | null
+          created_at?: string
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          phone?: string | null
+          role?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       project_tools: {
         Row: {
@@ -435,6 +582,117 @@ export type Database = {
           },
         ]
       }
+      rams_documents: {
+        Row: {
+          activity_type: string
+          approval_status: string
+          approved_at: string | null
+          approved_by: string | null
+          company_id: string
+          control_measures: Json
+          created_at: string
+          created_by: string | null
+          hazards: Json
+          id: string
+          method_statement: string | null
+          ppe_required: Json | null
+          project_id: string | null
+          risk_level: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          activity_type: string
+          approval_status?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id: string
+          control_measures?: Json
+          created_at?: string
+          created_by?: string | null
+          hazards?: Json
+          id?: string
+          method_statement?: string | null
+          ppe_required?: Json | null
+          project_id?: string | null
+          risk_level?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          activity_type?: string
+          approval_status?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id?: string
+          control_measures?: Json
+          created_at?: string
+          created_by?: string | null
+          hazards?: Json
+          id?: string
+          method_statement?: string | null
+          ppe_required?: Json | null
+          project_id?: string | null
+          risk_level?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      reminders: {
+        Row: {
+          assigned_to: string | null
+          category: string
+          company_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          due_date: string
+          id: string
+          priority: string
+          project_id: string | null
+          recurring: boolean | null
+          recurring_pattern: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          category?: string
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_date: string
+          id?: string
+          priority?: string
+          project_id?: string | null
+          recurring?: boolean | null
+          recurring_pattern?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          category?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_date?: string
+          id?: string
+          priority?: string
+          project_id?: string | null
+          recurring?: boolean | null
+          recurring_pattern?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       retentions: {
         Row: {
           amount: number
@@ -516,6 +774,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      site_photos: {
+        Row: {
+          ai_analysis: Json | null
+          caption: string | null
+          company_id: string
+          created_at: string
+          id: string
+          location: Json | null
+          photo_date: string
+          project_id: string | null
+          tags: Json | null
+          taken_by: string | null
+          url: string
+        }
+        Insert: {
+          ai_analysis?: Json | null
+          caption?: string | null
+          company_id: string
+          created_at?: string
+          id?: string
+          location?: Json | null
+          photo_date?: string
+          project_id?: string | null
+          tags?: Json | null
+          taken_by?: string | null
+          url: string
+        }
+        Update: {
+          ai_analysis?: Json | null
+          caption?: string | null
+          company_id?: string
+          created_at?: string
+          id?: string
+          location?: Json | null
+          photo_date?: string
+          project_id?: string | null
+          tags?: Json | null
+          taken_by?: string | null
+          url?: string
+        }
+        Relationships: []
       }
       task_checklists: {
         Row: {
@@ -697,6 +997,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      timesheets: {
+        Row: {
+          break_duration: number | null
+          company_id: string
+          created_at: string
+          description: string | null
+          end_time: string | null
+          id: string
+          location: Json | null
+          project_id: string | null
+          start_time: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          break_duration?: number | null
+          company_id: string
+          created_at?: string
+          description?: string | null
+          end_time?: string | null
+          id?: string
+          location?: Json | null
+          project_id?: string | null
+          start_time: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          break_duration?: number | null
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          end_time?: string | null
+          id?: string
+          location?: Json | null
+          project_id?: string | null
+          start_time?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       tools: {
         Row: {
