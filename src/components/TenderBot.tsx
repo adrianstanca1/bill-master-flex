@@ -1,6 +1,7 @@
+
 import React, { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 export default function TenderBot() {
   const [url, setUrl] = useState("");
@@ -10,32 +11,73 @@ export default function TenderBot() {
   const { toast } = useToast();
 
   async function handleRun() {
-    if (!url) return;
+    if (!url.trim()) {
+      toast({ 
+        title: "Missing URL", 
+        description: "Please enter a website URL.", 
+        variant: "destructive" 
+      });
+      return;
+    }
+
     // Basic https URL validation
     try {
       const u = new URL(url);
       if (u.protocol !== "https:") {
-        toast({ title: "Use a secure URL", description: "Only https URLs are allowed.", variant: "destructive" });
+        toast({ 
+          title: "Use a secure URL", 
+          description: "Only https URLs are allowed.", 
+          variant: "destructive" 
+        });
         return;
       }
     } catch {
-      toast({ title: "Invalid URL", description: "Please enter a valid website URL.", variant: "destructive" });
+      toast({ 
+        title: "Invalid URL", 
+        description: "Please enter a valid website URL.", 
+        variant: "destructive" 
+      });
       return;
     }
 
     setLoading(true);
     setResult(null);
+    
     try {
       const { data, error } = await supabase.functions.invoke("tenderbot", {
         body: { url, mode, limit: 50 },
       });
-      if (error) throw error;
+      
+      if (error) {
+        console.error("TenderBot error:", error);
+        throw error;
+      }
+      
       setResult(data);
-      toast({ title: "TenderBot finished", description: "Results loaded below." });
+      toast({ 
+        title: "TenderBot finished", 
+        description: "Results loaded below." 
+      });
     } catch (e: any) {
-      console.error(e);
-      setResult({ error: "Failed to run TenderBot" });
-      toast({ title: "TenderBot failed", description: e?.message || "Could not complete the request.", variant: "destructive" });
+      console.error("TenderBot failed:", e);
+      
+      let errorMessage = "Could not complete the request.";
+      if (e?.message?.includes("JWT") || e?.message?.includes("401")) {
+        errorMessage = "Please sign in to use TenderBot.";
+      } else if (e?.message?.includes("FIRECRAWL_API_KEY")) {
+        errorMessage = "Firecrawl API key not configured. Please contact administrator.";
+      }
+      
+      setResult({ 
+        error: errorMessage,
+        technical_details: e?.message 
+      });
+      
+      toast({ 
+        title: "TenderBot failed", 
+        description: errorMessage, 
+        variant: "destructive" 
+      });
     } finally {
       setLoading(false);
     }
@@ -56,14 +98,34 @@ export default function TenderBot() {
           <option value="crawl">Crawl (site-wide)</option>
           <option value="scrape">Scrape (single page)</option>
         </select>
-        <button className="button" onClick={handleRun} disabled={loading} aria-busy={loading} aria-live="polite">
+        <button 
+          className="button" 
+          onClick={handleRun} 
+          disabled={loading || !url.trim()} 
+          aria-busy={loading} 
+          aria-live="polite"
+        >
           {loading ? "Running…" : "Run TenderBot"}
         </button>
       </div>
 
       {result && (
         <div className="bg-gray-900 rounded-md p-3 overflow-auto">
-          <pre className="text-xs whitespace-pre-wrap">{JSON.stringify(result, null, 2)}</pre>
+          {result.error ? (
+            <div className="text-red-400">
+              <div className="font-semibold mb-2">Error:</div>
+              <div className="mb-2">{result.error}</div>
+              {result.technical_details && (
+                <div className="text-xs text-gray-400">
+                  Technical details: {result.technical_details}
+                </div>
+              )}
+            </div>
+          ) : (
+            <pre className="text-xs text-white whitespace-pre-wrap">
+              {JSON.stringify(result, null, 2)}
+            </pre>
+          )}
         </div>
       )}
     </div>

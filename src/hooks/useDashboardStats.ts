@@ -13,6 +13,21 @@ export function useDashboardStats() {
       if (!companyId) return null;
       
       try {
+        // Validate UUID format
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        if (!uuidRegex.test(companyId)) {
+          console.warn('Invalid company ID format:', companyId);
+          return {
+            activeProjects: 0,
+            pendingReminders: 0,
+            activeTimesheets: 0,
+            recentDayworks: 0,
+            totalAssets: 0,
+            recentPhotos: 0,
+            ramsDocuments: 0,
+          };
+        }
+        
         const [
           { count: activeProjects },
           { count: pendingReminders },
@@ -42,7 +57,16 @@ export function useDashboardStats() {
         };
       } catch (error) {
         console.error('Error fetching dashboard stats:', error);
-        throw error;
+        // Return zeros instead of throwing to prevent the dashboard from crashing
+        return {
+          activeProjects: 0,
+          pendingReminders: 0,
+          activeTimesheets: 0,
+          recentDayworks: 0,
+          totalAssets: 0,
+          recentPhotos: 0,
+          ramsDocuments: 0,
+        };
       }
     },
     enabled: !!companyId,
