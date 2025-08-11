@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import DOMPurify from "dompurify";
 import { useCompanyId } from "@/hooks/useCompanyId";
 import { useToast } from "@/hooks/use-toast";
+import ErrorHandler from "@/components/ErrorHandler";
 
 export default function RamsGenerator() {
   const [name, setName] = useState("");
@@ -13,6 +14,7 @@ export default function RamsGenerator() {
   const [tasks, setTasks] = useState("");
   const [loading, setLoading] = useState(false);
   const [html, setHtml] = useState<string>("");
+  const [error, setError] = useState<any>(null);
   const companyId = useCompanyId();
   const { toast } = useToast();
 
@@ -42,6 +44,7 @@ export default function RamsGenerator() {
 
     setLoading(true);
     setHtml("");
+    setError(null);
     
     try {
       const { data, error } = await supabase.functions.invoke("rams", {
@@ -62,24 +65,11 @@ export default function RamsGenerator() {
       });
     } catch (e: any) {
       console.error("RAMS generation failed:", e);
-      
-      let errorMessage = "Failed to generate RAMS document.";
-      
-      if (e?.message?.includes("JWT") || e?.message?.includes("401")) {
-        errorMessage = "Please sign in to use the RAMS generator.";
-      } else if (e?.message?.includes("OPENAI_API_KEY")) {
-        errorMessage = "OpenAI API key not configured. Please contact administrator.";
-      }
-      
-      setHtml(`<div class="text-red-600 p-4 bg-red-50 rounded-md">
-        <h3 class="font-semibold">Error Generating RAMS</h3>
-        <p>${errorMessage}</p>
-        ${e?.message ? `<p class="text-sm mt-2">Technical details: ${e.message}</p>` : ''}
-      </div>`);
+      setError(e);
       
       toast({
         title: "Generation Failed",
-        description: errorMessage,
+        description: "Failed to generate RAMS document.",
         variant: "destructive"
       });
     } finally {
@@ -166,6 +156,15 @@ export default function RamsGenerator() {
           Print / Open
         </button>
       </div>
+
+      {error && (
+        <ErrorHandler 
+          error={error} 
+          context="RAMS Generator"
+          onRetry={generate}
+          showApiKeyPrompt={true}
+        />
+      )}
 
       {html && (
         <div className="bg-gray-900 rounded-md p-3 max-h-[400px] overflow-auto">

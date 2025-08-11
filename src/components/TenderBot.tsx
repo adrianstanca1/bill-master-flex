@@ -2,12 +2,14 @@
 import React, { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import ErrorHandler from "@/components/ErrorHandler";
 
 export default function TenderBot() {
   const [url, setUrl] = useState("");
   const [mode, setMode] = useState<"crawl" | "scrape">("crawl");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
+  const [error, setError] = useState<any>(null);
   const { toast } = useToast();
 
   async function handleRun() {
@@ -42,6 +44,7 @@ export default function TenderBot() {
 
     setLoading(true);
     setResult(null);
+    setError(null);
     
     try {
       const { data, error } = await supabase.functions.invoke("tenderbot", {
@@ -60,22 +63,11 @@ export default function TenderBot() {
       });
     } catch (e: any) {
       console.error("TenderBot failed:", e);
-      
-      let errorMessage = "Could not complete the request.";
-      if (e?.message?.includes("JWT") || e?.message?.includes("401")) {
-        errorMessage = "Please sign in to use TenderBot.";
-      } else if (e?.message?.includes("FIRECRAWL_API_KEY")) {
-        errorMessage = "Firecrawl API key not configured. Please contact administrator.";
-      }
-      
-      setResult({ 
-        error: errorMessage,
-        technical_details: e?.message 
-      });
+      setError(e);
       
       toast({ 
         title: "TenderBot failed", 
-        description: errorMessage, 
+        description: "Could not complete the request.", 
         variant: "destructive" 
       });
     } finally {
@@ -108,6 +100,15 @@ export default function TenderBot() {
           {loading ? "Running…" : "Run TenderBot"}
         </button>
       </div>
+
+      {error && (
+        <ErrorHandler 
+          error={error} 
+          context="TenderBot"
+          onRetry={handleRun}
+          showApiKeyPrompt={true}
+        />
+      )}
 
       {result && (
         <div className="bg-gray-900 rounded-md p-3 overflow-auto">
