@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 interface SecurityAlert {
   id: string;
   type: 'high' | 'medium' | 'low';
+  severity: 'high' | 'medium' | 'low';
   message: string;
   timestamp: string;
   details?: any;
@@ -41,6 +42,7 @@ export function useSecurityMonitoring() {
         alerts.push({
           id: 'failed-ops',
           type: 'high',
+          severity: 'high',
           message: `${failedOps.length} failed operations detected in the last hour`,
           timestamp: new Date().toISOString(),
           details: { count: failedOps.length }
@@ -53,6 +55,7 @@ export function useSecurityMonitoring() {
         alerts.push({
           id: 'unusual-deletions',
           type: 'medium',
+          severity: 'medium',
           message: `Unusual deletion activity: ${deletions.length} records deleted`,
           timestamp: new Date().toISOString(),
           details: { deletions }
@@ -71,6 +74,7 @@ export function useSecurityMonitoring() {
         alerts.push({
           id: 'after-hours',
           type: 'low',
+          severity: 'low',
           message: `${afterHours.length} after-hours activities detected`,
           timestamp: new Date().toISOString(),
           details: { count: afterHours.length }
@@ -129,7 +133,13 @@ export function useSecurityMonitoring() {
   });
 
   return {
-    suspiciousActivity,
+    alerts: suspiciousActivity || [],
+    stats: {
+      securityEvents: suspiciousActivity?.length || 0,
+      totalAlerts: suspiciousActivity?.length || 0,
+      criticalAlerts: suspiciousActivity?.filter(a => a.severity === 'high').length || 0
+    },
+    suspiciousActivity: suspiciousActivity || [],
     authEvents,
     isMonitoring: true
   };

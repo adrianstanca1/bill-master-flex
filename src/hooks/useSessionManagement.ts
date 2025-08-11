@@ -55,28 +55,32 @@ export function useSessionManagement(config: SessionConfig = {
 
   useEffect(() => {
     // Check if user is authenticated
-    const { data: { session } } = supabase.auth.getSession();
-    if (!session) return;
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
 
-    // Set up activity listeners
-    const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
-    
-    events.forEach(event => {
-      document.addEventListener(event, handleActivity, { passive: true });
-    });
-
-    // Initialize timer
-    resetTimer();
-
-    // Cleanup
-    return () => {
-      events.forEach(event => {
-        document.removeEventListener(event, handleActivity);
-      });
+      // Set up activity listeners
+      const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
       
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      if (warningRef.current) clearTimeout(warningRef.current);
+      events.forEach(event => {
+        document.addEventListener(event, handleActivity, { passive: true });
+      });
+
+      // Initialize timer
+      resetTimer();
+
+      // Cleanup function
+      return () => {
+        events.forEach(event => {
+          document.removeEventListener(event, handleActivity);
+        });
+        
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        if (warningRef.current) clearTimeout(warningRef.current);
+      };
     };
+
+    checkSession();
   }, [config.timeoutMinutes, config.warningMinutes, config.enableWarning]);
 
   return {
