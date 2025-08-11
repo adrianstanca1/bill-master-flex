@@ -56,7 +56,7 @@ Keep answers structured with headings and concise bullet points.`;
     if (!resp.ok) {
       const t = await resp.text();
       console.error("advisor openai error", resp.status, t);
-      return new Response(JSON.stringify({ error: "AI call failed", details: t }), {
+      return new Response(JSON.stringify({ error: "AI call failed" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -70,7 +70,7 @@ Keep answers structured with headings and concise bullet points.`;
     });
   } catch (e) {
     console.error("advisor function error", e);
-    return new Response(JSON.stringify({ error: e?.message || "Unknown error" }), {
+    return new Response(JSON.stringify({ error: "Internal error" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

@@ -120,7 +120,7 @@ serve(async (req) => {
 
       if (insertError) {
         console.error("insert invoice error", insertError);
-        return new Response(JSON.stringify({ error: insertError.message }), {
+        return new Response(JSON.stringify({ error: "Bad request" }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
@@ -170,7 +170,7 @@ serve(async (req) => {
 
       if (retErr) {
         console.error("insert retention error", retErr);
-        return new Response(JSON.stringify({ error: retErr.message }), {
+        return new Response(JSON.stringify({ error: "Bad request" }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });

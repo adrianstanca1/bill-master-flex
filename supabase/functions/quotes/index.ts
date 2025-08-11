@@ -53,6 +53,16 @@ serve(async (req) => {
         source: { type: "quote", id: quote.id, title: quote.title },
       };
 
+      // Idempotency: if an invoice was already created from this quote, return it
+      const { data: existing, error: exErr } = await supabase
+        .from("invoices")
+        .select("id, number, total, status")
+        .contains("meta", { source: { type: "quote", id: quote.id } })
+        .maybeSingle();
+      if (existing) {
+        return json({ invoice: existing });
+      }
+
       const { data: invoice, error: iErr } = await supabase
         .from("invoices")
         .insert({

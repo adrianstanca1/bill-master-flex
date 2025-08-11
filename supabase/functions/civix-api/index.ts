@@ -113,7 +113,7 @@ serve(async (req) => {
     return json({ error: "Route not found", route, path: pathname }, 404);
   } catch (err) {
     console.error("civix-api error:", err);
-    return json({ error: "Internal server error", details: String(err) }, 500);
+    return json({ error: "Internal error" }, 500);
   }
 });
 
