@@ -1,24 +1,25 @@
 
 import React from 'react';
-import { DashboardOverview } from '@/components/DashboardOverview';
+import { ImprovedDashboardOverview } from '@/components/ImprovedDashboardOverview';
 import SEO from '@/components/SEO';
 
 export default function Dashboard() {
   return (
-    <div className="container mx-auto px-4 py-8">
+    <>
       <SEO 
-        title="Dashboard" 
-        description="Your construction business dashboard - track invoices, projects, and performance"
+        title="Construction Business Dashboard | Real-time Analytics & Management"
+        description="Comprehensive construction business dashboard with real-time analytics, project tracking, invoice management, and AI-powered insights for optimal business performance."
+        keywords="construction dashboard, business analytics, project management, invoice tracking, construction CRM"
+        openGraph={{
+          title: "Professional Construction Business Dashboard",
+          description: "Monitor your construction business performance with real-time analytics, project tracking, and intelligent insights.",
+          type: "website"
+        }}
       />
       
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground">
-          Welcome back! Here's an overview of your business performance.
-        </p>
+      <div className="min-h-screen bg-background">
+        <ImprovedDashboardOverview />
       </div>
-
-      <DashboardOverview />
-    </div>
+    </>
   );
 }

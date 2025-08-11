@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -8,6 +9,7 @@ import { RequireAuth } from '@/components/RequireAuth';
 import { SessionManager } from '@/components/SessionManager';
 import { SecurityMonitor } from '@/components/SecurityMonitor';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { useIsMobile } from '@/hooks/use-mobile';
 import Index from '@/pages/Index';
 import Auth from '@/pages/Auth';
 import Dashboard from '@/pages/Dashboard';
@@ -28,9 +30,25 @@ const queryClient = new QueryClient({
     queries: {
       retry: 1,
       refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000, // 5 minutes
     },
   },
 });
+
+function AppLayout({ children }: { children: React.ReactNode }) {
+  const isMobile = useIsMobile();
+  
+  return (
+    <SidebarProvider collapsibleWidth={isMobile ? 0 : 56}>
+      <div className="flex min-h-screen w-full bg-background">
+        {!isMobile && <AppSidebar />}
+        <div className="flex-1 overflow-hidden">
+          {children}
+        </div>
+      </div>
+    </SidebarProvider>
+  );
+}
 
 function App() {
   return (
@@ -44,16 +62,16 @@ function App() {
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/dashboard" element={<RequireAuth><Dashboard /></RequireAuth>} />
-              <Route path="/business-manager" element={<RequireAuth><SidebarProvider><div className="flex"><AppSidebar /><div className="flex-1"><BusinessManager /></div></div></SidebarProvider></RequireAuth>} />
-              <Route path="/invoices" element={<RequireAuth><SidebarProvider><div className="flex"><AppSidebar /><div className="flex-1"><Invoices /></div></div></SidebarProvider></RequireAuth>} />
-              <Route path="/quotes" element={<RequireAuth><SidebarProvider><div className="flex"><AppSidebar /><div className="flex-1"><Quotes /></div></div></SidebarProvider></RequireAuth>} />
-              <Route path="/variations" element={<RequireAuth><SidebarProvider><div className="flex"><AppSidebar /><div className="flex-1"><Variations /></div></div></SidebarProvider></RequireAuth>} />
-              <Route path="/crm" element={<RequireAuth><SidebarProvider><div className="flex"><AppSidebar /><div className="flex-1"><CRM /></div></div></SidebarProvider></RequireAuth>} />
-              <Route path="/advisor" element={<RequireAuth><SidebarProvider><div className="flex"><AppSidebar /><div className="flex-1"><Advisor /></div></div></SidebarProvider></RequireAuth>} />
-              <Route path="/security" element={<RequireAuth><SidebarProvider><div className="flex"><AppSidebar /><div className="flex-1"><Security /></div></div></SidebarProvider></RequireAuth>} />
-              <Route path="/tool-setup" element={<RequireAuth><SidebarProvider><div className="flex"><AppSidebar /><div className="flex-1"><ToolSetup /></div></div></SidebarProvider></RequireAuth>} />
-              <Route path="/account-settings" element={<RequireAuth><SidebarProvider><div className="flex"><AppSidebar /><div className="flex-1"><AccountSettings /></div></div></SidebarProvider></RequireAuth>} />
-              <Route path="/settings" element={<RequireAuth><SidebarProvider><div className="flex"><AppSidebar /><div className="flex-1"><Settings /></div></div></SidebarProvider></RequireAuth>} />
+              <Route path="/business-manager" element={<RequireAuth><AppLayout><BusinessManager /></AppLayout></RequireAuth>} />
+              <Route path="/invoices" element={<RequireAuth><AppLayout><Invoices /></AppLayout></RequireAuth>} />
+              <Route path="/quotes" element={<RequireAuth><AppLayout><Quotes /></AppLayout></RequireAuth>} />
+              <Route path="/variations" element={<RequireAuth><AppLayout><Variations /></AppLayout></RequireAuth>} />
+              <Route path="/crm" element={<RequireAuth><AppLayout><CRM /></AppLayout></RequireAuth>} />
+              <Route path="/advisor" element={<RequireAuth><AppLayout><Advisor /></AppLayout></RequireAuth>} />
+              <Route path="/security" element={<RequireAuth><AppLayout><Security /></AppLayout></RequireAuth>} />
+              <Route path="/tool-setup" element={<RequireAuth><AppLayout><ToolSetup /></AppLayout></RequireAuth>} />
+              <Route path="/account-settings" element={<RequireAuth><AppLayout><AccountSettings /></AppLayout></RequireAuth>} />
+              <Route path="/settings" element={<RequireAuth><AppLayout><Settings /></AppLayout></RequireAuth>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </div>

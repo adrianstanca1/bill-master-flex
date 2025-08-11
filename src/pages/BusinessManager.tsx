@@ -1,12 +1,13 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { ResponsiveLayout } from '@/components/ResponsiveLayout';
+import { DashboardGrid } from '@/components/DashboardGrid';
+import { EnhancedStatsCard } from '@/components/EnhancedStatsCard';
 import { HRManager } from '@/components/HRManager';
 import { BusinessGrowthAssistant } from '@/components/BusinessGrowthAssistant';
 import { ComplianceAssurance } from '@/components/ComplianceAssurance';
 import { OperationsScheduler } from '@/components/OperationsScheduler';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { 
   Building2, 
   Users, 
@@ -15,12 +16,16 @@ import {
   Calendar,
   BarChart3,
   CheckCircle,
-  AlertTriangle
+  AlertTriangle,
+  Activity,
+  Target
 } from 'lucide-react';
 import SEO from '@/components/SEO';
+import { cn } from '@/lib/utils';
 
 export default function BusinessManager() {
   const [activeTab, setActiveTab] = useState('overview');
+  const isMobile = useIsMobile();
 
   const businessMetrics = {
     activeProjects: 8,
@@ -35,162 +40,194 @@ export default function BusinessManager() {
     { id: 3, type: 'operations', message: 'Material delivery scheduled for tomorrow', urgent: false }
   ];
 
+  const tabsData = [
+    { value: 'overview', label: 'Overview', icon: BarChart3 },
+    { value: 'hr', label: 'HR Manager', icon: Users },
+    { value: 'growth', label: 'Growth', icon: TrendingUp },
+    { value: 'compliance', label: 'Compliance', icon: Shield },
+    { value: 'operations', label: 'Operations', icon: Calendar }
+  ];
+
   return (
-    <div className="container mx-auto px-4 py-8">
+    <>
       <SEO 
-        title="Business Manager" 
-        description="Comprehensive business management for construction companies"
+        title="Business Manager | Construction Management Suite"
+        description="Comprehensive business management tools for construction companies - HR management, compliance tracking, growth assistance, and operations scheduling."
+        keywords="construction management, HR tools, compliance tracking, business growth, operations management"
       />
       
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">Business Manager</h1>
-        <p className="text-muted-foreground">
-          Comprehensive management tools for your construction business
-        </p>
-      </div>
-
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="hr">HR Manager</TabsTrigger>
-          <TabsTrigger value="growth">Growth</TabsTrigger>
-          <TabsTrigger value="compliance">Compliance</TabsTrigger>
-          <TabsTrigger value="operations">Operations</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="overview" className="space-y-6">
-          {/* Business Metrics */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center">
-                  <Building2 className="h-8 w-8 text-blue-600" />
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-muted-foreground">Active Projects</p>
-                    <p className="text-2xl font-bold">{businessMetrics.activeProjects}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center">
-                  <Users className="h-8 w-8 text-green-600" />
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-muted-foreground">Team Members</p>
-                    <p className="text-2xl font-bold">{businessMetrics.teamMembers}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center">
-                  <Shield className="h-8 w-8 text-purple-600" />
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-muted-foreground">Compliance Score</p>
-                    <p className="text-2xl font-bold">{businessMetrics.complianceScore}%</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center">
-                  <BarChart3 className="h-8 w-8 text-orange-600" />
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-muted-foreground">Efficiency</p>
-                    <p className="text-2xl font-bold">{businessMetrics.operationalEfficiency}%</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Alerts & Notifications */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <AlertTriangle className="h-5 w-5 mr-2" />
-                Business Alerts
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {alerts.map((alert) => (
-                  <div key={alert.id} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex items-center gap-3">
-                      {alert.urgent ? (
-                        <AlertTriangle className="h-4 w-4 text-red-500" />
-                      ) : (
-                        <CheckCircle className="h-4 w-4 text-blue-500" />
-                      )}
-                      <span>{alert.message}</span>
-                    </div>
-                    <Badge variant={alert.urgent ? 'destructive' : 'secondary'}>
-                      {alert.type}
-                    </Badge>
-                  </div>
-                ))}
+      <ResponsiveLayout maxWidth="full">
+        <div className="space-y-6">
+          {/* Header */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <Building2 className="h-6 w-6 text-primary" />
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Quick Actions */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveTab('hr')}>
-              <CardContent className="pt-6 text-center">
-                <Users className="h-12 w-12 mx-auto text-blue-600 mb-2" />
-                <h3 className="font-semibold">HR Management</h3>
-                <p className="text-sm text-muted-foreground">Manage employees & training</p>
-              </CardContent>
-            </Card>
-
-            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveTab('growth')}>
-              <CardContent className="pt-6 text-center">
-                <TrendingUp className="h-12 w-12 mx-auto text-green-600 mb-2" />
-                <h3 className="font-semibold">Business Growth</h3>
-                <p className="text-sm text-muted-foreground">Certifications & expansion</p>
-              </CardContent>
-            </Card>
-
-            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveTab('compliance')}>
-              <CardContent className="pt-6 text-center">
-                <Shield className="h-12 w-12 mx-auto text-purple-600 mb-2" />
-                <h3 className="font-semibold">Compliance</h3>
-                <p className="text-sm text-muted-foreground">HMRC & regulations</p>
-              </CardContent>
-            </Card>
-
-            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveTab('operations')}>
-              <CardContent className="pt-6 text-center">
-                <Calendar className="h-12 w-12 mx-auto text-orange-600 mb-2" />
-                <h3 className="font-semibold">Operations</h3>
-                <p className="text-sm text-muted-foreground">Scheduling & resources</p>
-              </CardContent>
-            </Card>
+              <div>
+                <h1 className={cn(
+                  "font-bold text-foreground",
+                  isMobile ? "text-2xl" : "text-3xl"
+                )}>
+                  Business Manager
+                </h1>
+                <p className="text-muted-foreground">
+                  Comprehensive management tools for your construction business
+                </p>
+              </div>
+            </div>
           </div>
-        </TabsContent>
 
-        <TabsContent value="hr">
-          <HRManager />
-        </TabsContent>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            <TabsList className={cn(
+              "grid w-full",
+              isMobile ? "grid-cols-3" : "grid-cols-5",
+              isMobile && "h-auto p-1"
+            )}>
+              {tabsData.map((tab) => (
+                <TabsTrigger 
+                  key={tab.value} 
+                  value={tab.value}
+                  className={cn(
+                    "flex items-center gap-2",
+                    isMobile && "flex-col text-xs py-2 px-1"
+                  )}
+                >
+                  <tab.icon className={cn(
+                    isMobile ? "h-4 w-4" : "h-4 w-4"
+                  )} />
+                  <span className={isMobile ? "hidden" : ""}>{tab.label}</span>
+                  {isMobile && <span className="text-xs">{tab.label}</span>}
+                </TabsTrigger>
+              ))}
+            </TabsList>
 
-        <TabsContent value="growth">
-          <BusinessGrowthAssistant />
-        </TabsContent>
+            <TabsContent value="overview" className="space-y-6">
+              {/* Business Metrics */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Target className="h-5 w-5 text-primary" />
+                  <h2 className="text-lg font-semibold">Business Metrics</h2>
+                </div>
+                
+                <DashboardGrid columns={isMobile ? 2 : 4} gap="md">
+                  <EnhancedStatsCard
+                    title="Active Projects"
+                    value={businessMetrics.activeProjects}
+                    icon={Building2}
+                    trend={{ value: 14.3, isPositive: true }}
+                    description="Currently running projects"
+                  />
+                  <EnhancedStatsCard
+                    title="Team Members"
+                    value={businessMetrics.teamMembers}
+                    icon={Users}
+                    trend={{ value: 8.3, isPositive: true }}
+                    description="Active workforce"
+                    onClick={() => setActiveTab('hr')}
+                  />
+                  <EnhancedStatsCard
+                    title="Compliance Score"
+                    value={`${businessMetrics.complianceScore}%`}
+                    icon={Shield}
+                    trend={{ value: 2.1, isPositive: true }}
+                    description="Regulatory compliance"
+                    onClick={() => setActiveTab('compliance')}
+                  />
+                  <EnhancedStatsCard
+                    title="Efficiency"
+                    value={`${businessMetrics.operationalEfficiency}%`}
+                    icon={Activity}
+                    trend={{ value: 5.2, isPositive: true }}
+                    description="Operational efficiency"
+                    onClick={() => setActiveTab('operations')}
+                  />
+                </DashboardGrid>
+              </div>
 
-        <TabsContent value="compliance">
-          <ComplianceAssurance />
-        </TabsContent>
+              {/* Alerts & Notifications */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <AlertTriangle className="h-5 w-5 mr-2" />
+                    Business Alerts
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {alerts.map((alert) => (
+                      <div key={alert.id} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div className="flex items-center gap-3">
+                          {alert.urgent ? (
+                            <AlertTriangle className="h-4 w-4 text-red-500" />
+                          ) : (
+                            <CheckCircle className="h-4 w-4 text-blue-500" />
+                          )}
+                          <span>{alert.message}</span>
+                        </div>
+                        <Badge variant={alert.urgent ? 'destructive' : 'secondary'}>
+                          {alert.type}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
 
-        <TabsContent value="operations">
-          <OperationsScheduler />
-        </TabsContent>
-      </Tabs>
-    </div>
+              {/* Quick Actions */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveTab('hr')}>
+                  <CardContent className="pt-6 text-center">
+                    <Users className="h-12 w-12 mx-auto text-blue-600 mb-2" />
+                    <h3 className="font-semibold">HR Management</h3>
+                    <p className="text-sm text-muted-foreground">Manage employees & training</p>
+                  </CardContent>
+                </Card>
+
+                <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveTab('growth')}>
+                  <CardContent className="pt-6 text-center">
+                    <TrendingUp className="h-12 w-12 mx-auto text-green-600 mb-2" />
+                    <h3 className="font-semibold">Business Growth</h3>
+                    <p className="text-sm text-muted-foreground">Certifications & expansion</p>
+                  </CardContent>
+                </Card>
+
+                <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveTab('compliance')}>
+                  <CardContent className="pt-6 text-center">
+                    <Shield className="h-12 w-12 mx-auto text-purple-600 mb-2" />
+                    <h3 className="font-semibold">Compliance</h3>
+                    <p className="text-sm text-muted-foreground">HMRC & regulations</p>
+                  </CardContent>
+                </Card>
+
+                <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveTab('operations')}>
+                  <CardContent className="pt-6 text-center">
+                    <Calendar className="h-12 w-12 mx-auto text-orange-600 mb-2" />
+                    <h3 className="font-semibold">Operations</h3>
+                    <p className="text-sm text-muted-foreground">Scheduling & resources</p>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="hr">
+              <HRManager />
+            </TabsContent>
+
+            <TabsContent value="growth">
+              <BusinessGrowthAssistant />
+            </TabsContent>
+
+            <TabsContent value="compliance">
+              <ComplianceAssurance />
+            </TabsContent>
+
+            <TabsContent value="operations">
+              <OperationsScheduler />
+            </TabsContent>
+          </Tabs>
+        </div>
+      </ResponsiveLayout>
+    </>
   );
 }
