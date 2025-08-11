@@ -14,11 +14,11 @@ import ToolSetup from "./pages/ToolSetup";
 import Setup from "./pages/Setup";
 import Auth from "./pages/Auth";
 import Advisor from "./pages/Advisor";
-import AuthStatus from "@/components/AuthStatus";
-import { RequireAuth } from "@/components/RequireAuth";
+import CRM from "./pages/CRM";
 import Quotes from "./pages/Quotes";
 import Variations from "./pages/Variations";
-import CRM from "./pages/CRM";
+import AuthStatus from "@/components/AuthStatus";
+import { RequireAuth } from "@/components/RequireAuth";
 
 const queryClient = new QueryClient();
 
