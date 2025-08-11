@@ -30,10 +30,10 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <SidebarProvider>
-          <header className="sticky top-0 z-40 h-12 flex items-center border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <div className="container mx-auto flex items-center gap-3 justify-between">
+          <header className="sticky top-0 z-40 h-12 flex items-center border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 safe-area-top">
+            <div className="container mx-auto flex items-center gap-3 justify-between px-4">
               <div className="flex items-center gap-3">
-                <SidebarTrigger className="mr-2" />
+                <SidebarTrigger className="mr-2 touch-manipulation" />
                 {(() => { try { const s = JSON.parse(localStorage.getItem("as-settings")||"{}"); return s?.logoDataUrl ? (<img src={s.logoDataUrl} alt="Logo" className="h-6 w-auto rounded-sm border" />) : (<span className="text-sm text-muted-foreground">Menu</span>); } catch { return (<span className="text-sm text-muted-foreground">Menu</span>); } })()}
               </div>
               <div className="flex-1 hidden md:flex items-center justify-center px-4">
@@ -54,14 +54,14 @@ const App = () => (
                 />
               </div>
               <div className="flex items-center gap-2">
-                <Link to="/dashboard#invoices" className="button">New</Link>
+                <Link to="/dashboard#invoices" className="button touch-manipulation">New</Link>
                 <AuthStatus />
               </div>
             </div>
           </header>
-          <div className="flex min-h-screen w-full">
+          <div className="flex min-h-screen w-full safe-area-bottom">
             <AppSidebar />
-            <main className="flex-1 container py-6 animate-fade-in">
+            <main className="flex-1 container py-6 animate-fade-in touch-manipulation">
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />

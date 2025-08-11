@@ -73,6 +73,28 @@
     @apply bg-background text-foreground font-sans;
     color: hsl(var(--text-primary));
     background: hsl(var(--background));
+    /* Mobile optimizations */
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  /* Safe area support for mobile devices */
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .safe-area-left {
+    padding-left: env(safe-area-inset-left);
+  }
+  
+  .safe-area-right {
+    padding-right: env(safe-area-inset-right);
   }
 
   /* Invoice-specific print styles */
@@ -133,6 +155,9 @@
     padding: 0.5rem 0.75rem;
     outline: none;
     transition: var(--transition-fast);
+    /* Mobile touch improvements */
+    min-height: 44px;
+    font-size: 16px; /* Prevents zoom on iOS */
   }
   .input::placeholder { color: hsl(var(--text-muted)); }
   .input:focus {
@@ -149,10 +174,14 @@
     font-weight: 600;
     border: 1px solid transparent;
     transition: var(--transition-fast);
+    /* Mobile touch improvements */
+    min-height: 44px;
+    cursor: pointer;
+    user-select: none;
   }
   .button:hover { background: hsl(var(--emerald-dark)); }
   .button:disabled { opacity: 0.6; cursor: not-allowed; }
-  .button-sm { padding: 0.35rem 0.65rem; font-weight: 600; border-radius: var(--radius); }
+  .button-sm { padding: 0.35rem 0.65rem; font-weight: 600; border-radius: var(--radius); min-height: 36px; }
 
   .button-secondary {
     background: transparent;
@@ -161,12 +190,23 @@
     border-radius: var(--radius);
     padding: 0.5rem 0.9rem;
     transition: var(--transition-fast);
+    min-height: 44px;
+    cursor: pointer;
+    user-select: none;
   }
   .button-secondary:hover { background: hsl(var(--surface-hover)); }
-  .button-secondary-sm { padding: 0.35rem 0.65rem; border-radius: var(--radius); }
+  .button-secondary-sm { padding: 0.35rem 0.65rem; border-radius: var(--radius); min-height: 36px; }
 
   .table { width: 100%; border-collapse: collapse; }
   .table th, .table td { padding: 0.5rem 0.75rem; border-bottom: 1px solid hsl(var(--border)); }
+
+  /* Mobile touch improvements */
+  .touch-manipulation {
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+  }
 
   /* Ensure dropdowns/menus are opaque and on top */
   [data-radix-popper-content-wrapper] { z-index: 60 !important; }
@@ -184,7 +224,6 @@
     background-image: none;
   }
 }
-
 
 @layer utilities {
   /* Improve contrast where gray utilities were used */
