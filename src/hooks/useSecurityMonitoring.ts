@@ -30,10 +30,12 @@ export function useSecurityMonitoring() {
       // Analyze for suspicious patterns
       const alerts: SecurityAlert[] = [];
       
-      // Check for multiple failed operations
-      const failedOps = data.filter(log => 
-        log.details?.error || log.action === 'FAILED_LOGIN'
-      );
+      // Check for multiple failed operations with safe property access
+      const failedOps = data.filter(log => {
+        // Safely check if details contains error information
+        const details = log.details as any;
+        return (details && typeof details === 'object' && details.error) || log.action === 'FAILED_LOGIN';
+      });
       
       if (failedOps.length > 5) {
         alerts.push({
