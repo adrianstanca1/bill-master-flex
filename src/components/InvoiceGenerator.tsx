@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { z } from 'zod';
@@ -7,8 +8,10 @@ import { format } from 'date-fns';
 import { InvoiceForm } from './InvoiceForm';
 import { InvoiceTotals } from './InvoiceTotals';
 import { InvoicePreview } from './InvoicePreview';
+import { InvoiceList } from './InvoiceList';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from "@/integrations/supabase/client";
+import { useCompanyId } from '@/hooks/useCompanyId';
 
 const itemSchema = z.object({
   description: z.string().min(1, 'Description is required'),
@@ -42,7 +45,6 @@ const formSchema = z.object({
   vatMode: z.enum(['STANDARD_20','REVERSE_CHARGE_20','NO_VAT']),
   discountPercent: z.number().min(0).max(100).default(0),
   retentionPercent: z.number().min(0).max(100).default(0),
-  // CIS options - simplified
   cisEnabled: z.boolean().default(false).optional(),
   cisPercent: z.number().min(0).max(100).default(20).optional(),
 });
@@ -67,9 +69,9 @@ function getInitialDefaults(): Partial<FormValues> {
   const today = format(new Date(), 'yyyy-MM-dd');
   return {
     company: {
-      name: 'AS Cladding & Roofing Ltd',
+      name: 'Your Company Ltd',
       address: 'Your Address Line 1\nCity, Postcode\nUnited Kingdom',
-      email: 'info@example.com',
+      email: 'info@yourcompany.com',
       phone: '+44 1234 567890',
       vatNumber: 'GB123456789',
       regNumber: '12345678',
@@ -81,7 +83,7 @@ function getInitialDefaults(): Partial<FormValues> {
       email: '',
     },
     invoice: {
-      number: 'INV-0001',
+      number: `INV-${Date.now().toString().slice(-6)}`,
       date: today,
       dueDate: '',
       reference: '',
@@ -99,11 +101,13 @@ function getInitialDefaults(): Partial<FormValues> {
 }
 
 export function InvoiceGenerator() {
-  const [showPreview, setShowPreview] = useState(false);
+  const [currentView, setCurrentView] = useState<'list' | 'create' | 'edit' | 'preview'>('list');
+  const [editingInvoice, setEditingInvoice] = useState<any>(null);
   const { toast } = useToast();
+  const companyId = useCompanyId();
   
   const defaults = loadDefaults();
-  const { control, register, watch, setValue } = useForm<FormValues>({
+  const { control, register, watch, setValue, reset } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: defaults as FormValues
   });
@@ -124,42 +128,147 @@ export function InvoiceGenerator() {
     });
   }
 
-function handlePreview() {
-  setShowPreview(true);
-}
-
-async function handleSaveBackend() {
-  try {
-    const settings = JSON.parse(localStorage.getItem('as-settings') || '{}');
-    const companyId = settings?.companyId;
-    if (!companyId) {
-      toast({ title: "Missing company", description: "Set a company ID in Settings first.", variant: "destructive" });
-      return;
-    }
-    const body = {
-      endpoint: "invoices",
-      companyId,
-      client: values.client,
-      number: values.invoice.number,
-      dueDate: values.invoice.dueDate,
-      items: values.items,
-      reverseVAT: values.vatMode === 'REVERSE_CHARGE_20',
-      retentionApplied: (values.retentionPercent || 0) > 0,
-    };
-    const { data, error } = await supabase.functions.invoke("accounting", { body });
-    if (error) throw error as any;
-    toast({ title: "Invoice saved", description: `ID: ${ (data as any)?.invoiceId || 'created' }` });
-  } catch (e: any) {
-    console.error(e);
-    toast({ title: "Failed to save invoice", description: e?.message || String(e), variant: "destructive" });
+  function handleCreateNew() {
+    reset(getInitialDefaults() as FormValues);
+    setEditingInvoice(null);
+    setCurrentView('create');
   }
-}
 
-function handleClosePreview() {
-  setShowPreview(false);
-}
+  function handleEditInvoice(invoice: any) {
+    const meta = invoice.meta || {};
+    
+    // Populate form with invoice data
+    reset({
+      company: meta.company || getInitialDefaults().company,
+      client: {
+        name: invoice.client || '',
+        address: meta.client?.address || '',
+        contact: meta.client?.contact || '',
+        email: meta.client?.email || '',
+      },
+      invoice: {
+        number: invoice.number,
+        date: format(new Date(invoice.created_at), 'yyyy-MM-dd'),
+        dueDate: invoice.due_date ? format(new Date(invoice.due_date), 'yyyy-MM-dd') : '',
+        reference: meta.reference || '',
+        notes: meta.notes || '',
+      },
+      items: meta.items || [{ description: 'Labour and materials', quantity: 1, unitPrice: 0 }],
+      vatMode: meta.reverse_vat ? 'REVERSE_CHARGE_20' : 'STANDARD_20',
+      discountPercent: meta.discount_percent || 0,
+      retentionPercent: meta.retention_percent || 0,
+      cisEnabled: meta.cis_enabled || false,
+      cisPercent: meta.cis_percent || 20,
+    } as FormValues);
+    
+    setEditingInvoice(invoice);
+    setCurrentView('edit');
+  }
 
-  if (showPreview) {
+  function handlePreview() {
+    setCurrentView('preview');
+  }
+
+  async function handleSaveBackend() {
+    try {
+      if (!companyId) {
+        toast({ 
+          title: "Missing company", 
+          description: "Please set up your company in Settings first.", 
+          variant: "destructive" 
+        });
+        return;
+      }
+
+      const itemTotals = values.items.map(item => item.quantity * item.unitPrice);
+      const netTotal = itemTotals.reduce((sum, total) => sum + total, 0);
+      
+      const invoiceData = {
+        company_id: companyId,
+        number: values.invoice.number,
+        client: values.client.name,
+        total: totals.totalDue,
+        due_date: values.invoice.dueDate || null,
+        status: 'draft' as const,
+        meta: {
+          company: values.company,
+          client: values.client,
+          invoice: values.invoice,
+          items: values.items,
+          net_total: netTotal,
+          vat_amount: totals.vatAmount,
+          reverse_vat: values.vatMode === 'REVERSE_CHARGE_20',
+          discount_percent: values.discountPercent,
+          retention_percent: values.retentionPercent,
+          cis_enabled: values.cisEnabled,
+          cis_percent: values.cisPercent,
+          totals: totals,
+        },
+      };
+
+      let result;
+      if (editingInvoice) {
+        // Update existing invoice
+        result = await supabase
+          .from('invoices')
+          .update(invoiceData)
+          .eq('id', editingInvoice.id)
+          .select()
+          .single();
+      } else {
+        // Create new invoice
+        result = await supabase
+          .from('invoices')
+          .insert(invoiceData)
+          .select()
+          .single();
+      }
+
+      if (result.error) throw result.error;
+
+      toast({ 
+        title: editingInvoice ? "Invoice updated" : "Invoice created", 
+        description: `Invoice ${values.invoice.number} has been saved successfully.` 
+      });
+      
+      setCurrentView('list');
+    } catch (error: any) {
+      console.error('Error saving invoice:', error);
+      toast({ 
+        title: "Failed to save invoice", 
+        description: error?.message || String(error), 
+        variant: "destructive" 
+      });
+    }
+  }
+
+  function handleClosePreview() {
+    setCurrentView(editingInvoice ? 'edit' : 'create');
+  }
+
+  function handleBackToList() {
+    setCurrentView('list');
+    setEditingInvoice(null);
+  }
+
+  if (currentView === 'list') {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="max-w-6xl mx-auto p-6">
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold">Invoice Management</h1>
+            <p className="text-gray-600">Create, manage and track your invoices</p>
+          </div>
+          <InvoiceList 
+            onCreateNew={handleCreateNew}
+            onEditInvoice={handleEditInvoice}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (currentView === 'preview') {
     return (
       <InvoicePreview 
         data={values as InvoiceData}
@@ -172,6 +281,23 @@ function handleClosePreview() {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-6xl mx-auto p-6">
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">
+              {editingInvoice ? 'Edit Invoice' : 'Create Invoice'}
+            </h1>
+            <p className="text-gray-600">
+              {editingInvoice ? `Editing ${editingInvoice.number}` : 'Generate professional invoices with VAT, CIS, and retention support'}
+            </p>
+          </div>
+          <button
+            onClick={handleBackToList}
+            className="text-blue-600 hover:text-blue-800 underline"
+          >
+            ← Back to Invoice List
+          </button>
+        </div>
+        
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <InvoiceForm
