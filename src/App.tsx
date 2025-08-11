@@ -39,7 +39,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
   const isMobile = useIsMobile();
   
   return (
-    <SidebarProvider collapsibleWidth={isMobile ? 0 : 56}>
+    <SidebarProvider>
       <div className="flex min-h-screen w-full bg-background">
         {!isMobile && <AppSidebar />}
         <div className="flex-1 overflow-hidden">

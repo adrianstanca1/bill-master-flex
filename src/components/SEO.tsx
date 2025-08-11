@@ -1,11 +1,20 @@
+
 import React, { useEffect } from "react";
 
 type SEOProps = {
   title: string;
   description?: string;
+  keywords?: string;
   canonical?: string;
   noindex?: boolean;
   jsonLd?: Record<string, any> | Array<any>;
+  openGraph?: {
+    title?: string;
+    description?: string;
+    type?: string;
+    image?: string;
+    url?: string;
+  };
 };
 
 function upsertMeta(name: string, content: string) {
@@ -18,7 +27,17 @@ function upsertMeta(name: string, content: string) {
   meta.content = content;
 }
 
-const SEO: React.FC<SEOProps> = ({ title, description, canonical, noindex, jsonLd }) => {
+function upsertProperty(property: string, content: string) {
+  let meta = document.querySelector(`meta[property="${property}"]`) as HTMLMetaElement | null;
+  if (!meta) {
+    meta = document.createElement("meta");
+    meta.setAttribute("property", property);
+    document.head.appendChild(meta);
+  }
+  meta.content = content;
+}
+
+const SEO: React.FC<SEOProps> = ({ title, description, keywords, canonical, noindex, jsonLd, openGraph }) => {
   useEffect(() => {
     // Title
     document.title = title.slice(0, 60);
@@ -26,6 +45,11 @@ const SEO: React.FC<SEOProps> = ({ title, description, canonical, noindex, jsonL
     // Meta description
     if (description) {
       upsertMeta("description", description.slice(0, 160));
+    }
+
+    // Keywords
+    if (keywords) {
+      upsertMeta("keywords", keywords);
     }
 
     // Robots
@@ -41,6 +65,25 @@ const SEO: React.FC<SEOProps> = ({ title, description, canonical, noindex, jsonL
     }
     link.href = href;
 
+    // Open Graph tags
+    if (openGraph) {
+      if (openGraph.title) {
+        upsertProperty("og:title", openGraph.title);
+      }
+      if (openGraph.description) {
+        upsertProperty("og:description", openGraph.description);
+      }
+      if (openGraph.type) {
+        upsertProperty("og:type", openGraph.type);
+      }
+      if (openGraph.image) {
+        upsertProperty("og:image", openGraph.image);
+      }
+      if (openGraph.url) {
+        upsertProperty("og:url", openGraph.url);
+      }
+    }
+
     // Structured data
     const id = "seo-jsonld";
     const existing = document.getElementById(id);
@@ -52,7 +95,7 @@ const SEO: React.FC<SEOProps> = ({ title, description, canonical, noindex, jsonL
       script.text = JSON.stringify(jsonLd);
       document.head.appendChild(script);
     }
-  }, [title, description, canonical, noindex, JSON.stringify(jsonLd)]);
+  }, [title, description, keywords, canonical, noindex, JSON.stringify(jsonLd), JSON.stringify(openGraph)]);
 
   return null;
 };

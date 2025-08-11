@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { ResponsiveLayout } from '@/components/ResponsiveLayout';
 import { DashboardGrid } from '@/components/DashboardGrid';
 import { EnhancedStatsCard } from '@/components/EnhancedStatsCard';
