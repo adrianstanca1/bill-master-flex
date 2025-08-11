@@ -9,7 +9,8 @@ import {
   Clock, Calendar, Bell, Camera, Shield, Wrench, 
   Users, TrendingUp, FileText, BarChart3, 
   MapPin, Smartphone, Zap, Brain, Package,
-  Activity, AlertCircle, RefreshCcw
+  Activity, AlertCircle, RefreshCcw, UserCheck,
+  Building2
 } from 'lucide-react';
 import { TimesheetTracker } from '@/components/TimesheetTracker';
 import { DayworkManager } from '@/components/DayworkManager';
@@ -17,6 +18,8 @@ import { ReminderSystem } from '@/components/ReminderSystem';
 import { AssetTracker } from '@/components/AssetTracker';
 import { SitePhotos } from '@/components/SitePhotos';
 import RamsGenerator from '@/components/RamsGenerator';
+import { HRManager } from '@/components/HRManager';
+import { BusinessGrowthAssistant } from '@/components/BusinessGrowthAssistant';
 import { useCompanyId } from '@/hooks/useCompanyId';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
@@ -65,13 +68,32 @@ export default function BusinessManager() {
       ]
     },
     {
+      id: 'human-resources',
+      title: 'Human Resources',
+      description: 'Employee management and development',
+      items: [
+        { icon: UserCheck, name: 'HR Management', desc: 'Employee tracking and development', status: 'Active', tab: 'hr' },
+        { icon: Users, name: 'Training Matrix', desc: 'Skills and certification tracking', status: 'Active', tab: 'hr' },
+        { icon: FileText, name: 'Competency Records', desc: 'Professional development tracking', status: 'Active', tab: 'hr' },
+      ]
+    },
+    {
+      id: 'growth',
+      title: 'Business Growth',
+      description: 'Certification and business development support',
+      items: [
+        { icon: Building2, name: 'Growth Assistant', desc: 'CHAS, SafeContractor certification support', status: 'Active', tab: 'growth' },
+        { icon: TrendingUp, name: 'Document Generator', desc: 'Automated compliance documentation', status: 'Active', tab: 'growth' },
+        { icon: Brain, name: 'AI Guidance', desc: 'Expert business growth advice', status: 'Active', tab: 'growth' },
+      ]
+    },
+    {
       id: 'intelligence',
       title: 'Business Intelligence',
       description: 'Data-driven insights and analytics',
       items: [
         { icon: BarChart3, name: 'Performance Analytics', desc: 'Real-time KPI dashboards', status: 'Coming Soon' },
         { icon: TrendingUp, name: 'Profit Analysis', desc: 'Financial performance tracking', status: 'Coming Soon' },
-        { icon: Users, name: 'Workforce Analytics', desc: 'Team productivity insights', status: 'Coming Soon' },
         { icon: MapPin, name: 'Location Intelligence', desc: 'Site-based analytics', status: 'Coming Soon' },
       ]
     },
@@ -96,6 +118,8 @@ export default function BusinessManager() {
     { value: 'assets', label: 'Assets', icon: Package },
     { value: 'photos', label: 'Photos', icon: Camera },
     { value: 'rams', label: 'RAMS', icon: Shield },
+    { value: 'hr', label: 'HR Manager', icon: UserCheck },
+    { value: 'growth', label: 'Growth', icon: Building2 },
   ];
 
   if (!companyId) {
@@ -164,7 +188,7 @@ export default function BusinessManager() {
                 <ScrollBar orientation="horizontal" />
               </ScrollArea>
             ) : (
-              <TabsList className="grid w-full grid-cols-7">
+              <TabsList className="grid w-full grid-cols-9">
                 {tabConfig.map((tab) => (
                   <TabsTrigger key={tab.value} value={tab.value} className="flex items-center gap-2">
                     <tab.icon className="h-4 w-4" />
@@ -320,6 +344,18 @@ export default function BusinessManager() {
             <TabsContent value="rams">
               <ErrorBoundary>
                 <RamsGenerator />
+              </ErrorBoundary>
+            </TabsContent>
+
+            <TabsContent value="hr">
+              <ErrorBoundary>
+                <HRManager />
+              </ErrorBoundary>
+            </TabsContent>
+
+            <TabsContent value="growth">
+              <ErrorBoundary>
+                <BusinessGrowthAssistant />
               </ErrorBoundary>
             </TabsContent>
           </Tabs>
