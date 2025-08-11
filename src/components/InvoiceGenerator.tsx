@@ -6,7 +6,7 @@ import { computeTotals, type VATMode, type InvoiceData } from '@/lib/invoice-cal
 import { format } from 'date-fns';
 import { InvoiceForm } from './InvoiceForm';
 import { InvoiceTotals } from './InvoiceTotals';
-import { InvoicePreview } from './InvoicePreview';
+import { EnhancedInvoicePreview } from './EnhancedInvoicePreview';
 import { InvoiceList } from './InvoiceList';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from "@/integrations/supabase/client";
@@ -265,6 +265,20 @@ export function InvoiceGenerator() {
     setEditingInvoice(null);
   }
 
+  function handleDownloadPDF() {
+    toast({
+      title: "PDF Download",
+      description: "PDF download functionality would be implemented here",
+    });
+  }
+
+  function handleSendInvoice() {
+    toast({
+      title: "Send Invoice",
+      description: "Email sending functionality would be implemented here",
+    });
+  }
+
   if (currentView === 'list') {
     return (
       <div className="min-h-screen bg-background">
@@ -284,10 +298,13 @@ export function InvoiceGenerator() {
 
   if (currentView === 'preview') {
     return (
-      <InvoicePreview 
+      <EnhancedInvoicePreview 
         data={values as InvoiceData}
         totals={totals}
         onClose={handleClosePreview}
+        onEdit={handleClosePreview}
+        onDownload={handleDownloadPDF}
+        onSend={handleSendInvoice}
       />
     );
   }

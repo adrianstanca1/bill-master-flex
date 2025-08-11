@@ -1,235 +1,563 @@
+
 import React, { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { ResponsiveLayout } from '@/components/ResponsiveLayout';
-import { DashboardGrid } from '@/components/DashboardGrid';
-import { EnhancedStatsCard } from '@/components/EnhancedStatsCard';
-import { HRManager } from '@/components/HRManager';
-import { BusinessGrowthAssistant } from '@/components/BusinessGrowthAssistant';
-import { ComplianceAssurance } from '@/components/ComplianceAssurance';
-import { OperationsScheduler } from '@/components/OperationsScheduler';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { 
-  Building2, 
-  Users, 
-  TrendingUp, 
-  Shield, 
-  Calendar,
-  BarChart3,
-  CheckCircle,
-  AlertTriangle,
-  Activity,
-  Target
-} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Building2, Users, Calendar, FileText, Plus, Edit, Trash2, Eye } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import SEO from '@/components/SEO';
-import { cn } from '@/lib/utils';
+import { ProfileUpload } from '@/components/ProfileUpload';
+
+interface Project {
+  id: string;
+  name: string;
+  client: string;
+  status: 'planning' | 'active' | 'completed' | 'on-hold';
+  startDate: string;
+  endDate?: string;
+  budget: number;
+  spent: number;
+  location: string;
+  description: string;
+}
+
+interface Client {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  type: 'individual' | 'business';
+  projects: number;
+  totalValue: number;
+}
 
 export default function BusinessManager() {
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('overview');
-  const isMobile = useIsMobile();
+  
+  // Sample data
+  const [projects, setProjects] = useState<Project[]>([
+    {
+      id: '1',
+      name: 'Kitchen Renovation',
+      client: 'Smith Family',
+      status: 'active',
+      startDate: '2025-01-15',
+      endDate: '2025-03-15',
+      budget: 25000,
+      spent: 12500,
+      location: 'London, SW1',
+      description: 'Complete kitchen renovation including new cabinets, appliances, and flooring'
+    },
+    {
+      id: '2',
+      name: 'Office Building Extension',
+      client: 'TechCorp Ltd',
+      status: 'planning',
+      startDate: '2025-02-01',
+      budget: 150000,
+      spent: 5000,
+      location: 'Manchester, M1',
+      description: 'Two-story extension to existing office building'
+    }
+  ]);
 
-  const businessMetrics = {
-    activeProjects: 8,
-    teamMembers: 12,
-    complianceScore: 94,
-    operationalEfficiency: 87
+  const [clients, setClients] = useState<Client[]>([
+    {
+      id: '1',
+      name: 'Smith Family',
+      email: 'john.smith@email.com',
+      phone: '+44 7700 900123',
+      address: '123 High Street, London, SW1A 1AA',
+      type: 'individual',
+      projects: 1,
+      totalValue: 25000
+    },
+    {
+      id: '2',
+      name: 'TechCorp Ltd',
+      email: 'contact@techcorp.com',
+      phone: '+44 161 123 4567',
+      address: '456 Business Park, Manchester, M1 1AA',
+      type: 'business',
+      projects: 1,
+      totalValue: 150000
+    }
+  ]);
+
+  const [newProject, setNewProject] = useState({
+    name: '',
+    client: '',
+    startDate: '',
+    endDate: '',
+    budget: '',
+    location: '',
+    description: ''
+  });
+
+  const [newClient, setNewClient] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    address: '',
+    type: 'individual'
+  });
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'active': return 'bg-green-100 text-green-800';
+      case 'planning': return 'bg-blue-100 text-blue-800';
+      case 'completed': return 'bg-gray-100 text-gray-800';
+      case 'on-hold': return 'bg-yellow-100 text-yellow-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
   };
 
-  const alerts = [
-    { id: 1, type: 'compliance', message: 'CIS300 return due in 3 days', urgent: true },
-    { id: 2, type: 'hr', message: '2 training certificates expiring soon', urgent: false },
-    { id: 3, type: 'operations', message: 'Material delivery scheduled for tomorrow', urgent: false }
-  ];
+  const handleAddProject = () => {
+    if (!newProject.name || !newProject.client || !newProject.startDate || !newProject.budget) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields",
+        variant: "destructive"
+      });
+      return;
+    }
 
-  const tabsData = [
-    { value: 'overview', label: 'Overview', icon: BarChart3 },
-    { value: 'hr', label: 'HR Manager', icon: Users },
-    { value: 'growth', label: 'Growth', icon: TrendingUp },
-    { value: 'compliance', label: 'Compliance', icon: Shield },
-    { value: 'operations', label: 'Operations', icon: Calendar }
-  ];
+    const project: Project = {
+      id: (projects.length + 1).toString(),
+      name: newProject.name,
+      client: newProject.client,
+      status: 'planning',
+      startDate: newProject.startDate,
+      endDate: newProject.endDate || undefined,
+      budget: parseFloat(newProject.budget),
+      spent: 0,
+      location: newProject.location,
+      description: newProject.description
+    };
+
+    setProjects([...projects, project]);
+    setNewProject({
+      name: '',
+      client: '',
+      startDate: '',
+      endDate: '',
+      budget: '',
+      location: '',
+      description: ''
+    });
+
+    toast({
+      title: "Project Created",
+      description: `${project.name} has been added successfully`,
+    });
+  };
+
+  const handleAddClient = () => {
+    if (!newClient.name || !newClient.email || !newClient.phone) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const client: Client = {
+      id: (clients.length + 1).toString(),
+      name: newClient.name,
+      email: newClient.email,
+      phone: newClient.phone,
+      address: newClient.address,
+      type: newClient.type as 'individual' | 'business',
+      projects: 0,
+      totalValue: 0
+    };
+
+    setClients([...clients, client]);
+    setNewClient({
+      name: '',
+      email: '',
+      phone: '',
+      address: '',
+      type: 'individual'
+    });
+
+    toast({
+      title: "Client Added",
+      description: `${client.name} has been added successfully`,
+    });
+  };
+
+  const totalProjects = projects.length;
+  const activeProjects = projects.filter(p => p.status === 'active').length;
+  const totalBudget = projects.reduce((sum, p) => sum + p.budget, 0);
+  const totalSpent = projects.reduce((sum, p) => sum + p.spent, 0);
 
   return (
-    <>
+    <ResponsiveLayout>
       <SEO 
-        title="Business Manager | Construction Management Suite"
-        description="Comprehensive business management tools for construction companies - HR management, compliance tracking, growth assistance, and operations scheduling."
-        keywords="construction management, HR tools, compliance tracking, business growth, operations management"
+        title="Business Manager" 
+        description="Manage your construction business projects, clients, and operations"
       />
       
-      <ResponsiveLayout maxWidth="full">
-        <div className="space-y-6">
-          {/* Header */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <Building2 className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <h1 className={cn(
-                  "font-bold text-foreground",
-                  isMobile ? "text-2xl" : "text-3xl"
-                )}>
-                  Business Manager
-                </h1>
-                <p className="text-muted-foreground">
-                  Comprehensive management tools for your construction business
-                </p>
-              </div>
-            </div>
+      {/* Header with navigation */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+        <div>
+          <h1 className="text-3xl font-bold">Business Manager</h1>
+          <p className="text-muted-foreground">Manage your projects, clients, and business operations</p>
+        </div>
+        <div className="flex gap-2">
+          <Button onClick={() => setActiveTab('projects')}>
+            <Building2 className="w-4 h-4 mr-2" />
+            Projects
+          </Button>
+          <Button variant="outline" onClick={() => setActiveTab('clients')}>
+            <Users className="w-4 h-4 mr-2" />
+            Clients
+          </Button>
+        </div>
+      </div>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="projects">Projects</TabsTrigger>
+          <TabsTrigger value="clients">Clients</TabsTrigger>
+          <TabsTrigger value="profile">Profile</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="space-y-6 mt-6">
+          {/* Overview Dashboard */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-2xl font-bold">{totalProjects}</div>
+                <p className="text-sm text-muted-foreground">Total Projects</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-2xl font-bold text-green-600">{activeProjects}</div>
+                <p className="text-sm text-muted-foreground">Active Projects</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-2xl font-bold">£{totalBudget.toLocaleString()}</div>
+                <p className="text-sm text-muted-foreground">Total Budget</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-2xl font-bold">£{totalSpent.toLocaleString()}</div>
+                <p className="text-sm text-muted-foreground">Total Spent</p>
+              </CardContent>
+            </Card>
           </div>
 
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className={cn(
-              "grid w-full",
-              isMobile ? "grid-cols-3" : "grid-cols-5",
-              isMobile && "h-auto p-1"
-            )}>
-              {tabsData.map((tab) => (
-                <TabsTrigger 
-                  key={tab.value} 
-                  value={tab.value}
-                  className={cn(
-                    "flex items-center gap-2",
-                    isMobile && "flex-col text-xs py-2 px-1"
-                  )}
-                >
-                  <tab.icon className={cn(
-                    isMobile ? "h-4 w-4" : "h-4 w-4"
-                  )} />
-                  <span className={isMobile ? "hidden" : ""}>{tab.label}</span>
-                  {isMobile && <span className="text-xs">{tab.label}</span>}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-
-            <TabsContent value="overview" className="space-y-6">
-              {/* Business Metrics */}
+          {/* Recent Projects */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Projects</CardTitle>
+            </CardHeader>
+            <CardContent>
               <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <Target className="h-5 w-5 text-primary" />
-                  <h2 className="text-lg font-semibold">Business Metrics</h2>
-                </div>
-                
-                <DashboardGrid columns={isMobile ? 2 : 4} gap="md">
-                  <EnhancedStatsCard
-                    title="Active Projects"
-                    value={businessMetrics.activeProjects}
-                    icon={Building2}
-                    trend={{ value: 14.3, isPositive: true }}
-                    description="Currently running projects"
-                  />
-                  <EnhancedStatsCard
-                    title="Team Members"
-                    value={businessMetrics.teamMembers}
-                    icon={Users}
-                    trend={{ value: 8.3, isPositive: true }}
-                    description="Active workforce"
-                    onClick={() => setActiveTab('hr')}
-                  />
-                  <EnhancedStatsCard
-                    title="Compliance Score"
-                    value={`${businessMetrics.complianceScore}%`}
-                    icon={Shield}
-                    trend={{ value: 2.1, isPositive: true }}
-                    description="Regulatory compliance"
-                    onClick={() => setActiveTab('compliance')}
-                  />
-                  <EnhancedStatsCard
-                    title="Efficiency"
-                    value={`${businessMetrics.operationalEfficiency}%`}
-                    icon={Activity}
-                    trend={{ value: 5.2, isPositive: true }}
-                    description="Operational efficiency"
-                    onClick={() => setActiveTab('operations')}
-                  />
-                </DashboardGrid>
+                {projects.slice(0, 3).map((project) => (
+                  <div key={project.id} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <h4 className="font-medium">{project.name}</h4>
+                      <p className="text-sm text-muted-foreground">{project.client} • {project.location}</p>
+                    </div>
+                    <div className="text-right">
+                      <Badge className={getStatusColor(project.status)}>
+                        {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
+                      </Badge>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        £{project.spent.toLocaleString()} / £{project.budget.toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                ))}
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-              {/* Alerts & Notifications */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <AlertTriangle className="h-5 w-5 mr-2" />
-                    Business Alerts
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {alerts.map((alert) => (
-                      <div key={alert.id} className="flex items-center justify-between p-3 border rounded-lg">
-                        <div className="flex items-center gap-3">
-                          {alert.urgent ? (
-                            <AlertTriangle className="h-4 w-4 text-red-500" />
-                          ) : (
-                            <CheckCircle className="h-4 w-4 text-blue-500" />
-                          )}
-                          <span>{alert.message}</span>
-                        </div>
-                        <Badge variant={alert.urgent ? 'destructive' : 'secondary'}>
-                          {alert.type}
+        <TabsContent value="projects" className="space-y-6 mt-6">
+          {/* Add New Project */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Plus className="w-5 h-5" />
+                Add New Project
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="projectName">Project Name *</Label>
+                  <Input
+                    id="projectName"
+                    value={newProject.name}
+                    onChange={(e) => setNewProject(prev => ({ ...prev, name: e.target.value }))}
+                    placeholder="Enter project name"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="projectClient">Client *</Label>
+                  <Input
+                    id="projectClient"
+                    value={newProject.client}
+                    onChange={(e) => setNewProject(prev => ({ ...prev, client: e.target.value }))}
+                    placeholder="Enter client name"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="startDate">Start Date *</Label>
+                  <Input
+                    id="startDate"
+                    type="date"
+                    value={newProject.startDate}
+                    onChange={(e) => setNewProject(prev => ({ ...prev, startDate: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="endDate">End Date</Label>
+                  <Input
+                    id="endDate"
+                    type="date"
+                    value={newProject.endDate}
+                    onChange={(e) => setNewProject(prev => ({ ...prev, endDate: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="budget">Budget (£) *</Label>
+                  <Input
+                    id="budget"
+                    type="number"
+                    value={newProject.budget}
+                    onChange={(e) => setNewProject(prev => ({ ...prev, budget: e.target.value }))}
+                    placeholder="0.00"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="location">Location</Label>
+                  <Input
+                    id="location"
+                    value={newProject.location}
+                    onChange={(e) => setNewProject(prev => ({ ...prev, location: e.target.value }))}
+                    placeholder="Project location"
+                  />
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  value={newProject.description}
+                  onChange={(e) => setNewProject(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Project description"
+                  rows={3}
+                />
+              </div>
+              <Button onClick={handleAddProject}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Project
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Projects List */}
+          <div className="grid gap-4">
+            {projects.map((project) => (
+              <Card key={project.id}>
+                <CardContent className="pt-6">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="font-semibold text-lg">{project.name}</h3>
+                        <Badge className={getStatusColor(project.status)}>
+                          {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
                         </Badge>
                       </div>
-                    ))}
+                      <p className="text-muted-foreground mb-2">{project.client} • {project.location}</p>
+                      <p className="text-sm text-muted-foreground mb-3">{project.description}</p>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                        <div>
+                          <span className="text-muted-foreground">Start:</span>
+                          <p className="font-medium">{new Date(project.startDate).toLocaleDateString()}</p>
+                        </div>
+                        {project.endDate && (
+                          <div>
+                            <span className="text-muted-foreground">End:</span>
+                            <p className="font-medium">{new Date(project.endDate).toLocaleDateString()}</p>
+                          </div>
+                        )}
+                        <div>
+                          <span className="text-muted-foreground">Budget:</span>
+                          <p className="font-medium">£{project.budget.toLocaleString()}</p>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Spent:</span>
+                          <p className="font-medium">£{project.spent.toLocaleString()}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button size="sm" variant="outline">
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                      <Button size="sm" variant="outline">
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button size="sm" variant="outline">
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
+            ))}
+          </div>
+        </TabsContent>
 
-              {/* Quick Actions */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveTab('hr')}>
-                  <CardContent className="pt-6 text-center">
-                    <Users className="h-12 w-12 mx-auto text-blue-600 mb-2" />
-                    <h3 className="font-semibold">HR Management</h3>
-                    <p className="text-sm text-muted-foreground">Manage employees & training</p>
-                  </CardContent>
-                </Card>
-
-                <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveTab('growth')}>
-                  <CardContent className="pt-6 text-center">
-                    <TrendingUp className="h-12 w-12 mx-auto text-green-600 mb-2" />
-                    <h3 className="font-semibold">Business Growth</h3>
-                    <p className="text-sm text-muted-foreground">Certifications & expansion</p>
-                  </CardContent>
-                </Card>
-
-                <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveTab('compliance')}>
-                  <CardContent className="pt-6 text-center">
-                    <Shield className="h-12 w-12 mx-auto text-purple-600 mb-2" />
-                    <h3 className="font-semibold">Compliance</h3>
-                    <p className="text-sm text-muted-foreground">HMRC & regulations</p>
-                  </CardContent>
-                </Card>
-
-                <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveTab('operations')}>
-                  <CardContent className="pt-6 text-center">
-                    <Calendar className="h-12 w-12 mx-auto text-orange-600 mb-2" />
-                    <h3 className="font-semibold">Operations</h3>
-                    <p className="text-sm text-muted-foreground">Scheduling & resources</p>
-                  </CardContent>
-                </Card>
+        <TabsContent value="clients" className="space-y-6 mt-6">
+          {/* Add New Client */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Plus className="w-5 h-5" />
+                Add New Client
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="clientName">Name *</Label>
+                  <Input
+                    id="clientName"
+                    value={newClient.name}
+                    onChange={(e) => setNewClient(prev => ({ ...prev, name: e.target.value }))}
+                    placeholder="Enter client name"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="clientType">Type</Label>
+                  <Select value={newClient.type} onValueChange={(value) => setNewClient(prev => ({ ...prev, type: value }))}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="individual">Individual</SelectItem>
+                      <SelectItem value="business">Business</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="clientEmail">Email *</Label>
+                  <Input
+                    id="clientEmail"
+                    type="email"
+                    value={newClient.email}
+                    onChange={(e) => setNewClient(prev => ({ ...prev, email: e.target.value }))}
+                    placeholder="Enter email address"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="clientPhone">Phone *</Label>
+                  <Input
+                    id="clientPhone"
+                    value={newClient.phone}
+                    onChange={(e) => setNewClient(prev => ({ ...prev, phone: e.target.value }))}
+                    placeholder="Enter phone number"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <Label htmlFor="clientAddress">Address</Label>
+                  <Textarea
+                    id="clientAddress"
+                    value={newClient.address}
+                    onChange={(e) => setNewClient(prev => ({ ...prev, address: e.target.value }))}
+                    placeholder="Enter address"
+                    rows={2}
+                  />
+                </div>
               </div>
-            </TabsContent>
+              <Button onClick={handleAddClient}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Client
+              </Button>
+            </CardContent>
+          </Card>
 
-            <TabsContent value="hr">
-              <HRManager />
-            </TabsContent>
+          {/* Clients List */}
+          <div className="grid gap-4">
+            {clients.map((client) => (
+              <Card key={client.id}>
+                <CardContent className="pt-6">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="font-semibold text-lg">{client.name}</h3>
+                        <Badge variant={client.type === 'business' ? 'default' : 'secondary'}>
+                          {client.type}
+                        </Badge>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <span className="text-muted-foreground">Email:</span>
+                          <p className="font-medium">{client.email}</p>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Phone:</span>
+                          <p className="font-medium">{client.phone}</p>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Projects:</span>
+                          <p className="font-medium">{client.projects}</p>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Total Value:</span>
+                          <p className="font-medium">£{client.totalValue.toLocaleString()}</p>
+                        </div>
+                        {client.address && (
+                          <div className="md:col-span-2">
+                            <span className="text-muted-foreground">Address:</span>
+                            <p className="font-medium">{client.address}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button size="sm" variant="outline">
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                      <Button size="sm" variant="outline">
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button size="sm" variant="outline">
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
 
-            <TabsContent value="growth">
-              <BusinessGrowthAssistant />
-            </TabsContent>
-
-            <TabsContent value="compliance">
-              <ComplianceAssurance />
-            </TabsContent>
-
-            <TabsContent value="operations">
-              <OperationsScheduler />
-            </TabsContent>
-          </Tabs>
-        </div>
-      </ResponsiveLayout>
-    </>
+        <TabsContent value="profile" className="space-y-6 mt-6">
+          <ProfileUpload />
+        </TabsContent>
+      </Tabs>
+    </ResponsiveLayout>
   );
 }

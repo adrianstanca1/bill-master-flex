@@ -1,13 +1,14 @@
+
 import React from 'react';
 import { UseFormRegister, UseFieldArrayReturn, Control } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Trash2, Plus } from 'lucide-react';
+import { Trash2, Plus, Upload } from 'lucide-react';
 import { FormValues } from './InvoiceGenerator';
+import { useToast } from '@/hooks/use-toast';
 
 interface InvoiceFormProps {
   register: UseFormRegister<FormValues>;
@@ -29,15 +30,42 @@ export function InvoiceForm({
   onPreview,
   onSaveBackend,
 }: InvoiceFormProps) {
+  const { toast } = useToast();
+
+  const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) { // 2MB limit
+        toast({
+          title: "File too large",
+          description: "Please select a logo under 2MB",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const logoUrl = e.target?.result as string;
+        localStorage.setItem('company-logo', logoUrl);
+        toast({
+          title: "Logo uploaded",
+          description: "Your company logo has been saved",
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header Actions */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold text-text-primary">AS Invoice Generator</h1>
           <p className="text-text-secondary">Create professional UK invoices with VAT calculations</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <Button variant="outline" onClick={onSaveDefaults}>
             Save Defaults
           </Button>
@@ -96,6 +124,30 @@ export function InvoiceForm({
                       className="bg-input border-border text-text-primary"
                       {...register('company.regNumber')} 
                     />
+                  </div>
+                  
+                  {/* Logo Upload */}
+                  <div>
+                    <Label className="text-text-secondary font-medium">Company Logo</Label>
+                    <div className="mt-2">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleLogoUpload}
+                        className="hidden"
+                        id="logo-upload"
+                      />
+                      <label
+                        htmlFor="logo-upload"
+                        className="flex items-center gap-2 px-4 py-2 bg-input border border-border rounded-md cursor-pointer hover:bg-muted transition-colors"
+                      >
+                        <Upload className="w-4 h-4" />
+                        <span className="text-sm">Upload Logo</span>
+                      </label>
+                      <p className="text-xs text-text-secondary mt-1">
+                        Recommended: PNG, JPG (max 2MB)
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
