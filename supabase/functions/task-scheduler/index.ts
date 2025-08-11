@@ -11,13 +11,11 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    // Optional secret gate (works alongside JWT if enabled)
+    // Require secret gate for all calls (no JWT)
     const CRON_SECRET = Deno.env.get("CRON_SECRET");
-    if (CRON_SECRET) {
-      const provided = req.headers.get("x-cron-secret") || req.headers.get("x-cron-key");
-      if (provided !== CRON_SECRET) {
-        return json({ error: "Forbidden" }, 403);
-      }
+    const provided = req.headers.get("x-cron-secret") || req.headers.get("x-cron-key");
+    if (!CRON_SECRET || !provided || provided !== CRON_SECRET) {
+      return json({ error: "Forbidden" }, 403);
     }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
@@ -87,7 +85,7 @@ serve(async (req) => {
     return json({ date: todayStr, considered, created });
   } catch (err) {
     console.error("task-scheduler error", err);
-    return json({ error: "Internal error", details: String(err) }, 500);
+    return json({ error: "Internal error" }, 500);
   }
 });
 

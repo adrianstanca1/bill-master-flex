@@ -25,7 +25,7 @@ verify_jwt = true
 verify_jwt = true
 
 [functions.task-scheduler]
-verify_jwt = true
+verify_jwt = false
 
 [functions.tenders]
 verify_jwt = true
