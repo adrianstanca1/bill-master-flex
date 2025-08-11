@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Totals, VATMode, formatCurrency, getVATLabel } from '@/lib/invoice-calc';
+import { Totals, VATMode, formatCurrency } from '@/lib/invoice-calc';
 import { FormValues } from './InvoiceGenerator';
 import { Info } from 'lucide-react';
 
@@ -72,6 +72,25 @@ export function InvoiceTotals({ totals, vatMode, register, setValue }: InvoiceTo
               {...register('retentionPercent', { valueAsNumber: true })} 
             />
           </div>
+
+          {/* CIS Deduction */}
+          <div className="pt-2 border-t border-border">
+            <div className="flex items-center justify-between gap-3">
+              <Label className="text-text-secondary">Apply CIS deduction (20%)</Label>
+              <input type="checkbox" className="scale-110" {...register('cisEnabled')} />
+            </div>
+            <div className="mt-3">
+              <Label className="text-text-secondary">CIS taxable amount (£)</Label>
+              <Input
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="Defaults to Net after discount"
+                className="bg-input border-border text-text-primary mt-1"
+                {...register('cisTaxableBase', { valueAsNumber: true })}
+              />
+            </div>
+          </div>
         </CardContent>
       </Card>
 
@@ -113,6 +132,13 @@ export function InvoiceTotals({ totals, vatMode, register, setValue }: InvoiceTo
               <div className="flex justify-between text-sm">
                 <span className="text-text-secondary">Retention</span>
                 <span className="text-destructive font-medium">-{formatCurrency(totals.retention)}</span>
+              </div>
+            )}
+
+            {totals.cisDeduction > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-text-secondary">CIS ({totals.cisPercent.toFixed(0)}%)</span>
+                <span className="text-destructive font-medium">-{formatCurrency(totals.cisDeduction)}</span>
               </div>
             )}
             

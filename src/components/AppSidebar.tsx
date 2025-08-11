@@ -16,6 +16,7 @@ const items = [
   { title: "Home", url: "/", icon: Home },
   { title: "Setup", url: "/setup", icon: SettingsIcon },
   { title: "Dashboard", url: "/dashboard", icon: Gauge },
+  { title: "Business Manager", url: "/business-manager", icon: Briefcase },
   { title: "Advisor", url: "/advisor", icon: Brain },
   { title: "Invoices", url: "/invoices", icon: FileText },
   { title: "Quotes", url: "/quotes", icon: FilePlus2 },

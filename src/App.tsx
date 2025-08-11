@@ -19,6 +19,7 @@ import Quotes from "./pages/Quotes";
 import Variations from "./pages/Variations";
 import AuthStatus from "@/components/AuthStatus";
 import { RequireAuth } from "@/components/RequireAuth";
+import BusinessManager from "./pages/BusinessManager";
 
 const queryClient = new QueryClient();
 
@@ -73,6 +74,7 @@ const App = () => (
                 <Route path="/settings" element={<RequireAuth><Settings /></RequireAuth>} />
                 <Route path="/tool-setup" element={<RequireAuth><ToolSetup /></RequireAuth>} />
                 <Route path="/setup" element={<RequireAuth><Setup /></RequireAuth>} />
+                <Route path="/business-manager" element={<RequireAuth><BusinessManager /></RequireAuth>} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

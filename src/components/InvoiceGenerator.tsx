@@ -42,6 +42,10 @@ const formSchema = z.object({
   vatMode: z.enum(['STANDARD_20','REVERSE_CHARGE_20','NO_VAT']),
   discountPercent: z.number().min(0).max(100).default(0),
   retentionPercent: z.number().min(0).max(100).default(0),
+  // CIS options
+  cisEnabled: z.boolean().default(false).optional(),
+  cisPercent: z.number().min(0).max(100).default(20).optional(),
+  cisTaxableBase: z.number().min(0).optional(),
 });
 
 export type FormValues = z.infer<typeof formSchema>;
@@ -90,6 +94,8 @@ function getInitialDefaults(): Partial<FormValues> {
     vatMode: 'STANDARD_20' as VATMode,
     discountPercent: 0,
     retentionPercent: 0,
+    cisEnabled: false,
+    cisPercent: 20,
   };
 }
 
