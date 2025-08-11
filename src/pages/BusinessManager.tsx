@@ -12,7 +12,7 @@ import {
 import { TimesheetTracker } from '@/components/TimesheetTracker';
 import { DayworkManager } from '@/components/DayworkManager';
 import { ReminderSystem } from '@/components/ReminderSystem';
-import { RamsGenerator } from '@/components/RamsGenerator';
+import RamsGenerator from '@/components/RamsGenerator';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useCompanyId } from '@/hooks/useCompanyId';
