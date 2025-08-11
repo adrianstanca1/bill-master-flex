@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { Shield, AlertTriangle, Eye, Clock } from 'lucide-react';
+import { Shield, Clock } from 'lucide-react';
 import { useCompanyId } from '@/hooks/useCompanyId';
 
 interface AuditLogEntry {
@@ -16,13 +16,6 @@ interface AuditLogEntry {
   details: any;
   created_at: string;
   user_id: string;
-}
-
-interface SecurityStats {
-  recentLogins: number;
-  failedAttempts: number;
-  dataAccess: number;
-  suspiciousActivity: number;
 }
 
 export function SecurityMonitor() {
@@ -57,23 +50,6 @@ export function SecurityMonitor() {
     refetchInterval: 300000, // Test every 5 minutes
   });
 
-  const securityStats: SecurityStats = React.useMemo(() => {
-    if (!auditLogs) return { recentLogins: 0, failedAttempts: 0, dataAccess: 0, suspiciousActivity: 0 };
-
-    const last24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const recentLogs = auditLogs.filter(log => new Date(log.created_at) > last24h);
-
-    return {
-      recentLogins: recentLogs.filter(log => log.action === 'LOGIN').length,
-      failedAttempts: recentLogs.filter(log => log.action === 'FAILED_LOGIN').length,
-      dataAccess: recentLogs.filter(log => log.action === 'SELECT').length,
-      suspiciousActivity: recentLogs.filter(log => 
-        log.details?.suspicious || 
-        (log.action === 'DELETE' && log.resource_type === 'invoices')
-      ).length,
-    };
-  }, [auditLogs]);
-
   const getActionBadgeColor = (action: string) => {
     switch (action) {
       case 'INSERT': return 'bg-green-500';
@@ -94,57 +70,6 @@ export function SecurityMonitor() {
 
   return (
     <div className="space-y-6">
-      {/* Security Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <Shield className="h-5 w-5 text-green-500" />
-              <div>
-                <p className="text-sm text-muted-foreground">Recent Logins</p>
-                <p className="text-2xl font-bold">{securityStats.recentLogins}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <AlertTriangle className="h-5 w-5 text-yellow-500" />
-              <div>
-                <p className="text-sm text-muted-foreground">Failed Attempts</p>
-                <p className="text-2xl font-bold">{securityStats.failedAttempts}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <Eye className="h-5 w-5 text-blue-500" />
-              <div>
-                <p className="text-sm text-muted-foreground">Data Access</p>
-                <p className="text-2xl font-bold">{securityStats.dataAccess}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <AlertTriangle className="h-5 w-5 text-red-500" />
-              <div>
-                <p className="text-sm text-muted-foreground">Suspicious Activity</p>
-                <p className="text-2xl font-bold">{securityStats.suspiciousActivity}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
       {/* RLS Policy Test Results */}
       {rlsTestResults && (
         <Card>
@@ -238,24 +163,6 @@ export function SecurityMonitor() {
                 Review and rotate API keys regularly (recommended: every 90 days)
               </AlertDescription>
             </Alert>
-
-            {securityStats.failedAttempts > 5 && (
-              <Alert className="border-yellow-500">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>
-                  High number of failed login attempts detected. Consider reviewing access logs.
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {securityStats.suspiciousActivity > 0 && (
-              <Alert className="border-red-500">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>
-                  Suspicious activity detected. Please review recent security events immediately.
-                </AlertDescription>
-              </Alert>
-            )}
           </div>
         </CardContent>
       </Card>
