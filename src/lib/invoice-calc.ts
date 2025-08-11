@@ -1,3 +1,4 @@
+
 export type VATMode = 'STANDARD_20' | 'REVERSE_CHARGE_20' | 'NO_VAT';
 
 export interface LineItem {
@@ -31,11 +32,10 @@ export interface InvoiceData {
   items: LineItem[];
   vatMode: VATMode;
   discountPercent?: number; // applied to subtotal
-  retentionPercent?: number; // applied at the end
-  // CIS (Construction Industry Scheme) optional deduction
-  cisEnabled?: boolean; // when true, apply cisPercent to cisTaxableBase (or netAfterDiscount if not provided)
+  retentionPercent?: number; // applied after VAT
+  // CIS (Construction Industry Scheme) deduction - applied at the very end
+  cisEnabled?: boolean;
   cisPercent?: number; // typically 20%
-  cisTaxableBase?: number; // if omitted, defaults to netAfterDiscount
 }
 
 export interface Totals {
@@ -46,8 +46,8 @@ export interface Totals {
   vatAmount: number;
   totalBeforeRetention: number;
   retention: number;
-  // CIS
-  cisBase: number;
+  totalAfterRetention: number;
+  // CIS - applied at the very end
   cisPercent: number;
   cisDeduction: number;
   totalDue: number;
@@ -73,14 +73,14 @@ export function computeTotals(data: InvoiceData): Totals {
 
   const retentionPercent = Math.max(0, Math.min(100, data.retentionPercent || 0));
   const retention = round2(totalBeforeRetention * (retentionPercent / 100));
+  const totalAfterRetention = round2(totalBeforeRetention - retention);
 
-  // CIS deduction (does not affect VAT)
+  // CIS deduction - applied at the very end to the total after retention
   const cisEnabled = !!data.cisEnabled;
   const cisPercent = cisEnabled ? Math.max(0, Math.min(100, data.cisPercent ?? 20)) : 0;
-  const cisBase = cisEnabled ? round2(data.cisTaxableBase ?? netAfterDiscount) : 0;
-  const cisDeduction = cisEnabled ? round2(cisBase * (cisPercent / 100)) : 0;
+  const cisDeduction = cisEnabled ? round2(totalAfterRetention * (cisPercent / 100)) : 0;
 
-  const totalDue = round2(totalBeforeRetention - retention - cisDeduction);
+  const totalDue = round2(totalAfterRetention - cisDeduction);
 
   return {
     subtotal,
@@ -90,8 +90,7 @@ export function computeTotals(data: InvoiceData): Totals {
     vatAmount,
     totalBeforeRetention,
     retention,
-    // CIS
-    cisBase,
+    totalAfterRetention,
     cisPercent,
     cisDeduction,
     totalDue,

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { UseFormRegister, UseFormSetValue } from 'react-hook-form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -79,17 +80,9 @@ export function InvoiceTotals({ totals, vatMode, register, setValue }: InvoiceTo
               <Label className="text-text-secondary">Apply CIS deduction (20%)</Label>
               <input type="checkbox" className="scale-110" {...register('cisEnabled')} />
             </div>
-            <div className="mt-3">
-              <Label className="text-text-secondary">CIS taxable amount (£)</Label>
-              <Input
-                type="number"
-                min="0"
-                step="0.01"
-                placeholder="Defaults to Net after discount"
-                className="bg-input border-border text-text-primary mt-1"
-                {...register('cisTaxableBase', { valueAsNumber: true })}
-              />
-            </div>
+            <p className="text-xs text-text-secondary mt-1">
+              Applied to total after retention
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -135,16 +128,21 @@ export function InvoiceTotals({ totals, vatMode, register, setValue }: InvoiceTo
               </div>
             )}
 
+            <div className="flex justify-between text-sm">
+              <span className="text-text-secondary">Total after retention</span>
+              <span className="text-text-primary font-medium">{formatCurrency(totals.totalAfterRetention)}</span>
+            </div>
+
             {totals.cisDeduction > 0 && (
               <div className="flex justify-between text-sm">
-                <span className="text-text-secondary">CIS ({totals.cisPercent.toFixed(0)}%)</span>
+                <span className="text-text-secondary">Less CIS deduction ({totals.cisPercent.toFixed(0)}%)</span>
                 <span className="text-destructive font-medium">-{formatCurrency(totals.cisDeduction)}</span>
               </div>
             )}
             
             <div className="border-t border-border pt-3">
               <div className="flex justify-between">
-                <span className="text-text-primary font-semibold">Total Due</span>
+                <span className="text-text-primary font-semibold">Amount Due</span>
                 <span className="text-primary font-bold text-lg">{formatCurrency(totals.totalDue)}</span>
               </div>
             </div>
@@ -163,6 +161,24 @@ export function InvoiceTotals({ totals, vatMode, register, setValue }: InvoiceTo
                 <p className="text-xs text-text-secondary">
                   VAT shows as £0 on the invoice. The customer will account for VAT at 20% 
                   through their VAT return.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* CIS Information */}
+      {totals.cisDeduction > 0 && (
+        <Card className="bg-surface border-border shadow-card">
+          <CardContent className="pt-6">
+            <div className="flex gap-3">
+              <Info className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm text-text-primary font-medium mb-1">CIS Deduction</p>
+                <p className="text-xs text-text-secondary">
+                  20% deduction applied under Construction Industry Scheme. 
+                  This amount will be paid directly to HMRC by your client.
                 </p>
               </div>
             </div>
