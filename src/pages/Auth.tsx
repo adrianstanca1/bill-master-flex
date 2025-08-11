@@ -1,7 +1,8 @@
+
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import SEO from "@/components/SEO";
 
 export default function Auth() {
@@ -18,48 +19,113 @@ export default function Auth() {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
-        setTimeout(() => {
-          const onboarded = (()=>{ try { return !!(JSON.parse(localStorage.getItem("as-settings")||"{}")?.onboarded); } catch { return false; } })();
-          navigate(onboarded ? redirectTo : "/setup", { replace: true });
-        }, 0);
-      }
-    });
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        const onboarded = (()=>{ try { return !!(JSON.parse(localStorage.getItem("as-settings")||"{}")?.onboarded); } catch { return false; } })();
+        console.log("User authenticated, redirecting...");
+        const onboarded = (()=>{ 
+          try { 
+            return !!(JSON.parse(localStorage.getItem("as-settings")||"{}")?.onboarded); 
+          } catch { 
+            return false; 
+          } 
+        })();
         navigate(onboarded ? redirectTo : "/setup", { replace: true });
       }
     });
+
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        console.log("Existing session found, redirecting...");
+        const onboarded = (()=>{ 
+          try { 
+            return !!(JSON.parse(localStorage.getItem("as-settings")||"{}")?.onboarded); 
+          } catch { 
+            return false; 
+          } 
+        })();
+        navigate(onboarded ? redirectTo : "/setup", { replace: true });
+      }
+    });
+
     return () => subscription.unsubscribe();
   }, [navigate, redirectTo]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (!email || !password) {
+      toast({ 
+        title: "Missing information", 
+        description: "Please enter both email and password.", 
+        variant: "destructive" 
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       if (mode === "signup") {
         const { data, error } = await supabase.auth.signUp({
-          email,
+          email: email.trim(),
           password,
-          options: { emailRedirectTo: `${window.location.origin}/` },
+          options: { 
+            emailRedirectTo: `${window.location.origin}/`,
+            data: {
+              email: email.trim()
+            }
+          },
         });
-        if (error) throw error;
-        if (data?.session) {
-          toast({ title: "Welcome!", description: "Account created. You're signed in." });
-          const onboarded = (()=>{ try { return !!(JSON.parse(localStorage.getItem("as-settings")||"{}")?.onboarded); } catch { return false; } })();
-          navigate(onboarded ? redirectTo : "/setup", { replace: true });
-        } else {
-          toast({ title: "Check your email", description: "Confirm to complete sign up." });
+        
+        if (error) {
+          if (error.message.includes("User already registered")) {
+            toast({ 
+              title: "Account exists", 
+              description: "This email is already registered. Try signing in instead.", 
+              variant: "destructive" 
+            });
+            setMode("signin");
+          } else {
+            throw error;
+          }
+        } else if (data?.session) {
+          toast({ title: "Welcome!", description: "Account created successfully." });
+        } else if (data?.user && !data?.session) {
+          toast({ 
+            title: "Check your email", 
+            description: "Please check your email to confirm your account before signing in." 
+          });
         }
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        // After sign-in, route to setup if not onboarded yet
-        const onboarded = (()=>{ try { return !!(JSON.parse(localStorage.getItem("as-settings")||"{}")?.onboarded); } catch { return false; } })();
-        navigate(onboarded ? redirectTo : "/setup", { replace: true });
+        const { data, error } = await supabase.auth.signInWithPassword({ 
+          email: email.trim(), 
+          password 
+        });
+        
+        if (error) {
+          if (error.message.includes("Invalid login credentials")) {
+            toast({ 
+              title: "Invalid credentials", 
+              description: "Please check your email and password and try again.", 
+              variant: "destructive" 
+            });
+          } else if (error.message.includes("Email not confirmed")) {
+            toast({ 
+              title: "Email not confirmed", 
+              description: "Please check your email and confirm your account before signing in.", 
+              variant: "destructive" 
+            });
+          } else {
+            throw error;
+          }
+        } else if (data?.session) {
+          toast({ title: "Welcome back!", description: "Successfully signed in." });
+        }
       }
     } catch (err: any) {
-      toast({ title: "Auth error", description: err?.message || "Failed", variant: "destructive" });
+      console.error("Auth error:", err);
+      toast({ 
+        title: "Authentication error", 
+        description: err?.message || "An unexpected error occurred. Please try again.", 
+        variant: "destructive" 
+      });
     } finally {
       setLoading(false);
     }
@@ -68,18 +134,84 @@ export default function Auth() {
   return (
     <main className="container max-w-md mx-auto py-10">
       <SEO title={mode === "signin" ? "Sign in" : "Create account"} description="Secure sign in/up for your dashboard" noindex />
-      <h1 className="text-2xl font-bold mb-6">{mode === "signin" ? "Sign in" : "Create account"}</h1>
+      
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold mb-2">
+          {mode === "signin" ? "Welcome back" : "Create your account"}
+        </h1>
+        <p className="text-muted-foreground">
+          {mode === "signin" 
+            ? "Sign in to access your construction dashboard" 
+            : "Join to manage your construction business"
+          }
+        </p>
+      </div>
+
       <section className="card">
-        <form className="grid gap-3" onSubmit={submit}>
-          <input className="input" type="email" placeholder="Email" value={email} onChange={(e)=>setEmail(e.target.value)} required />
-          <input className="input" type="password" placeholder="Password" value={password} onChange={(e)=>setPassword(e.target.value)} required />
-          <button className="button" type="submit" disabled={loading}>{loading ? "Please wait…" : (mode === "signin" ? "Sign in" : "Sign up")}</button>
+        <form className="grid gap-4" onSubmit={submit}>
+          <div className="space-y-2">
+            <label htmlFor="email" className="text-sm font-medium">
+              Email address
+            </label>
+            <input 
+              id="email"
+              className="input" 
+              type="email" 
+              placeholder="Enter your email"
+              value={email} 
+              onChange={(e)=>setEmail(e.target.value)} 
+              required 
+              autoComplete="email"
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <label htmlFor="password" className="text-sm font-medium">
+              Password
+            </label>
+            <input 
+              id="password"
+              className="input" 
+              type="password" 
+              placeholder="Enter your password"
+              value={password} 
+              onChange={(e)=>setPassword(e.target.value)} 
+              required 
+              autoComplete={mode === "signin" ? "current-password" : "new-password"}
+              minLength={6}
+            />
+          </div>
+          
+          <button 
+            className="button" 
+            type="submit" 
+            disabled={loading || !email || !password}
+          >
+            {loading ? "Please wait…" : (mode === "signin" ? "Sign in" : "Create account")}
+          </button>
         </form>
-        <div className="mt-4 text-sm">
+        
+        <div className="mt-6 text-center">
           {mode === "signin" ? (
-            <button className="link" onClick={()=>setMode("signup")}>New here? Create an account</button>
+            <p className="text-sm">
+              Don't have an account?{" "}
+              <button 
+                className="link font-medium" 
+                onClick={()=>setMode("signup")}
+              >
+                Create one here
+              </button>
+            </p>
           ) : (
-            <button className="link" onClick={()=>setMode("signin")}>Already have an account? Sign in</button>
+            <p className="text-sm">
+              Already have an account?{" "}
+              <button 
+                className="link font-medium" 
+                onClick={()=>setMode("signin")}
+              >
+                Sign in instead
+              </button>
+            </p>
           )}
         </div>
       </section>

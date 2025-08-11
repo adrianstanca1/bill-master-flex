@@ -1,24 +1,35 @@
 
 import { useState, useEffect } from 'react';
 
-export function useCompanyId() {
-  const [companyId, setCompanyId] = useState<string | null>(null);
+export const useCompanyId = () => {
+  const [companyId, setCompanyId] = useState<string>('');
 
   useEffect(() => {
-    // Try to get from settings first
-    const settings = JSON.parse(localStorage.getItem('as-settings') || '{}');
-    if (settings?.companyId) {
-      setCompanyId(settings.companyId);
-      return;
+    // Try to get company ID from localStorage settings
+    try {
+      const settings = JSON.parse(localStorage.getItem('as-settings') || '{}');
+      if (settings.companyId) {
+        setCompanyId(settings.companyId);
+        return;
+      }
+    } catch (error) {
+      console.error('Error parsing settings:', error);
     }
 
-    // If no company ID in settings, try to create one or get from user profile
-    // For now, generate a default one for demo purposes
-    const defaultCompanyId = 'demo-company-' + Date.now();
-    const newSettings = { ...settings, companyId: defaultCompanyId };
-    localStorage.setItem('as-settings', JSON.stringify(newSettings));
+    // If no company ID found, generate a default one
+    // This should be replaced with proper company selection/creation logic
+    const defaultCompanyId = crypto.randomUUID();
     setCompanyId(defaultCompanyId);
+
+    // Save it to localStorage for consistency
+    try {
+      const currentSettings = JSON.parse(localStorage.getItem('as-settings') || '{}');
+      const updatedSettings = { ...currentSettings, companyId: defaultCompanyId };
+      localStorage.setItem('as-settings', JSON.stringify(updatedSettings));
+    } catch (error) {
+      console.error('Error saving company ID:', error);
+    }
   }, []);
 
   return companyId;
-}
+};

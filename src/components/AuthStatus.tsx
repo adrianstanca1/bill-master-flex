@@ -1,29 +1,69 @@
+
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
+import { User } from "@supabase/supabase-js";
 
 export default function AuthStatus() {
-  const [email, setEmail] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Check current session
+    const getSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user ?? null);
+      setLoading(false);
+    };
+
+    getSession();
+
+    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setEmail(session?.user?.email ?? null);
+      setUser(session?.user ?? null);
+      setLoading(false);
     });
-    supabase.auth.getSession().then(({ data: { session } }) => setEmail(session?.user?.email ?? null));
+
     return () => subscription.unsubscribe();
   }, []);
 
-  if (!email) {
-    return <Link to="/auth" className="text-sm text-muted-foreground hover:underline">Sign in</Link>;
+  const handleSignOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Sign out error:', error);
+      }
+    } catch (err) {
+      console.error('Sign out error:', err);
+    }
+  };
+
+  if (loading) {
+    return <div className="text-sm text-muted-foreground">Loading...</div>;
+  }
+
+  if (!user) {
+    return (
+      <Link 
+        to="/auth" 
+        className="text-sm text-muted-foreground hover:underline transition-colors"
+      >
+        Sign in
+      </Link>
+    );
   }
 
   return (
     <div className="flex items-center gap-3 text-sm">
-      <span className="text-muted-foreground hidden sm:inline">{email}</span>
+      <span className="text-muted-foreground hidden sm:inline">
+        {user.email}
+      </span>
       <button
         className="button-secondary py-1 px-2"
-        onClick={() => supabase.auth.signOut()}
-      >Sign out</button>
+        onClick={handleSignOut}
+      >
+        Sign out
+      </button>
     </div>
   );
 }
