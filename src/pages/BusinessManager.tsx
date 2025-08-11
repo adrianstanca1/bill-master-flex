@@ -1,366 +1,289 @@
 
-import React, { useState } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import React, { useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { 
-  Clock, Calendar, Bell, Camera, Shield, Wrench, 
-  Users, TrendingUp, FileText, BarChart3, 
-  MapPin, Smartphone, Zap, Brain, Package,
-  Activity, AlertCircle, RefreshCcw, UserCheck,
-  Building2
-} from 'lucide-react';
-import { TimesheetTracker } from '@/components/TimesheetTracker';
-import { DayworkManager } from '@/components/DayworkManager';
-import { ReminderSystem } from '@/components/ReminderSystem';
-import { AssetTracker } from '@/components/AssetTracker';
-import { SitePhotos } from '@/components/SitePhotos';
-import RamsGenerator from '@/components/RamsGenerator';
-import { HRManager } from '@/components/HRManager';
-import { BusinessGrowthAssistant } from '@/components/BusinessGrowthAssistant';
-import { useCompanyId } from '@/hooks/useCompanyId';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { useDashboardStats } from '@/hooks/useDashboardStats';
-import { LoadingSpinner } from '@/components/LoadingSpinner';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { StatsCard } from '@/components/StatsCard';
-import { QuickActions } from '@/components/QuickActions';
-import { useToast } from '@/hooks/use-toast';
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  LineChart, Line, PieChart, Pie, Cell
+} from "recharts";
+import { 
+  DollarSign, TrendingUp, Users, Calendar, 
+  Target, Award, FileText, Shield,
+  Building, Briefcase, UserPlus, CheckCircle
+} from "lucide-react";
+import { HRManager } from "@/components/HRManager";
+import { BusinessGrowthAssistant } from "@/components/BusinessGrowthAssistant";
+import { ComplianceAssurance } from "@/components/ComplianceAssurance";
+import { OperationsScheduler } from "@/components/OperationsScheduler";
+import SEO from "@/components/SEO";
 
-export default function BusinessManager() {
-  const [activeTab, setActiveTab] = useState('dashboard');
-  const companyId = useCompanyId();
-  const isMobile = useIsMobile();
-  const { toast } = useToast();
+const BusinessManager = () => {
+  const [activeTab, setActiveTab] = useState("overview");
 
-  const { data: stats, isLoading: statsLoading, error: statsError, refetch } = useDashboardStats();
-
-  const handleRefreshStats = async () => {
-    try {
-      await refetch();
-      toast({
-        title: "Stats refreshed",
-        description: "Dashboard statistics have been updated.",
-      });
-    } catch (error) {
-      toast({
-        title: "Refresh failed",
-        description: "Failed to refresh dashboard statistics.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const modules = [
-    {
-      id: 'operations',
-      title: 'Operational Excellence',
-      description: 'Core business operations and workflow management',
-      items: [
-        { icon: Clock, name: 'Time Tracking', desc: 'Real-time timesheet management', status: 'Active', tab: 'timesheets' },
-        { icon: Calendar, name: 'Daily Reports', desc: 'Comprehensive daywork documentation', status: 'Active', tab: 'dayworks' },
-        { icon: Bell, name: 'Smart Reminders', desc: 'AI-powered task scheduling', status: 'Active', tab: 'reminders' },
-        { icon: Shield, name: 'RAMS Generator', desc: 'Risk assessment automation', status: 'Active', tab: 'rams' },
-        { icon: Package, name: 'Asset Management', desc: 'Equipment and material tracking', status: 'Active', tab: 'assets' },
-        { icon: Camera, name: 'Progress Photos', desc: 'Visual project documentation', status: 'Active', tab: 'photos' },
-      ]
-    },
-    {
-      id: 'human-resources',
-      title: 'Human Resources',
-      description: 'Employee management and development',
-      items: [
-        { icon: UserCheck, name: 'HR Management', desc: 'Employee tracking and development', status: 'Active', tab: 'hr' },
-        { icon: Users, name: 'Training Matrix', desc: 'Skills and certification tracking', status: 'Active', tab: 'hr' },
-        { icon: FileText, name: 'Competency Records', desc: 'Professional development tracking', status: 'Active', tab: 'hr' },
-      ]
-    },
-    {
-      id: 'growth',
-      title: 'Business Growth',
-      description: 'Certification and business development support',
-      items: [
-        { icon: Building2, name: 'Growth Assistant', desc: 'CHAS, SafeContractor certification support', status: 'Active', tab: 'growth' },
-        { icon: TrendingUp, name: 'Document Generator', desc: 'Automated compliance documentation', status: 'Active', tab: 'growth' },
-        { icon: Brain, name: 'AI Guidance', desc: 'Expert business growth advice', status: 'Active', tab: 'growth' },
-      ]
-    },
-    {
-      id: 'intelligence',
-      title: 'Business Intelligence',
-      description: 'Data-driven insights and analytics',
-      items: [
-        { icon: BarChart3, name: 'Performance Analytics', desc: 'Real-time KPI dashboards', status: 'Coming Soon' },
-        { icon: TrendingUp, name: 'Profit Analysis', desc: 'Financial performance tracking', status: 'Coming Soon' },
-        { icon: MapPin, name: 'Location Intelligence', desc: 'Site-based analytics', status: 'Coming Soon' },
-      ]
-    },
-    {
-      id: 'digital',
-      title: 'Digital Transformation',
-      description: 'Next-generation digital tools',
-      items: [
-        { icon: Brain, name: 'AI Assistant', desc: 'Intelligent business advisor', status: 'Beta' },
-        { icon: Smartphone, name: 'Mobile App', desc: 'Field worker companion', status: 'Planned' },
-        { icon: Zap, name: 'Automation Hub', desc: 'Workflow automation', status: 'Planned' },
-        { icon: FileText, name: 'Document AI', desc: 'Smart document processing', status: 'Planned' },
-      ]
-    }
+  // Mock data for charts
+  const revenueData = [
+    { month: 'Jan', revenue: 45000, profit: 12000 },
+    { month: 'Feb', revenue: 52000, profit: 15000 },
+    { month: 'Mar', revenue: 48000, profit: 13500 },
+    { month: 'Apr', revenue: 61000, profit: 18000 },
+    { month: 'May', revenue: 55000, profit: 16500 },
+    { month: 'Jun', revenue: 67000, profit: 20000 },
   ];
 
-  const tabConfig = [
-    { value: 'dashboard', label: 'Dashboard', icon: BarChart3 },
-    { value: 'timesheets', label: 'Time Tracking', icon: Clock },
-    { value: 'dayworks', label: 'Daily Reports', icon: Calendar },
-    { value: 'reminders', label: 'Reminders', icon: Bell },
-    { value: 'assets', label: 'Assets', icon: Package },
-    { value: 'photos', label: 'Photos', icon: Camera },
-    { value: 'rams', label: 'RAMS', icon: Shield },
-    { value: 'hr', label: 'HR Manager', icon: UserCheck },
-    { value: 'growth', label: 'Growth', icon: Building2 },
+  const projectData = [
+    { name: 'Completed', value: 65, color: '#10b981' },
+    { name: 'In Progress', value: 25, color: '#f59e0b' },
+    { name: 'Planning', value: 10, color: '#6b7280' },
   ];
 
-  if (!companyId) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Card className="max-w-md">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <AlertCircle className="h-5 w-5 text-yellow-500" />
-              Setup Required
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground mb-4">
-              Please complete your company setup in Settings to access the Business Manager.
-            </p>
-            <Button onClick={() => window.location.href = '/settings'} className="w-full">
-              Go to Settings
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  const kpis = [
+    {
+      title: "Monthly Revenue",
+      value: "£67,000",
+      change: "+12%",
+      trend: "up",
+      icon: DollarSign
+    },
+    {
+      title: "Active Projects",
+      value: "12",
+      change: "+3",
+      trend: "up",
+      icon: Building
+    },
+    {
+      title: "Team Members",
+      value: "24",
+      change: "+2",
+      trend: "up",
+      icon: Users
+    },
+    {
+      title: "Completion Rate",
+      value: "94%",
+      change: "+5%",
+      trend: "up",
+      icon: Target
+    }
+  ];
 
   return (
-    <ErrorBoundary>
-      <div className="min-h-screen bg-background">
-        <div className="max-w-7xl mx-auto p-4 md:p-6">
-          <div className="mb-6 md:mb-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Business Manager</h1>
-                <p className="text-muted-foreground mt-2">
-                  Comprehensive business management platform for construction companies
-                </p>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleRefreshStats}
-                disabled={statsLoading}
-                className="shrink-0"
-              >
-                <RefreshCcw className={`h-4 w-4 mr-2 ${statsLoading ? 'animate-spin' : ''}`} />
-                Refresh
-              </Button>
-            </div>
-          </div>
-
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            {isMobile ? (
-              <ScrollArea className="w-full whitespace-nowrap">
-                <TabsList className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground">
-                  {tabConfig.map((tab) => (
-                    <TabsTrigger 
-                      key={tab.value} 
-                      value={tab.value}
-                      className="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
-                    >
-                      <tab.icon className="h-4 w-4 mr-2" />
-                      {tab.label}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-                <ScrollBar orientation="horizontal" />
-              </ScrollArea>
-            ) : (
-              <TabsList className="grid w-full grid-cols-9">
-                {tabConfig.map((tab) => (
-                  <TabsTrigger key={tab.value} value={tab.value} className="flex items-center gap-2">
-                    <tab.icon className="h-4 w-4" />
-                    <span className="hidden sm:inline">{tab.label}</span>
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            )}
-
-            <TabsContent value="dashboard" className="space-y-6">
-              {/* Stats Overview */}
-              {statsLoading ? (
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
-                  {Array.from({ length: 7 }).map((_, i) => (
-                    <Card key={i} className="animate-pulse">
-                      <CardContent className="pt-4 pb-4">
-                        <div className="h-16 bg-muted rounded" />
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              ) : statsError ? (
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="text-center text-muted-foreground">
-                      <AlertCircle className="h-8 w-8 mx-auto mb-2" />
-                      <p>Failed to load dashboard statistics</p>
-                      <Button onClick={handleRefreshStats} variant="outline" size="sm" className="mt-2">
-                        Retry
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ) : stats ? (
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
-                  <StatsCard
-                    title="Projects"
-                    value={stats.activeProjects}
-                    icon={FileText}
-                    onClick={() => setActiveTab('dayworks')}
-                  />
-                  <StatsCard
-                    title="Reminders"
-                    value={stats.pendingReminders}
-                    icon={Bell}
-                    onClick={() => setActiveTab('reminders')}
-                  />
-                  <StatsCard
-                    title="Active Timers"
-                    value={stats.activeTimesheets}
-                    icon={Clock}
-                    onClick={() => setActiveTab('timesheets')}
-                  />
-                  <StatsCard
-                    title="Reports"
-                    value={stats.recentDayworks}
-                    icon={Calendar}
-                    onClick={() => setActiveTab('dayworks')}
-                  />
-                  <StatsCard
-                    title="Assets"
-                    value={stats.totalAssets}
-                    icon={Package}
-                    onClick={() => setActiveTab('assets')}
-                  />
-                  <StatsCard
-                    title="Photos"
-                    value={stats.recentPhotos}
-                    icon={Camera}
-                    onClick={() => setActiveTab('photos')}
-                  />
-                  <StatsCard
-                    title="RAMS"
-                    value={stats.ramsDocuments}
-                    icon={Shield}
-                    onClick={() => setActiveTab('rams')}
-                  />
-                </div>
-              ) : null}
-
-              {/* Quick Actions */}
-              <QuickActions onTabChange={setActiveTab} />
-
-              {/* Feature Modules */}
-              <div className="space-y-6">
-                {modules.map((module) => (
-                  <Card key={module.id}>
-                    <CardHeader>
-                      <CardTitle className="text-lg md:text-xl">{module.title}</CardTitle>
-                      <p className="text-sm text-muted-foreground">{module.description}</p>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {module.items.map((item, index) => (
-                          <div 
-                            key={index} 
-                            className="flex items-start space-x-3 p-3 border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer"
-                            onClick={() => item.tab && setActiveTab(item.tab)}
-                          >
-                            <item.icon className="h-5 w-5 mt-0.5 text-primary" />
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center justify-between">
-                                <h4 className="text-sm font-medium">{item.name}</h4>
-                                <Badge 
-                                  variant={item.status === 'Active' ? 'default' : 
-                                          item.status === 'Beta' ? 'secondary' : 'outline'}
-                                  className="text-xs"
-                                >
-                                  {item.status}
-                                </Badge>
-                              </div>
-                              <p className="text-xs text-muted-foreground mt-1">{item.desc}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </TabsContent>
-
-            <TabsContent value="timesheets">
-              <ErrorBoundary>
-                <TimesheetTracker />
-              </ErrorBoundary>
-            </TabsContent>
-
-            <TabsContent value="dayworks">
-              <ErrorBoundary>
-                <DayworkManager />
-              </ErrorBoundary>
-            </TabsContent>
-
-            <TabsContent value="reminders">
-              <ErrorBoundary>
-                <ReminderSystem />
-              </ErrorBoundary>
-            </TabsContent>
-
-            <TabsContent value="assets">
-              <ErrorBoundary>
-                <AssetTracker />
-              </ErrorBoundary>
-            </TabsContent>
-
-            <TabsContent value="photos">
-              <ErrorBoundary>
-                <SitePhotos />
-              </ErrorBoundary>
-            </TabsContent>
-
-            <TabsContent value="rams">
-              <ErrorBoundary>
-                <RamsGenerator />
-              </ErrorBoundary>
-            </TabsContent>
-
-            <TabsContent value="hr">
-              <ErrorBoundary>
-                <HRManager />
-              </ErrorBoundary>
-            </TabsContent>
-
-            <TabsContent value="growth">
-              <ErrorBoundary>
-                <BusinessGrowthAssistant />
-              </ErrorBoundary>
-            </TabsContent>
-          </Tabs>
+    <div className="container mx-auto p-6 space-y-6">
+      <SEO 
+        title="Business Manager | Construction Management Platform" 
+        description="Comprehensive business management tools for construction companies including analytics, HR, compliance, and growth assistance." 
+      />
+      
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Business Manager</h1>
+          <p className="text-muted-foreground">
+            Comprehensive business management and growth tools
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline">
+            <FileText className="h-4 w-4 mr-2" />
+            Generate Report
+          </Button>
+          <Button>
+            <Target className="h-4 w-4 mr-2" />
+            Set Goals
+          </Button>
         </div>
       </div>
-    </ErrorBoundary>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <TabsList className="grid w-full grid-cols-6">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="hr">HR Manager</TabsTrigger>
+          <TabsTrigger value="growth">Growth Assistant</TabsTrigger>
+          <TabsTrigger value="compliance">Compliance</TabsTrigger>
+          <TabsTrigger value="operations">Operations</TabsTrigger>
+          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="space-y-6">
+          {/* KPI Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {kpis.map((kpi, index) => (
+              <Card key={index}>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">{kpi.title}</CardTitle>
+                  <kpi.icon className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{kpi.value}</div>
+                  <p className="text-xs text-muted-foreground">
+                    <span className={`${kpi.trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>
+                      {kpi.change}
+                    </span> from last month
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Charts Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Revenue & Profit Trends</CardTitle>
+                <CardDescription>Monthly performance over the last 6 months</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={revenueData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <Tooltip formatter={(value) => [`£${value.toLocaleString()}`, '']} />
+                    <Line type="monotone" dataKey="revenue" stroke="#2563eb" strokeWidth={2} />
+                    <Line type="monotone" dataKey="profit" stroke="#10b981" strokeWidth={2} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Project Distribution</CardTitle>
+                <CardDescription>Current project status breakdown</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={projectData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={120}
+                      paddingAngle={5}
+                      dataKey="value"
+                    >
+                      {projectData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value) => [`${value}%`, '']} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Quick Actions */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Quick Actions</CardTitle>
+              <CardDescription>Frequently used business management tasks</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <Button variant="outline" className="h-20 flex-col">
+                  <UserPlus className="h-6 w-6 mb-2" />
+                  Add Employee
+                </Button>
+                <Button variant="outline" className="h-20 flex-col">
+                  <Building className="h-6 w-6 mb-2" />
+                  New Project
+                </Button>
+                <Button variant="outline" className="h-20 flex-col">
+                  <Award className="h-6 w-6 mb-2" />
+                  Certifications
+                </Button>
+                <Button variant="outline" className="h-20 flex-col">
+                  <Shield className="h-6 w-6 mb-2" />
+                  Compliance Check
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="hr">
+          <HRManager />
+        </TabsContent>
+
+        <TabsContent value="growth">
+          <BusinessGrowthAssistant />
+        </TabsContent>
+
+        <TabsContent value="compliance">
+          <ComplianceAssurance />
+        </TabsContent>
+
+        <TabsContent value="operations">
+          <OperationsScheduler />
+        </TabsContent>
+
+        <TabsContent value="analytics" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Business Analytics Dashboard</CardTitle>
+              <CardDescription>
+                Detailed analytics and insights for your construction business
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div>
+                  <h3 className="text-lg font-semibold mb-4">Revenue Analysis</h3>
+                  <ResponsiveContainer width="100%" height={250}>
+                    <BarChart data={revenueData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="month" />
+                      <YAxis />
+                      <Tooltip formatter={(value) => [`£${value.toLocaleString()}`, '']} />
+                      <Bar dataKey="revenue" fill="#2563eb" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+                
+                <div>
+                  <h3 className="text-lg font-semibold mb-4">Key Metrics</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex justify-between mb-1">
+                        <span className="text-sm font-medium">Project Completion Rate</span>
+                        <span className="text-sm">94%</span>
+                      </div>
+                      <Progress value={94} />
+                    </div>
+                    <div>
+                      <div className="flex justify-between mb-1">
+                        <span className="text-sm font-medium">Client Satisfaction</span>
+                        <span className="text-sm">96%</span>
+                      </div>
+                      <Progress value={96} />
+                    </div>
+                    <div>
+                      <div className="flex justify-between mb-1">
+                        <span className="text-sm font-medium">Safety Compliance</span>
+                        <span className="text-sm">98%</span>
+                      </div>
+                      <Progress value={98} />
+                    </div>
+                    <div>
+                      <div className="flex justify-between mb-1">
+                        <span className="text-sm font-medium">Resource Utilization</span>
+                        <span className="text-sm">87%</span>
+                      </div>
+                      <Progress value={87} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
   );
-}
+};
+
+export default BusinessManager;

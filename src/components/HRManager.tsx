@@ -1,83 +1,109 @@
-
 import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Progress } from '@/components/ui/progress';
 import { 
-  Users, Plus, Calendar, Award, AlertTriangle, 
-  FileText, BookOpen, CheckCircle, Clock,
-  User, Phone, Mail, MapPin
+  Users, UserPlus, BookOpen, Award, Calendar, 
+  AlertCircle, CheckCircle, Clock, TrendingUp,
+  FileText, Shield, Target
 } from 'lucide-react';
 import { useCompanyId } from '@/hooks/useCompanyId';
-import { ErrorHandler } from '@/components/ErrorHandler';
+import ErrorHandler from '@/components/ErrorHandler';
 
 export const HRManager: React.FC = () => {
   const companyId = useCompanyId();
   const [activeTab, setActiveTab] = useState('employees');
 
-  // Mock data - in real app, this would come from the database
+  // Mock data - replace with real data from your backend
   const employees = [
     {
-      id: '1',
+      id: 1,
       name: 'John Smith',
-      position: 'Site Manager',
-      email: 'john.smith@company.com',
-      phone: '+44 7123 456789',
-      startDate: '2023-01-15',
-      status: 'Active',
-      certifications: ['CSCS Gold', 'First Aid', 'SMSTS'],
-      trainingStatus: 85
+      role: 'Site Manager',
+      startDate: '2022-01-15',
+      certifications: ['SMSTS', 'First Aid', 'CSCS Gold'],
+      trainingProgress: 85,
+      nextTraining: 'Health & Safety Refresher',
+      nextTrainingDate: '2024-09-15'
     },
     {
-      id: '2',
-      name: 'Sarah Jones',
-      position: 'Health & Safety Officer',
-      email: 'sarah.jones@company.com',
-      phone: '+44 7987 654321',
-      startDate: '2022-06-01',
-      status: 'Active',
-      certifications: ['NEBOSH', 'IOSH', 'Fire Safety'],
-      trainingStatus: 92
+      id: 2,
+      name: 'Sarah Johnson',
+      role: 'Carpenter',
+      startDate: '2023-03-20',
+      certifications: ['CSCS Blue', 'Manual Handling'],
+      trainingProgress: 65,
+      nextTraining: 'Working at Height',
+      nextTrainingDate: '2024-08-20'
+    },
+    {
+      id: 3,
+      name: 'Mike Brown',
+      role: 'Electrician',
+      startDate: '2021-11-08',
+      certifications: ['17th Edition', 'CSCS Gold', 'Test & Inspection'],
+      trainingProgress: 92,
+      nextTraining: '18th Edition Update',
+      nextTrainingDate: '2024-10-01'
     }
   ];
 
   const trainingMatrix = [
     {
-      course: 'Health & Safety Awareness',
-      required: true,
-      frequency: 'Annual',
-      completionRate: 78,
-      nextDue: '2024-03-15'
+      course: 'SMSTS (Site Management Safety Training Scheme)',
+      mandatory: true,
+      frequency: '5 years',
+      completedBy: ['John Smith'],
+      pendingFor: ['Sarah Johnson'],
+      nextDeadline: '2025-01-15'
     },
     {
-      course: 'Manual Handling',
-      required: true,
-      frequency: '3 Years',
-      completionRate: 92,
-      nextDue: '2024-06-20'
+      course: 'First Aid at Work',
+      mandatory: true,
+      frequency: '3 years',
+      completedBy: ['John Smith', 'Mike Brown'],
+      pendingFor: ['Sarah Johnson'],
+      nextDeadline: '2024-09-01'
     },
     {
       course: 'Working at Height',
-      required: true,
-      frequency: '3 Years',
-      completionRate: 65,
-      nextDue: '2024-04-10'
+      mandatory: true,
+      frequency: '3 years',
+      completedBy: ['Mike Brown'],
+      pendingFor: ['John Smith', 'Sarah Johnson'],
+      nextDeadline: '2024-08-20'
+    },
+    {
+      course: 'Manual Handling',
+      mandatory: true,
+      frequency: '3 years',
+      completedBy: ['Sarah Johnson', 'Mike Brown'],
+      pendingFor: ['John Smith'],
+      nextDeadline: '2024-11-15'
     }
   ];
 
-  const upcomingTraining = [
+  const certifications = [
     {
-      employee: 'John Smith',
-      course: 'CSCS Renewal',
-      dueDate: '2024-02-28',
-      priority: 'High'
+      name: 'CSCS Cards',
+      description: 'Construction Skills Certification Scheme',
+      employees: [
+        { name: 'John Smith', level: 'Gold', expiry: '2025-03-15' },
+        { name: 'Sarah Johnson', level: 'Blue', expiry: '2025-06-20' },
+        { name: 'Mike Brown', level: 'Gold', expiry: '2024-12-08' }
+      ]
     },
     {
-      employee: 'Sarah Jones',
-      course: 'NEBOSH Refresher',
-      dueDate: '2024-03-15',
-      priority: 'Medium'
+      name: 'Health & Safety',
+      description: 'Various H&S certifications',
+      employees: [
+        { name: 'John Smith', level: 'SMSTS', expiry: '2025-01-15' },
+        { name: 'Mike Brown', level: 'IOSH Managing Safely', expiry: '2025-11-08' }
+      ]
     }
   ];
 
@@ -101,12 +127,12 @@ export const HRManager: React.FC = () => {
           </p>
         </div>
         <Button>
-          <Plus className="h-4 w-4 mr-2" />
+          <UserPlus className="h-4 w-4 mr-2" />
           Add Employee
         </Button>
       </div>
 
-      {/* Quick Stats */}
+      {/* Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="pt-6">
@@ -123,12 +149,10 @@ export const HRManager: React.FC = () => {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center">
-              <Award className="h-8 w-8 text-green-600" />
+              <BookOpen className="h-8 w-8 text-green-600" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-muted-foreground">Certifications</p>
-                <p className="text-2xl font-bold">
-                  {employees.reduce((acc, emp) => acc + emp.certifications.length, 0)}
-                </p>
+                <p className="text-sm font-medium text-muted-foreground">Training Courses</p>
+                <p className="text-2xl font-bold">{trainingMatrix.length}</p>
               </div>
             </div>
           </CardContent>
@@ -137,10 +161,10 @@ export const HRManager: React.FC = () => {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center">
-              <AlertTriangle className="h-8 w-8 text-yellow-600" />
+              <Award className="h-8 w-8 text-purple-600" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-muted-foreground">Training Due</p>
-                <p className="text-2xl font-bold">{upcomingTraining.length}</p>
+                <p className="text-sm font-medium text-muted-foreground">Active Certifications</p>
+                <p className="text-2xl font-bold">12</p>
               </div>
             </div>
           </CardContent>
@@ -149,10 +173,10 @@ export const HRManager: React.FC = () => {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center">
-              <CheckCircle className="h-8 w-8 text-green-600" />
+              <AlertCircle className="h-8 w-8 text-red-600" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-muted-foreground">Compliance Rate</p>
-                <p className="text-2xl font-bold">85%</p>
+                <p className="text-sm font-medium text-muted-foreground">Expiring Soon</p>
+                <p className="text-2xl font-bold">2</p>
               </div>
             </div>
           </CardContent>
@@ -168,159 +192,181 @@ export const HRManager: React.FC = () => {
         </TabsList>
 
         <TabsContent value="employees" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Employee Directory</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {employees.map((employee) => (
-                  <div key={employee.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center space-x-4">
-                      <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                        <User className="h-6 w-6 text-primary" />
-                      </div>
-                      <div>
-                        <h3 className="font-medium">{employee.name}</h3>
-                        <p className="text-sm text-muted-foreground">{employee.position}</p>
-                        <div className="flex items-center space-x-4 mt-1">
-                          <div className="flex items-center text-xs text-muted-foreground">
-                            <Mail className="h-3 w-3 mr-1" />
-                            {employee.email}
-                          </div>
-                          <div className="flex items-center text-xs text-muted-foreground">
-                            <Phone className="h-3 w-3 mr-1" />
-                            {employee.phone}
-                          </div>
-                        </div>
+          <div className="grid gap-4">
+            {employees.map((employee) => (
+              <Card key={employee.id}>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-lg">{employee.name}</CardTitle>
+                      <p className="text-muted-foreground">{employee.role}</p>
+                    </div>
+                    <Badge variant="outline">
+                      Started: {new Date(employee.startDate).toLocaleDateString()}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                      <h4 className="font-medium mb-3 flex items-center">
+                        <Award className="h-4 w-4 mr-2 text-blue-600" />
+                        Certifications
+                      </h4>
+                      <div className="space-y-2">
+                        {employee.certifications.map((cert, i) => (
+                          <Badge key={i} variant="secondary">{cert}</Badge>
+                        ))}
                       </div>
                     </div>
-                    <div className="text-right">
-                      <Badge variant="outline" className="mb-2">
-                        {employee.status}
-                      </Badge>
-                      <div className="text-sm text-muted-foreground">
-                        Training: {employee.trainingStatus}% complete
-                      </div>
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {employee.certifications.slice(0, 2).map((cert) => (
-                          <Badge key={cert} variant="secondary" className="text-xs">
-                            {cert}
-                          </Badge>
-                        ))}
-                        {employee.certifications.length > 2 && (
-                          <Badge variant="outline" className="text-xs">
-                            +{employee.certifications.length - 2} more
-                          </Badge>
-                        )}
-                      </div>
+                    <div>
+                      <h4 className="font-medium mb-3 flex items-center">
+                        <TrendingUp className="h-4 w-4 mr-2 text-green-600" />
+                        Training Progress
+                      </h4>
+                      <Progress value={employee.trainingProgress} className="mb-2" />
+                      <p className="text-sm text-muted-foreground">{employee.trainingProgress}% complete</p>
+                    </div>
+                    <div>
+                      <h4 className="font-medium mb-3 flex items-center">
+                        <Calendar className="h-4 w-4 mr-2 text-purple-600" />
+                        Next Training
+                      </h4>
+                      <p className="text-sm font-medium">{employee.nextTraining}</p>
+                      <p className="text-sm text-muted-foreground">
+                        Due: {new Date(employee.nextTrainingDate).toLocaleDateString()}
+                      </p>
                     </div>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </TabsContent>
 
         <TabsContent value="training" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Training Matrix</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {trainingMatrix.map((training, index) => (
-                  <div key={index} className="p-4 border rounded-lg">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-medium">{training.course}</h3>
-                      <div className="flex items-center space-x-2">
-                        {training.required && (
-                          <Badge variant="destructive" className="text-xs">Required</Badge>
-                        )}
-                        <Badge variant="outline" className="text-xs">
-                          Every {training.frequency}
-                        </Badge>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
-                        <div className="text-sm">
-                          Completion Rate: {training.completionRate}%
-                        </div>
-                        <div className="w-32 bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-green-600 h-2 rounded-full" 
-                            style={{ width: `${training.completionRate}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        Next Due: {training.nextDue}
-                      </div>
+          <div className="space-y-4">
+            {trainingMatrix.map((training, index) => (
+              <Card key={index}>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg">{training.course}</CardTitle>
+                    <div className="flex items-center gap-2">
+                      {training.mandatory && <Badge variant="destructive">Mandatory</Badge>}
+                      <Badge variant="outline">Every {training.frequency}</Badge>
                     </div>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                      <h4 className="font-medium mb-3 flex items-center">
+                        <CheckCircle className="h-4 w-4 mr-2 text-green-600" />
+                        Completed By
+                      </h4>
+                      <div className="space-y-1">
+                        {training.completedBy.map((name, i) => (
+                          <div key={i} className="text-sm flex items-center">
+                            <CheckCircle className="h-3 w-3 mr-2 text-green-600" />
+                            {name}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="font-medium mb-3 flex items-center">
+                        <Clock className="h-4 w-4 mr-2 text-orange-600" />
+                        Pending For
+                      </h4>
+                      <div className="space-y-1">
+                        {training.pendingFor.map((name, i) => (
+                          <div key={i} className="text-sm flex items-center">
+                            <Clock className="h-3 w-3 mr-2 text-orange-600" />
+                            {name}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="font-medium mb-3 flex items-center">
+                        <AlertCircle className="h-4 w-4 mr-2 text-red-600" />
+                        Next Deadline
+                      </h4>
+                      <p className="text-sm font-medium">
+                        {new Date(training.nextDeadline).toLocaleDateString()}
+                      </p>
+                      <Button size="sm" className="mt-2">
+                        Schedule Training
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </TabsContent>
 
         <TabsContent value="certifications" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Upcoming Training & Renewals</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {upcomingTraining.map((item, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center space-x-4">
-                      <Clock className="h-5 w-5 text-yellow-600" />
-                      <div>
-                        <h3 className="font-medium">{item.employee}</h3>
-                        <p className="text-sm text-muted-foreground">{item.course}</p>
+          <div className="space-y-4">
+            {certifications.map((certGroup, index) => (
+              <Card key={index}>
+                <CardHeader>
+                  <CardTitle className="text-lg">{certGroup.name}</CardTitle>
+                  <p className="text-muted-foreground">{certGroup.description}</p>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {certGroup.employees.map((emp, i) => (
+                      <div key={i} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div>
+                          <p className="font-medium">{emp.name}</p>
+                          <p className="text-sm text-muted-foreground">{emp.level}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-medium">
+                            Expires: {new Date(emp.expiry).toLocaleDateString()}
+                          </p>
+                          <Badge 
+                            variant={new Date(emp.expiry) < new Date(Date.now() + 90 * 24 * 60 * 60 * 1000) ? 'destructive' : 'default'}
+                          >
+                            {new Date(emp.expiry) < new Date() ? 'Expired' : 
+                             new Date(emp.expiry) < new Date(Date.now() + 90 * 24 * 60 * 60 * 1000) ? 'Expiring Soon' : 'Valid'}
+                          </Badge>
+                        </div>
                       </div>
-                    </div>
-                    <div className="text-right">
-                      <Badge 
-                        variant={item.priority === 'High' ? 'destructive' : 'secondary'}
-                        className="mb-1"
-                      >
-                        {item.priority} Priority
-                      </Badge>
-                      <div className="text-sm text-muted-foreground">
-                        Due: {item.dueDate}
-                      </div>
-                    </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </TabsContent>
 
         <TabsContent value="reports" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>HR Reports</CardTitle>
+              <CardTitle>HR Reports & Analytics</CardTitle>
+              <p className="text-muted-foreground">
+                Generate comprehensive reports on training, certifications, and compliance
+              </p>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Button variant="outline" className="h-20 flex flex-col items-center justify-center">
+                <Button variant="outline" className="h-20 flex-col">
                   <FileText className="h-6 w-6 mb-2" />
-                  <span>Training Records</span>
+                  Training Compliance Report
                 </Button>
-                <Button variant="outline" className="h-20 flex flex-col items-center justify-center">
-                  <BookOpen className="h-6 w-6 mb-2" />
-                  <span>Competency Matrix</span>
+                <Button variant="outline" className="h-20 flex-col">
+                  <Shield className="h-6 w-6 mb-2" />
+                  Certification Status Report
                 </Button>
-                <Button variant="outline" className="h-20 flex flex-col items-center justify-center">
-                  <Award className="h-6 w-6 mb-2" />
-                  <span>Certification Report</span>
+                <Button variant="outline" className="h-20 flex-col">
+                  <Target className="h-6 w-6 mb-2" />
+                  Skills Gap Analysis
                 </Button>
-                <Button variant="outline" className="h-20 flex flex-col items-center justify-center">
-                  <Calendar className="h-6 w-6 mb-2" />
-                  <span>Training Schedule</span>
+                <Button variant="outline" className="h-20 flex-col">
+                  <TrendingUp className="h-6 w-6 mb-2" />
+                  Training ROI Report
                 </Button>
               </div>
             </CardContent>

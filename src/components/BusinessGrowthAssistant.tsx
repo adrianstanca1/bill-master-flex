@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,7 +10,7 @@ import {
   Building, Star, Target, Briefcase
 } from 'lucide-react';
 import { useCompanyId } from '@/hooks/useCompanyId';
-import { ErrorHandler } from '@/components/ErrorHandler';
+import ErrorHandler from '@/components/ErrorHandler';
 
 export const BusinessGrowthAssistant: React.FC = () => {
   const companyId = useCompanyId();
