@@ -9,7 +9,7 @@ import {
   Clock, Calendar, Bell, Camera, Shield, Wrench, 
   Users, TrendingUp, FileText, BarChart3, 
   MapPin, Smartphone, Zap, Brain, Package,
-  Image, Activity, AlertCircle
+  Activity, AlertCircle, RefreshCcw
 } from 'lucide-react';
 import { TimesheetTracker } from '@/components/TimesheetTracker';
 import { DayworkManager } from '@/components/DayworkManager';
@@ -17,61 +17,38 @@ import { ReminderSystem } from '@/components/ReminderSystem';
 import { AssetTracker } from '@/components/AssetTracker';
 import { SitePhotos } from '@/components/SitePhotos';
 import RamsGenerator from '@/components/RamsGenerator';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { useCompanyId } from '@/hooks/useCompanyId';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useDashboardStats } from '@/hooks/useDashboardStats';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { StatsCard } from '@/components/StatsCard';
+import { QuickActions } from '@/components/QuickActions';
+import { useToast } from '@/hooks/use-toast';
 
 export default function BusinessManager() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const companyId = useCompanyId();
   const isMobile = useIsMobile();
+  const { toast } = useToast();
 
-  // Fetch comprehensive dashboard stats
-  const { data: stats } = useQuery({
-    queryKey: ['dashboard-stats', companyId],
-    queryFn: async () => {
-      if (!companyId) return null;
-      
-      const [
-        { count: activeProjects },
-        { count: pendingReminders },
-        { count: activeTimesheets },
-        { count: recentDayworks },
-        { count: totalAssets },
-        { count: recentPhotos },
-        { count: ramsDocuments }
-      ] = await Promise.all([
-        supabase.from('projects').select('*', { count: 'exact', head: true }).eq('company_id', companyId),
-        supabase.from('reminders').select('*', { count: 'exact', head: true }).eq('company_id', companyId).eq('status', 'pending'),
-        supabase.from('timesheets').select('*', { count: 'exact', head: true }).eq('company_id', companyId).eq('status', 'active'),
-        supabase.from('dayworks').select('*', { count: 'exact', head: true }).eq('company_id', companyId).gte('date', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]),
-        supabase.from('asset_tracking').select('*', { count: 'exact', head: true }).eq('company_id', companyId),
-        supabase.from('site_photos').select('*', { count: 'exact', head: true }).eq('company_id', companyId).gte('photo_date', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
-        supabase.from('rams_documents').select('*', { count: 'exact', head: true }).eq('company_id', companyId)
-      ]);
+  const { data: stats, isLoading: statsLoading, error: statsError, refetch } = useDashboardStats();
 
-      return {
-        activeProjects: activeProjects || 0,
-        pendingReminders: pendingReminders || 0,
-        activeTimesheets: activeTimesheets || 0,
-        recentDayworks: recentDayworks || 0,
-        totalAssets: totalAssets || 0,
-        recentPhotos: recentPhotos || 0,
-        ramsDocuments: ramsDocuments || 0,
-      };
-    },
-    enabled: !!companyId,
-  });
-
-  const quickActions = [
-    { icon: Clock, label: 'Start Timer', action: () => setActiveTab('timesheets'), color: 'text-blue-600' },
-    { icon: Calendar, label: 'Add Daywork', action: () => setActiveTab('dayworks'), color: 'text-green-600' },
-    { icon: Bell, label: 'Set Reminder', action: () => setActiveTab('reminders'), color: 'text-yellow-600' },
-    { icon: Camera, label: 'Upload Photo', action: () => setActiveTab('photos'), color: 'text-purple-600' },
-    { icon: Package, label: 'Track Asset', action: () => setActiveTab('assets'), color: 'text-indigo-600' },
-    { icon: Shield, label: 'Create RAMS', action: () => setActiveTab('rams'), color: 'text-red-600' },
-  ];
+  const handleRefreshStats = async () => {
+    try {
+      await refetch();
+      toast({
+        title: "Stats refreshed",
+        description: "Dashboard statistics have been updated.",
+      });
+    } catch (error) {
+      toast({
+        title: "Refresh failed",
+        description: "Failed to refresh dashboard statistics.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const modules = [
     {
@@ -121,220 +98,233 @@ export default function BusinessManager() {
     { value: 'rams', label: 'RAMS', icon: Shield },
   ];
 
-  return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto p-4 md:p-6">
-        <div className="mb-6 md:mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Business Manager</h1>
-          <p className="text-muted-foreground mt-2">
-            Comprehensive business management platform for construction companies
-          </p>
-        </div>
+  if (!companyId) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Card className="max-w-md">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-yellow-500" />
+              Setup Required
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground mb-4">
+              Please complete your company setup in Settings to access the Business Manager.
+            </p>
+            <Button onClick={() => window.location.href = '/settings'} className="w-full">
+              Go to Settings
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          {isMobile ? (
-            <ScrollArea className="w-full whitespace-nowrap">
-              <TabsList className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground">
+  return (
+    <ErrorBoundary>
+      <div className="min-h-screen bg-background">
+        <div className="max-w-7xl mx-auto p-4 md:p-6">
+          <div className="mb-6 md:mb-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Business Manager</h1>
+                <p className="text-muted-foreground mt-2">
+                  Comprehensive business management platform for construction companies
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRefreshStats}
+                disabled={statsLoading}
+                className="shrink-0"
+              >
+                <RefreshCcw className={`h-4 w-4 mr-2 ${statsLoading ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
+            </div>
+          </div>
+
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            {isMobile ? (
+              <ScrollArea className="w-full whitespace-nowrap">
+                <TabsList className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground">
+                  {tabConfig.map((tab) => (
+                    <TabsTrigger 
+                      key={tab.value} 
+                      value={tab.value}
+                      className="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+                    >
+                      <tab.icon className="h-4 w-4 mr-2" />
+                      {tab.label}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
+            ) : (
+              <TabsList className="grid w-full grid-cols-7">
                 {tabConfig.map((tab) => (
-                  <TabsTrigger 
-                    key={tab.value} 
-                    value={tab.value}
-                    className="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
-                  >
-                    <tab.icon className="h-4 w-4 mr-2" />
-                    {tab.label}
+                  <TabsTrigger key={tab.value} value={tab.value} className="flex items-center gap-2">
+                    <tab.icon className="h-4 w-4" />
+                    <span className="hidden sm:inline">{tab.label}</span>
                   </TabsTrigger>
                 ))}
               </TabsList>
-              <ScrollBar orientation="horizontal" />
-            </ScrollArea>
-          ) : (
-            <TabsList className="grid w-full grid-cols-7">
-              {tabConfig.map((tab) => (
-                <TabsTrigger key={tab.value} value={tab.value} className="flex items-center gap-2">
-                  <tab.icon className="h-4 w-4" />
-                  <span className="hidden sm:inline">{tab.label}</span>
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          )}
-
-          <TabsContent value="dashboard" className="space-y-6">
-            {/* Enhanced Stats Overview */}
-            {stats && (
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
-                <Card>
-                  <CardContent className="pt-4 pb-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs font-medium text-muted-foreground">Projects</p>
-                        <p className="text-xl md:text-2xl font-bold">{stats.activeProjects}</p>
-                      </div>
-                      <FileText className="h-6 w-6 md:h-8 md:w-8 text-muted-foreground" />
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardContent className="pt-4 pb-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs font-medium text-muted-foreground">Reminders</p>
-                        <p className="text-xl md:text-2xl font-bold">{stats.pendingReminders}</p>
-                      </div>
-                      <Bell className="h-6 w-6 md:h-8 md:w-8 text-muted-foreground" />
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardContent className="pt-4 pb-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs font-medium text-muted-foreground">Active Timers</p>
-                        <p className="text-xl md:text-2xl font-bold">{stats.activeTimesheets}</p>
-                      </div>
-                      <Clock className="h-6 w-6 md:h-8 md:w-8 text-muted-foreground" />
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardContent className="pt-4 pb-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs font-medium text-muted-foreground">Reports</p>
-                        <p className="text-xl md:text-2xl font-bold">{stats.recentDayworks}</p>
-                      </div>
-                      <Calendar className="h-6 w-6 md:h-8 md:w-8 text-muted-foreground" />
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardContent className="pt-4 pb-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs font-medium text-muted-foreground">Assets</p>
-                        <p className="text-xl md:text-2xl font-bold">{stats.totalAssets}</p>
-                      </div>
-                      <Package className="h-6 w-6 md:h-8 md:w-8 text-muted-foreground" />
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardContent className="pt-4 pb-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs font-medium text-muted-foreground">Photos</p>
-                        <p className="text-xl md:text-2xl font-bold">{stats.recentPhotos}</p>
-                      </div>
-                      <Camera className="h-6 w-6 md:h-8 md:w-8 text-muted-foreground" />
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardContent className="pt-4 pb-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs font-medium text-muted-foreground">RAMS</p>
-                        <p className="text-xl md:text-2xl font-bold">{stats.ramsDocuments}</p>
-                      </div>
-                      <Shield className="h-6 w-6 md:h-8 md:w-8 text-muted-foreground" />
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
             )}
 
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                  {quickActions.map((action, index) => (
-                    <Button
-                      key={index}
-                      variant="outline"
-                      className="h-16 md:h-20 flex-col gap-2"
-                      onClick={action.action}
-                    >
-                      <action.icon className={`h-5 w-5 md:h-6 md:w-6 ${action.color}`} />
-                      <span className="text-xs md:text-sm">{action.label}</span>
-                    </Button>
+            <TabsContent value="dashboard" className="space-y-6">
+              {/* Stats Overview */}
+              {statsLoading ? (
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+                  {Array.from({ length: 7 }).map((_, i) => (
+                    <Card key={i} className="animate-pulse">
+                      <CardContent className="pt-4 pb-4">
+                        <div className="h-16 bg-muted rounded" />
+                      </CardContent>
+                    </Card>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Feature Modules */}
-            <div className="space-y-6">
-              {modules.map((module) => (
-                <Card key={module.id}>
-                  <CardHeader>
-                    <CardTitle className="text-lg md:text-xl">{module.title}</CardTitle>
-                    <p className="text-sm text-muted-foreground">{module.description}</p>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {module.items.map((item, index) => (
-                        <div 
-                          key={index} 
-                          className="flex items-start space-x-3 p-3 border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer"
-                          onClick={() => item.tab && setActiveTab(item.tab)}
-                        >
-                          <item.icon className="h-5 w-5 mt-0.5 text-primary" />
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between">
-                              <h4 className="text-sm font-medium">{item.name}</h4>
-                              <Badge 
-                                variant={item.status === 'Active' ? 'default' : 
-                                        item.status === 'Beta' ? 'secondary' : 'outline'}
-                                className="text-xs"
-                              >
-                                {item.status}
-                              </Badge>
-                            </div>
-                            <p className="text-xs text-muted-foreground mt-1">{item.desc}</p>
-                          </div>
-                        </div>
-                      ))}
+              ) : statsError ? (
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="text-center text-muted-foreground">
+                      <AlertCircle className="h-8 w-8 mx-auto mb-2" />
+                      <p>Failed to load dashboard statistics</p>
+                      <Button onClick={handleRefreshStats} variant="outline" size="sm" className="mt-2">
+                        Retry
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
-              ))}
-            </div>
-          </TabsContent>
+              ) : stats ? (
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+                  <StatsCard
+                    title="Projects"
+                    value={stats.activeProjects}
+                    icon={FileText}
+                    onClick={() => setActiveTab('dayworks')}
+                  />
+                  <StatsCard
+                    title="Reminders"
+                    value={stats.pendingReminders}
+                    icon={Bell}
+                    onClick={() => setActiveTab('reminders')}
+                  />
+                  <StatsCard
+                    title="Active Timers"
+                    value={stats.activeTimesheets}
+                    icon={Clock}
+                    onClick={() => setActiveTab('timesheets')}
+                  />
+                  <StatsCard
+                    title="Reports"
+                    value={stats.recentDayworks}
+                    icon={Calendar}
+                    onClick={() => setActiveTab('dayworks')}
+                  />
+                  <StatsCard
+                    title="Assets"
+                    value={stats.totalAssets}
+                    icon={Package}
+                    onClick={() => setActiveTab('assets')}
+                  />
+                  <StatsCard
+                    title="Photos"
+                    value={stats.recentPhotos}
+                    icon={Camera}
+                    onClick={() => setActiveTab('photos')}
+                  />
+                  <StatsCard
+                    title="RAMS"
+                    value={stats.ramsDocuments}
+                    icon={Shield}
+                    onClick={() => setActiveTab('rams')}
+                  />
+                </div>
+              ) : null}
 
-          <TabsContent value="timesheets">
-            <TimesheetTracker />
-          </TabsContent>
+              {/* Quick Actions */}
+              <QuickActions onTabChange={setActiveTab} />
 
-          <TabsContent value="dayworks">
-            <DayworkManager />
-          </TabsContent>
+              {/* Feature Modules */}
+              <div className="space-y-6">
+                {modules.map((module) => (
+                  <Card key={module.id}>
+                    <CardHeader>
+                      <CardTitle className="text-lg md:text-xl">{module.title}</CardTitle>
+                      <p className="text-sm text-muted-foreground">{module.description}</p>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {module.items.map((item, index) => (
+                          <div 
+                            key={index} 
+                            className="flex items-start space-x-3 p-3 border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer"
+                            onClick={() => item.tab && setActiveTab(item.tab)}
+                          >
+                            <item.icon className="h-5 w-5 mt-0.5 text-primary" />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between">
+                                <h4 className="text-sm font-medium">{item.name}</h4>
+                                <Badge 
+                                  variant={item.status === 'Active' ? 'default' : 
+                                          item.status === 'Beta' ? 'secondary' : 'outline'}
+                                  className="text-xs"
+                                >
+                                  {item.status}
+                                </Badge>
+                              </div>
+                              <p className="text-xs text-muted-foreground mt-1">{item.desc}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
 
-          <TabsContent value="reminders">
-            <ReminderSystem />
-          </TabsContent>
+            <TabsContent value="timesheets">
+              <ErrorBoundary>
+                <TimesheetTracker />
+              </ErrorBoundary>
+            </TabsContent>
 
-          <TabsContent value="assets">
-            <AssetTracker />
-          </TabsContent>
+            <TabsContent value="dayworks">
+              <ErrorBoundary>
+                <DayworkManager />
+              </ErrorBoundary>
+            </TabsContent>
 
-          <TabsContent value="photos">
-            <SitePhotos />
-          </TabsContent>
+            <TabsContent value="reminders">
+              <ErrorBoundary>
+                <ReminderSystem />
+              </ErrorBoundary>
+            </TabsContent>
 
-          <TabsContent value="rams">
-            <RamsGenerator />
-          </TabsContent>
-        </Tabs>
+            <TabsContent value="assets">
+              <ErrorBoundary>
+                <AssetTracker />
+              </ErrorBoundary>
+            </TabsContent>
+
+            <TabsContent value="photos">
+              <ErrorBoundary>
+                <SitePhotos />
+              </ErrorBoundary>
+            </TabsContent>
+
+            <TabsContent value="rams">
+              <ErrorBoundary>
+                <RamsGenerator />
+              </ErrorBoundary>
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
-    </div>
+    </ErrorBoundary>
   );
 }
