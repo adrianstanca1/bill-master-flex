@@ -1,11 +1,13 @@
+
 import React from "react";
 import { AdvisorAgent } from "@/components/AdvisorAgent";
+import { ResponsiveLayout } from "@/components/ResponsiveLayout";
 import SEO from "@/components/SEO";
 
 const Advisor: React.FC = () => {
 
   return (
-    <div>
+    <ResponsiveLayout>
       <SEO title="Business Advisor – Civix" description="AI advisor that audits, advises, and improves your operations." />
       <header className="mb-6">
         <h1 className="text-2xl font-semibold">Business Advisor & Supervisor</h1>
@@ -17,7 +19,7 @@ const Advisor: React.FC = () => {
           <AdvisorAgent />
         </section>
       </main>
-    </div>
+    </ResponsiveLayout>
   );
 };
 

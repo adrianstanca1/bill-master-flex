@@ -61,7 +61,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
-              <Route path="/dashboard" element={<RequireAuth><Dashboard /></RequireAuth>} />
+              <Route path="/dashboard" element={<RequireAuth><AppLayout><Dashboard /></AppLayout></RequireAuth>} />
               <Route path="/business-manager" element={<RequireAuth><AppLayout><BusinessManager /></AppLayout></RequireAuth>} />
               <Route path="/invoices" element={<RequireAuth><AppLayout><Invoices /></AppLayout></RequireAuth>} />
               <Route path="/quotes" element={<RequireAuth><AppLayout><Quotes /></AppLayout></RequireAuth>} />

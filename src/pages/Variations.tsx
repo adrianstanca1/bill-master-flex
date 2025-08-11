@@ -1,5 +1,7 @@
+
 import React, { useEffect, useMemo, useState } from "react";
 import SEO from "@/components/SEO";
+import { ResponsiveLayout } from "@/components/ResponsiveLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -59,7 +61,7 @@ const Variations: React.FC = () => {
   }), []);
 
   return (
-    <main>
+    <ResponsiveLayout>
       <SEO title="Variations & Change Orders | UK Construction" description="Create and manage variations/change orders." jsonLd={jsonLd} />
       <h1 className="sr-only">Variations & Change Orders</h1>
       <Card>
@@ -105,7 +107,7 @@ const Variations: React.FC = () => {
           </CardContent>
         </Card>
       </div>
-    </main>
+    </ResponsiveLayout>
   );
 };
 
