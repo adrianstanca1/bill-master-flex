@@ -1,76 +1,84 @@
 
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useCompanyId } from '@/hooks/useCompanyId';
-import type { DashboardStats } from '@/types/business';
+import { useCompanyId } from './useCompanyId';
 
-export function useDashboardStats() {
-  const companyId = useCompanyId();
-
-  return useQuery({
-    queryKey: ['dashboard-stats', companyId],
-    queryFn: async (): Promise<DashboardStats | null> => {
-      if (!companyId) return null;
-      
-      try {
-        // Validate UUID format
-        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-        if (!uuidRegex.test(companyId)) {
-          console.warn('Invalid company ID format:', companyId);
-          return {
-            activeProjects: 0,
-            pendingReminders: 0,
-            activeTimesheets: 0,
-            recentDayworks: 0,
-            totalAssets: 0,
-            recentPhotos: 0,
-            ramsDocuments: 0,
-          };
-        }
-        
-        const [
-          { count: activeProjects },
-          { count: pendingReminders },
-          { count: activeTimesheets },
-          { count: recentDayworks },
-          { count: totalAssets },
-          { count: recentPhotos },
-          { count: ramsDocuments }
-        ] = await Promise.all([
-          supabase.from('projects').select('*', { count: 'exact', head: true }).eq('company_id', companyId),
-          supabase.from('reminders').select('*', { count: 'exact', head: true }).eq('company_id', companyId).eq('status', 'pending'),
-          supabase.from('timesheets').select('*', { count: 'exact', head: true }).eq('company_id', companyId).eq('status', 'active'),
-          supabase.from('dayworks').select('*', { count: 'exact', head: true }).eq('company_id', companyId).gte('date', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]),
-          supabase.from('asset_tracking').select('*', { count: 'exact', head: true }).eq('company_id', companyId),
-          supabase.from('site_photos').select('*', { count: 'exact', head: true }).eq('company_id', companyId).gte('photo_date', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
-          supabase.from('rams_documents').select('*', { count: 'exact', head: true }).eq('company_id', companyId)
-        ]);
-
-        return {
-          activeProjects: activeProjects || 0,
-          pendingReminders: pendingReminders || 0,
-          activeTimesheets: activeTimesheets || 0,
-          recentDayworks: recentDayworks || 0,
-          totalAssets: totalAssets || 0,
-          recentPhotos: recentPhotos || 0,
-          ramsDocuments: ramsDocuments || 0,
-        };
-      } catch (error) {
-        console.error('Error fetching dashboard stats:', error);
-        // Return zeros instead of throwing to prevent the dashboard from crashing
-        return {
-          activeProjects: 0,
-          pendingReminders: 0,
-          activeTimesheets: 0,
-          recentDayworks: 0,
-          totalAssets: 0,
-          recentPhotos: 0,
-          ramsDocuments: 0,
-        };
-      }
-    },
-    enabled: !!companyId,
-    refetchInterval: 30000, // Refresh every 30 seconds
-    staleTime: 10000, // Consider data stale after 10 seconds
-  });
+interface DashboardStats {
+  totalRevenue: number;
+  pendingInvoices: number;
+  overdueAmount: number;
+  activeProjects: number;
+  recentInvoices: any[];
+  loading: boolean;
+  error: string | null;
 }
+
+export const useDashboardStats = (): DashboardStats => {
+  const companyId = useCompanyId();
+  const [stats, setStats] = useState<DashboardStats>({
+    totalRevenue: 0,
+    pendingInvoices: 0,
+    overdueAmount: 0,
+    activeProjects: 0,
+    recentInvoices: [],
+    loading: true,
+    error: null
+  });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      if (!companyId) return;
+
+      try {
+        setStats(prev => ({ ...prev, loading: true, error: null }));
+
+        // Fetch invoices
+        const { data: invoices, error: invoicesError } = await supabase
+          .from('invoices')
+          .select('*')
+          .eq('company_id', companyId)
+          .order('created_at', { ascending: false });
+
+        if (invoicesError) throw invoicesError;
+
+        // Fetch projects
+        const { data: projects, error: projectsError } = await supabase
+          .from('projects')
+          .select('*')
+          .eq('company_id', companyId);
+
+        if (projectsError) throw projectsError;
+
+        // Calculate stats
+        const totalRevenue = invoices?.reduce((sum, inv) => sum + Number(inv.total || 0), 0) || 0;
+        const pendingInvoices = invoices?.filter(inv => inv.status === 'issued').length || 0;
+        const overdueAmount = invoices?.filter(inv => {
+          if (!inv.due_date || inv.status === 'paid') return false;
+          return new Date(inv.due_date) < new Date();
+        }).reduce((sum, inv) => sum + Number(inv.total || 0), 0) || 0;
+
+        setStats({
+          totalRevenue,
+          pendingInvoices,
+          overdueAmount,
+          activeProjects: projects?.length || 0,
+          recentInvoices: invoices?.slice(0, 5) || [],
+          loading: false,
+          error: null
+        });
+
+      } catch (error: any) {
+        console.error('Error fetching dashboard stats:', error);
+        setStats(prev => ({
+          ...prev,
+          loading: false,
+          error: error.message || 'Failed to load dashboard data'
+        }));
+      }
+    };
+
+    fetchStats();
+  }, [companyId]);
+
+  return stats;
+};

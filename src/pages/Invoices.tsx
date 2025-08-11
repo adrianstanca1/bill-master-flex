@@ -1,17 +1,17 @@
 
-import React from "react";
-import { InvoiceGenerator } from "@/components/InvoiceGenerator";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
-import SEO from "@/components/SEO";
+import React from 'react';
+import { InvoiceManager } from '@/components/InvoiceManager';
+import SEO from '@/components/SEO';
 
-const Invoices = () => {
+export default function Invoices() {
   return (
-    <ErrorBoundary>
-      <SEO title="Invoice Management | Professional Invoicing" description="Create, manage and track professional invoices with VAT, CIS, retention and payment tracking." />
-      <h1 className="sr-only">Professional Invoice Management System</h1>
-      <InvoiceGenerator />
-    </ErrorBoundary>
+    <div className="container mx-auto px-4 py-8">
+      <SEO 
+        title="Invoices" 
+        description="Manage your construction business invoices - create, track, and send invoices"
+      />
+      
+      <InvoiceManager />
+    </div>
   );
-};
-
-export default Invoices;
+}
