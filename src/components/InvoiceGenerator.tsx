@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { z } from 'zod';
@@ -183,6 +182,21 @@ export function InvoiceGenerator() {
       const itemTotals = values.items.map(item => item.quantity * item.unitPrice);
       const netTotal = itemTotals.reduce((sum, total) => sum + total, 0);
       
+      // Convert totals to a plain object compatible with Json type
+      const totalsForDb = {
+        subtotal: totals.subtotal,
+        discount: totals.discount,
+        netAfterDiscount: totals.netAfterDiscount,
+        vatRate: totals.vatRate,
+        vatAmount: totals.vatAmount,
+        totalBeforeRetention: totals.totalBeforeRetention,
+        retention: totals.retention,
+        totalAfterRetention: totals.totalAfterRetention,
+        cisPercent: totals.cisPercent,
+        cisDeduction: totals.cisDeduction,
+        totalDue: totals.totalDue,
+      };
+
       const invoiceData = {
         company_id: companyId,
         number: values.invoice.number,
@@ -202,7 +216,7 @@ export function InvoiceGenerator() {
           retention_percent: values.retentionPercent,
           cis_enabled: values.cisEnabled,
           cis_percent: values.cisPercent,
-          totals: totals,
+          totals: totalsForDb,
         },
       };
 
