@@ -775,6 +775,45 @@ export type Database = {
           },
         ]
       }
+      security_audit_log: {
+        Row: {
+          action: string
+          company_id: string | null
+          created_at: string
+          details: Json | null
+          id: string
+          ip_address: unknown | null
+          resource_id: string | null
+          resource_type: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          company_id?: string | null
+          created_at?: string
+          details?: Json | null
+          id?: string
+          ip_address?: unknown | null
+          resource_id?: string | null
+          resource_type: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          company_id?: string | null
+          created_at?: string
+          details?: Json | null
+          id?: string
+          ip_address?: unknown | null
+          resource_id?: string | null
+          resource_type?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       site_photos: {
         Row: {
           ai_analysis: Json | null
@@ -1201,6 +1240,14 @@ export type Database = {
       is_tender_company_member: {
         Args: { _tender_id: string }
         Returns: boolean
+      }
+      test_rls_policies: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          table_name: string
+          policy_test: string
+          result: boolean
+        }[]
       }
     }
     Enums: {

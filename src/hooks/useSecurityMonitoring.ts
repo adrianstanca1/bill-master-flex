@@ -1,0 +1,134 @@
+
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useEffect } from 'react';
+import { useToast } from '@/hooks/use-toast';
+
+interface SecurityAlert {
+  id: string;
+  type: 'high' | 'medium' | 'low';
+  message: string;
+  timestamp: string;
+  details?: any;
+}
+
+export function useSecurityMonitoring() {
+  const { toast } = useToast();
+
+  // Monitor for suspicious activity
+  const { data: suspiciousActivity } = useQuery({
+    queryKey: ['suspicious-activity'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('security_audit_log')
+        .select('*')
+        .gte('created_at', new Date(Date.now() - 60 * 60 * 1000).toISOString()) // Last hour
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      // Analyze for suspicious patterns
+      const alerts: SecurityAlert[] = [];
+      
+      // Check for multiple failed operations
+      const failedOps = data.filter(log => 
+        log.details?.error || log.action === 'FAILED_LOGIN'
+      );
+      
+      if (failedOps.length > 5) {
+        alerts.push({
+          id: 'failed-ops',
+          type: 'high',
+          message: `${failedOps.length} failed operations detected in the last hour`,
+          timestamp: new Date().toISOString(),
+          details: { count: failedOps.length }
+        });
+      }
+
+      // Check for unusual deletion activity
+      const deletions = data.filter(log => log.action === 'DELETE');
+      if (deletions.length > 3) {
+        alerts.push({
+          id: 'unusual-deletions',
+          type: 'medium',
+          message: `Unusual deletion activity: ${deletions.length} records deleted`,
+          timestamp: new Date().toISOString(),
+          details: { deletions }
+        });
+      }
+
+      // Check for after-hours activity
+      const now = new Date();
+      const afterHours = data.filter(log => {
+        const logTime = new Date(log.created_at);
+        const hour = logTime.getHours();
+        return hour < 6 || hour > 22; // Before 6 AM or after 10 PM
+      });
+
+      if (afterHours.length > 0) {
+        alerts.push({
+          id: 'after-hours',
+          type: 'low',
+          message: `${afterHours.length} after-hours activities detected`,
+          timestamp: new Date().toISOString(),
+          details: { count: afterHours.length }
+        });
+      }
+
+      return alerts;
+    },
+    refetchInterval: 60000, // Check every minute
+  });
+
+  // Show alerts when detected
+  useEffect(() => {
+    if (suspiciousActivity && suspiciousActivity.length > 0) {
+      suspiciousActivity.forEach(alert => {
+        if (alert.type === 'high') {
+          toast({
+            title: "Security Alert",
+            description: alert.message,
+            variant: "destructive"
+          });
+        } else if (alert.type === 'medium') {
+          toast({
+            title: "Security Notice",
+            description: alert.message,
+          });
+        }
+      });
+    }
+  }, [suspiciousActivity, toast]);
+
+  // Monitor authentication events
+  const { data: authEvents } = useQuery({
+    queryKey: ['auth-events'],
+    queryFn: async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error) throw error;
+
+      // Log successful authentication
+      if (session) {
+        await supabase.from('security_audit_log').insert({
+          user_id: session.user.id,
+          action: 'SESSION_CHECK',
+          resource_type: 'auth',
+          resource_id: session.user.id,
+          details: { 
+            last_sign_in: session.user.last_sign_in_at,
+            user_agent: navigator.userAgent 
+          }
+        });
+      }
+
+      return session;
+    },
+    refetchInterval: 300000, // Check every 5 minutes
+  });
+
+  return {
+    suspiciousActivity,
+    authEvents,
+    isMonitoring: true
+  };
+}
