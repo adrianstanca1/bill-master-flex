@@ -20,6 +20,7 @@ export function TopNavigation() {
 
   const navigationItems = [
     { path: '/dashboard', label: 'Dashboard', icon: Home },
+    { path: '/site-manager', label: 'Site', icon: Building },
     { path: '/business-manager', label: 'Business', icon: Building },
     { path: '/advisor', label: 'AI Advisor', icon: MessageSquare },
     { path: '/invoices', label: 'Invoices', icon: FileText },
