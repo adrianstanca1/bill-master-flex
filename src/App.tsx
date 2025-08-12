@@ -6,7 +6,6 @@ import { Toaster } from '@/components/ui/sonner';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { RequireAuth } from '@/components/RequireAuth';
-import { SessionManager } from '@/components/SessionManager';
 import { SecurityMonitor } from '@/components/SecurityMonitor';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -55,7 +54,6 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ErrorBoundary>
         <Router>
-          <SessionManager />
           <SecurityMonitor />
           <div className="min-h-screen bg-background">
             <Routes>
