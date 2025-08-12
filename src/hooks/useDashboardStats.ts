@@ -25,9 +25,16 @@ export const useDashboardStats = (): DashboardStats => {
     error: null
   });
 
+  const isValidUUID = (val: string) =>
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(val);
+
   useEffect(() => {
     const fetchStats = async () => {
-      if (!companyId) return;
+      if (!companyId || !isValidUUID(companyId)) {
+        // No valid company context; show empty state without errors
+        setStats(prev => ({ ...prev, loading: false, error: null }));
+        return;
+      }
 
       try {
         setStats(prev => ({ ...prev, loading: true, error: null }));

@@ -1,6 +1,9 @@
 
 import { useState, useEffect } from 'react';
 
+const isValidUUID = (val: string) =>
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(val);
+
 export const useCompanyId = () => {
   const [companyId, setCompanyId] = useState<string>('');
 
@@ -8,27 +11,17 @@ export const useCompanyId = () => {
     // Try to get company ID from localStorage settings
     try {
       const settings = JSON.parse(localStorage.getItem('as-settings') || '{}');
-      if (settings.companyId) {
-        setCompanyId(settings.companyId);
+      const candidate = String(settings.companyId || '').trim();
+      if (candidate && isValidUUID(candidate)) {
+        setCompanyId(candidate);
         return;
       }
     } catch (error) {
       console.error('Error parsing settings:', error);
     }
 
-    // If no company ID found, generate a default one
-    // This should be replaced with proper company selection/creation logic
-    const defaultCompanyId = crypto.randomUUID();
-    setCompanyId(defaultCompanyId);
-
-    // Save it to localStorage for consistency
-    try {
-      const currentSettings = JSON.parse(localStorage.getItem('as-settings') || '{}');
-      const updatedSettings = { ...currentSettings, companyId: defaultCompanyId };
-      localStorage.setItem('as-settings', JSON.stringify(updatedSettings));
-    } catch (error) {
-      console.error('Error saving company ID:', error);
-    }
+    // If no valid company ID found, leave empty so data queries are disabled
+    setCompanyId('');
   }, []);
 
   return companyId;
