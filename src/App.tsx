@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/sonner';
 import { SidebarProvider } from '@/components/ui/sidebar';
@@ -50,12 +50,17 @@ function AppLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
+function ConditionalSecurityMonitor() {
+  const location = useLocation();
+  return location.pathname !== "/" ? <SecurityMonitor /> : null;
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ErrorBoundary>
         <Router>
-          <SecurityMonitor />
+          <ConditionalSecurityMonitor />
           <div className="min-h-screen bg-background">
             <Routes>
               <Route path="/" element={<Index />} />
