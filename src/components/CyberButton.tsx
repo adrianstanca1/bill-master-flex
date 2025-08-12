@@ -4,7 +4,7 @@ import { Button, ButtonProps } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { LucideIcon } from 'lucide-react';
 
-interface CyberButtonProps extends ButtonProps {
+interface CyberButtonProps extends Omit<ButtonProps, 'variant'> {
   variant?: 'cyber' | 'ghost' | 'neon' | 'default';
   icon?: LucideIcon;
   loading?: boolean;
@@ -28,10 +28,14 @@ export function CyberButton({
     default: ''
   };
 
+  // Map cyber variants to button variants for underlying Button component
+  const buttonVariant = variant === 'ghost' ? 'ghost' : 'default';
+
   const glowClass = glow ? 'shadow-glow hover:shadow-neon' : '';
   
   return (
     <Button
+      variant={buttonVariant}
       className={cn(
         variantClasses[variant],
         glowClass,
