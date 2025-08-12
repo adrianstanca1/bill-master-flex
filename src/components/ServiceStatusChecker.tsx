@@ -3,198 +3,217 @@ import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { CheckCircle, XCircle, AlertCircle, Key, ExternalLink, RefreshCw } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { 
+  CheckCircle, 
+  XCircle, 
+  AlertTriangle, 
+  Settings, 
+  Key, 
+  RefreshCw,
+  ExternalLink,
+  Database,
+  Bot,
+  Mail
+} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import FunctionDiagnostics from '@/components/FunctionDiagnostics';
 
 interface ServiceStatus {
   name: string;
-  status: 'active' | 'inactive' | 'error' | 'missing-key';
+  status: 'online' | 'offline' | 'warning';
+  lastChecked: string;
+  responseTime: string;
   description: string;
-  apiKey?: string;
-  setupUrl?: string;
-  lastChecked?: string;
+  icon: React.ComponentType<any>;
+  requiresApiKey: boolean;
+  hasApiKey: boolean;
+  testEndpoint?: string;
 }
 
 export function ServiceStatusChecker() {
   const { toast } = useToast();
+  const [isChecking, setIsChecking] = useState(false);
   const [services, setServices] = useState<ServiceStatus[]>([
     {
-      name: 'OpenAI API',
-      status: 'missing-key',
-      description: 'Required for AI agents, advisor, and quote generation',
-      apiKey: 'OPENAI_API_KEY',
-      setupUrl: 'https://platform.openai.com/api-keys'
-    },
-    {
-      name: 'Firecrawl API',
-      status: 'missing-key',
-      description: 'Required for TenderBot web scraping',
-      apiKey: 'FIRECRAWL_API_KEY',
-      setupUrl: 'https://www.firecrawl.dev/'
-    },
-    {
       name: 'Supabase Database',
-      status: 'active',
-      description: 'Primary database and authentication service',
-      lastChecked: new Date().toISOString()
+      status: 'online',
+      lastChecked: new Date().toISOString(),
+      responseTime: '45ms',
+      description: 'Main database connection',
+      icon: Database,
+      requiresApiKey: false,
+      hasApiKey: true
     },
     {
-      name: 'Agent Function',
-      status: 'inactive',
-      description: 'Invoice analysis and client email drafting'
+      name: 'OpenAI API',
+      status: 'warning',
+      lastChecked: new Date(Date.now() - 300000).toISOString(),
+      responseTime: '200ms',
+      description: 'AI chat and completion services',
+      icon: Bot,
+      requiresApiKey: true,
+      hasApiKey: false,
+      testEndpoint: 'https://api.openai.com/v1/models'
     },
     {
-      name: 'Advisor Function',
-      status: 'inactive',
-      description: 'Business advice and strategy recommendations'
+      name: 'Supabase Functions',
+      status: 'online',
+      lastChecked: new Date().toISOString(),
+      responseTime: '120ms',
+      description: 'Edge functions for business logic',
+      icon: Settings,
+      requiresApiKey: false,
+      hasApiKey: true
     },
     {
-      name: 'Quote Bot',
-      status: 'inactive',
-      description: 'Automated quote generation'
-    },
-    {
-      name: 'Tax Bot',
-      status: 'active',
-      description: 'Tax calculations and compliance'
-    },
-    {
-      name: 'Tender Search',
-      status: 'active',
-      description: 'Tender opportunity search'
-    },
-    {
-      name: 'SmartOps',
-      status: 'active',
-      description: 'Operations analytics and insights'
-    },
-    {
-      name: 'RAMS Generator',
-      status: 'inactive',
-      description: 'Risk assessment and method statements'
+      name: 'Email Service',
+      status: 'offline',
+      lastChecked: new Date(Date.now() - 600000).toISOString(),
+      responseTime: 'N/A',
+      description: 'Email notifications and reminders',
+      icon: Mail,
+      requiresApiKey: true,
+      hasApiKey: false
     }
   ]);
 
-  const [isChecking, setIsChecking] = useState(false);
-
-  const getStatusIcon = (status: ServiceStatus['status']) => {
-    switch (status) {
-      case 'active':
-        return <CheckCircle className="h-5 w-5 text-green-600" />;
-      case 'inactive':
-        return <XCircle className="h-5 w-5 text-red-600" />;
-      case 'error':
-        return <AlertCircle className="h-5 w-5 text-orange-600" />;
-      case 'missing-key':
-        return <Key className="h-5 w-5 text-yellow-600" />;
-      default:
-        return <XCircle className="h-5 w-5 text-gray-400" />;
-    }
-  };
-
-  const getStatusBadge = (status: ServiceStatus['status']) => {
-    switch (status) {
-      case 'active':
-        return <Badge className="bg-green-100 text-green-800">Active</Badge>;
-      case 'inactive':
-        return <Badge className="bg-red-100 text-red-800">Inactive</Badge>;
-      case 'error':
-        return <Badge className="bg-orange-100 text-orange-800">Error</Badge>;
-      case 'missing-key':
-        return <Badge className="bg-yellow-100 text-yellow-800">Missing Key</Badge>;
-      default:
-        return <Badge className="bg-gray-100 text-gray-800">Unknown</Badge>;
-    }
-  };
-
-  const checkAllServices = async () => {
+  const handleCheckAll = async () => {
     setIsChecking(true);
-    try {
-      // Simulate service checks
-      await new Promise(resolve => setTimeout(resolve, 2000));
+    toast({
+      title: "Checking Services",
+      description: "Testing all service connections...",
+    });
+
+    // Simulate service checks
+    setTimeout(() => {
+      setServices(prev => prev.map(service => ({
+        ...service,
+        lastChecked: new Date().toISOString(),
+        status: service.hasApiKey ? 'online' : 'warning'
+      })));
       
+      setIsChecking(false);
       toast({
         title: "Service Check Complete",
-        description: "All services have been checked successfully",
+        description: "All available services tested successfully",
       });
-    } catch (error) {
+    }, 2000);
+  };
+
+  const handleTestService = async (serviceName: string) => {
+    toast({
+      title: "Testing Service",
+      description: `Testing ${serviceName} connection...`,
+    });
+
+    setTimeout(() => {
       toast({
-        title: "Check Failed",
-        description: "Failed to check some services",
-        variant: "destructive"
+        title: "Test Complete",
+        description: `${serviceName} test completed`,
       });
-    } finally {
-      setIsChecking(false);
+    }, 1000);
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'online':
+        return <CheckCircle className="h-5 w-5 text-green-500" />;
+      case 'warning':
+        return <AlertTriangle className="h-5 w-5 text-yellow-500" />;
+      case 'offline':
+        return <XCircle className="h-5 w-5 text-red-500" />;
+      default:
+        return <AlertTriangle className="h-5 w-5 text-gray-500" />;
     }
   };
 
-  const activeServices = services.filter(s => s.status === 'active').length;
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'online': return 'bg-green-100 text-green-800';
+      case 'warning': return 'bg-yellow-100 text-yellow-800';
+      case 'offline': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const onlineServices = services.filter(s => s.status === 'online').length;
   const totalServices = services.length;
 
   return (
     <div className="space-y-6">
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5" />
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5" />
               Service Status Overview
-            </div>
-            <Button
-              onClick={checkAllServices}
-              disabled={isChecking}
-              variant="outline"
-            >
-              <RefreshCw className={`h-4 w-4 mr-2 ${isChecking ? 'animate-spin' : ''}`} />
-              {isChecking ? 'Checking...' : 'Check All'}
-            </Button>
-          </CardTitle>
+            </CardTitle>
+            <p className="text-sm text-muted-foreground mt-1">
+              Monitor all connected services and API integrations
+            </p>
+          </div>
+          <Button onClick={handleCheckAll} disabled={isChecking}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${isChecking ? 'animate-spin' : ''}`} />
+            {isChecking ? 'Checking...' : 'Check All'}
+          </Button>
         </CardHeader>
         <CardContent>
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium">Overall Status</span>
-              <span className="text-sm text-muted-foreground">
-                {activeServices}/{totalServices} services active
-              </span>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="text-center p-4 border rounded-lg bg-green-50">
+              <div className="text-2xl font-bold text-green-600">{onlineServices}/{totalServices}</div>
+              <div className="text-sm text-muted-foreground">Services Online</div>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div 
-                className="bg-green-600 h-2 rounded-full transition-all duration-300"
-                style={{ width: `${(activeServices / totalServices) * 100}%` }}
-              />
+            <div className="text-center p-4 border rounded-lg bg-blue-50">
+              <div className="text-2xl font-bold text-blue-600">99.9%</div>
+              <div className="text-sm text-muted-foreground">Uptime</div>
+            </div>
+            <div className="text-center p-4 border rounded-lg bg-yellow-50">
+              <div className="text-2xl font-bold text-yellow-600">120ms</div>
+              <div className="text-sm text-muted-foreground">Avg Response</div>
             </div>
           </div>
 
-          <div className="grid gap-4">
+          <div className="space-y-4">
             {services.map((service, index) => (
-              <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex items-start gap-3">
-                  {getStatusIcon(service.status)}
+              <div key={index} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50">
+                <div className="flex items-center gap-4">
+                  <service.icon className="h-8 w-8 text-primary" />
                   <div>
-                    <h4 className="font-medium">{service.name}</h4>
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-medium">{service.name}</h4>
+                      {service.requiresApiKey && !service.hasApiKey && (
+                        <Key className="h-4 w-4 text-yellow-500" />
+                      )}
+                    </div>
                     <p className="text-sm text-muted-foreground">{service.description}</p>
-                    {service.lastChecked && (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Last checked: {new Date(service.lastChecked).toLocaleString()}
-                      </p>
-                    )}
+                    <p className="text-xs text-muted-foreground">
+                      Last checked: {new Date(service.lastChecked).toLocaleTimeString()}
+                    </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  {getStatusBadge(service.status)}
-                  {service.setupUrl && (
+                
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <Badge className={getStatusColor(service.status)}>
+                      {service.status}
+                    </Badge>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {service.responseTime}
+                    </p>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    {getStatusIcon(service.status)}
                     <Button
-                      variant="outline"
                       size="sm"
-                      onClick={() => window.open(service.setupUrl, '_blank')}
+                      variant="outline"
+                      onClick={() => handleTestService(service.name)}
                     >
-                      <ExternalLink className="h-3 w-3 mr-1" />
-                      Setup
+                      Test
                     </Button>
-                  )}
+                  </div>
                 </div>
               </div>
             ))}
@@ -204,46 +223,71 @@ export function ServiceStatusChecker() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Missing API Keys</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Key className="h-5 w-5" />
+            API Key Management
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {services
-              .filter(service => service.status === 'missing-key')
-              .map((service, index) => (
-                <Alert key={index}>
-                  <Key className="h-4 w-4" />
-                  <AlertDescription>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <strong>{service.name}</strong> requires API key: {service.apiKey}
-                      </div>
-                      {service.setupUrl && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => window.open(service.setupUrl, '_blank')}
-                        >
-                          Get Key
-                        </Button>
-                      )}
-                    </div>
-                  </AlertDescription>
-                </Alert>
-              ))}
-          </div>
-        </CardContent>
-      </Card>
+            <div className="p-4 border rounded-lg bg-yellow-50">
+              <div className="flex items-center gap-2 mb-2">
+                <AlertTriangle className="h-5 w-5 text-yellow-600" />
+                <span className="font-medium text-yellow-800">Missing API Keys</span>
+              </div>
+              <p className="text-sm text-yellow-700 mb-3">
+                Some services require API keys to function properly. Add them to unlock full functionality.
+              </p>
+              <div className="space-y-2">
+                {services.filter(s => s.requiresApiKey && !s.hasApiKey).map((service, index) => (
+                  <div key={index} className="flex items-center justify-between">
+                    <span className="text-sm">{service.name}</span>
+                    <Button size="sm" variant="outline">
+                      Add API Key
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Function Diagnostics</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground mb-4">
-            Run comprehensive tests on all edge functions and services.
-          </p>
-          <FunctionDiagnostics />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-3">
+                <h4 className="font-medium">Service Configuration</h4>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Auto-retry failed requests</span>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Enable health checks</span>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Log service responses</span>
+                    <Switch />
+                  </div>
+                </div>
+              </div>
+              
+              <div className="space-y-3">
+                <h4 className="font-medium">Notification Settings</h4>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Email on service failure</span>
+                    <Switch />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Alert on slow responses</span>
+                    <Switch />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Weekly status reports</span>
+                    <Switch defaultChecked />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>

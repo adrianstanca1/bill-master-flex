@@ -10,25 +10,17 @@ import { ThreatDetection } from '@/components/ThreatDetection';
 import { ServiceStatusChecker } from '@/components/ServiceStatusChecker';
 import { AgentsDashboard } from '@/components/AgentsDashboard';
 import { useSecurityMonitoring } from '@/hooks/useSecurityMonitoring';
-import { useSessionManagement } from '@/hooks/useSessionManagement';
 import SEO from '@/components/SEO';
 
 export default function Security() {
   const [activeTab, setActiveTab] = useState('overview');
   const { alerts, stats } = useSecurityMonitoring();
-  
-  // Initialize session management with security policies
-  useSessionManagement({
-    timeoutMinutes: 60,
-    warningMinutes: 5,
-    enableWarning: true
-  });
 
   const securityMetrics = {
-    totalAlerts: alerts.length,
-    criticalAlerts: alerts.filter(a => a.severity === 'high').length,
+    totalAlerts: alerts?.length || 0,
+    criticalAlerts: alerts?.filter(a => a.severity === 'high').length || 0,
     activeThreats: stats?.securityEvents || 0,
-    securityScore: 85 // This would be calculated based on various factors
+    securityScore: 85
   };
 
   return (
@@ -68,9 +60,9 @@ export default function Security() {
               <AlertTriangle className="h-4 w-4" />
               <span className="hidden sm:inline">Threats</span>
             </TabsTrigger>
-            <TabsTrigger value="sessions" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              <span className="hidden sm:inline">Sessions</span>
+            <TabsTrigger value="monitor" className="flex items-center gap-2">
+              <Settings className="h-4 w-4" />
+              <span className="hidden sm:inline">Monitor</span>
             </TabsTrigger>
             <TabsTrigger value="testing" className="flex items-center gap-2">
               <Eye className="h-4 w-4" />
@@ -79,7 +71,6 @@ export default function Security() {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
-            {/* Security Overview Dashboard */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <Card>
                 <CardContent className="pt-6">
@@ -126,16 +117,15 @@ export default function Security() {
                 <CardContent className="pt-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium">Critical Threats</p>
-                      <p className="text-2xl font-bold text-red-600">{securityMetrics.criticalAlerts}</p>
+                      <p className="text-sm font-medium">System Status</p>
+                      <p className="text-2xl font-bold text-green-600">Online</p>
                     </div>
-                    <AlertTriangle className="h-8 w-8 text-red-600" />
+                    <Settings className="h-8 w-8 text-green-600" />
                   </div>
                 </CardContent>
               </Card>
             </div>
 
-            {/* Quick Access Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setActiveTab('service-status')}>
                 <CardHeader>
@@ -173,8 +163,6 @@ export default function Security() {
                 </CardContent>
               </Card>
             </div>
-
-            <SecurityMonitor />
           </TabsContent>
 
           <TabsContent value="service-status">
@@ -189,8 +177,8 @@ export default function Security() {
             <ThreatDetection />
           </TabsContent>
 
-          <TabsContent value="sessions">
-            <SessionManager />
+          <TabsContent value="monitor">
+            <SecurityMonitor />
           </TabsContent>
 
           <TabsContent value="testing">

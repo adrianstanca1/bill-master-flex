@@ -17,34 +17,76 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) {
-        console.log("User authenticated, redirecting...");
-        const onboarded = (()=>{ 
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state changed:", event, session?.user?.email);
+      
+      if (session?.user) {
+        console.log("User authenticated, checking onboarding status...");
+        
+        // Check if user has completed onboarding
+        const onboarded = (() => { 
           try { 
-            return !!(JSON.parse(localStorage.getItem("as-settings")||"{}")?.onboarded); 
+            return !!(JSON.parse(localStorage.getItem("as-settings") || "{}")?.onboarded); 
           } catch { 
             return false; 
           } 
         })();
+        
+        // Create or update user profile
+        try {
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+            
+          if (profileError && profileError.code === 'PGRST116') {
+            // Profile doesn't exist, create it
+            const { error: insertError } = await supabase
+              .from('profiles')
+              .insert({
+                id: session.user.id,
+                first_name: session.user.user_metadata?.first_name || '',
+                last_name: session.user.user_metadata?.last_name || ''
+              });
+              
+            if (insertError) {
+              console.error('Error creating profile:', insertError);
+            } else {
+              console.log('User profile created successfully');
+            }
+          }
+        } catch (error) {
+          console.error('Error handling user profile:', error);
+        }
+        
         navigate(onboarded ? redirectTo : "/setup", { replace: true });
       }
     });
 
     // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
+    const checkSession = async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error) {
+        console.error('Session check error:', error);
+        return;
+      }
+      
+      if (session?.user) {
         console.log("Existing session found, redirecting...");
-        const onboarded = (()=>{ 
+        const onboarded = (() => { 
           try { 
-            return !!(JSON.parse(localStorage.getItem("as-settings")||"{}")?.onboarded); 
+            return !!(JSON.parse(localStorage.getItem("as-settings") || "{}")?.onboarded); 
           } catch { 
             return false; 
           } 
         })();
         navigate(onboarded ? redirectTo : "/setup", { replace: true });
       }
-    });
+    };
+
+    checkSession();
 
     return () => subscription.unsubscribe();
   }, [navigate, redirectTo]);
@@ -69,7 +111,9 @@ export default function Auth() {
           options: { 
             emailRedirectTo: `${window.location.origin}/`,
             data: {
-              email: email.trim()
+              email: email.trim(),
+              first_name: '',
+              last_name: ''
             }
           },
         });
