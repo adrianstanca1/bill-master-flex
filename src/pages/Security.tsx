@@ -4,27 +4,27 @@ import SEO from "@/components/SEO";
 import { ResponsiveLayout } from "@/components/ResponsiveLayout";
 import { TopNavigation } from "@/components/TopNavigation";
 import { EnhancedSystemMonitor } from "@/components/EnhancedSystemMonitor";
+import { FloatingElements } from "@/components/EnhancedVisualEffects";
 
 const Security: React.FC = () => {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="page-enter">
       <TopNavigation />
-      <ResponsiveLayout>
-        <SEO 
-          title="System Monitor | UK Construction" 
-          description="Monitor system health and manage API integrations" 
-        />
-        <div className="space-y-6">
-          <div>
-            <h1 className="text-3xl font-bold">System Monitor</h1>
-            <p className="text-muted-foreground mt-2">
-              Monitor system health and manage API integrations
-            </p>
+      <FloatingElements>
+        <ResponsiveLayout>
+          <SEO 
+            title="System Monitor | UK Construction" 
+            description="Monitor system health and manage API integrations" 
+          />
+          <div className="dashboard-header animate-slide-in-right">
+            <h1 className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent animate-shimmer-text">System Monitor</h1>
+            <p className="text-text-muted animate-fade-in">Monitor system health and manage API integrations</p>
           </div>
-          
-          <EnhancedSystemMonitor />
-        </div>
-      </ResponsiveLayout>
+          <div className="space-y-6">
+            <EnhancedSystemMonitor />
+          </div>
+        </ResponsiveLayout>
+      </FloatingElements>
     </div>
   );
 };

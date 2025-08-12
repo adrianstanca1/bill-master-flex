@@ -37,6 +37,9 @@ const Index = () => {
           <Button variant="outline" asChild>
             <Link to="/invoices">Open Invoice Generator</Link>
           </Button>
+          <Button variant="ghost" asChild>
+            <Link to="/auth">Sign in</Link>
+          </Button>
         </nav>
       </header>
 

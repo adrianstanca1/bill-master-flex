@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import SEO from "@/components/SEO";
+import { applyUserTheme, loadTheme, saveTheme, type ThemePreset } from "@/lib/theme";
 
 const LS = "as-settings";
 
@@ -32,6 +33,8 @@ const defaults: SettingsData = {
 export default function Settings() {
   const [data, setData] = useState<SettingsData>(defaults);
   const [saved, setSaved] = useState(false);
+  const [preset, setPreset] = useState<ThemePreset>(loadTheme().preset);
+  const [radius, setRadius] = useState<number>(loadTheme().radius);
 
   useEffect(() => {
     try {
@@ -39,6 +42,11 @@ export default function Settings() {
       if (raw) setData({ ...defaults, ...(JSON.parse(raw) as SettingsData) });
     } catch {}
   }, []);
+
+  useEffect(() => {
+    applyUserTheme({ preset, radius });
+    saveTheme({ preset, radius });
+  }, [preset, radius]);
 
   function save() {
     localStorage.setItem(LS, JSON.stringify(data));
@@ -130,15 +138,40 @@ export default function Settings() {
 
       <Card>
         <CardHeader>
-          <CardTitle>How these are used</CardTitle>
+          <CardTitle>Appearance</CardTitle>
         </CardHeader>
         <CardContent>
-          <ul className="text-sm text-muted-foreground list-disc pl-5 space-y-1">
-            <li>Company ID is used for SmartOps scans (temporary until onboarding).</li>
-            <li>Country/Industry pre-fill Tender search filters.</li>
-            <li>Target margin sets default for Quote generator.</li>
-            <li>VAT scheme, Reverse charge and CIS pre-fill Tax advice.</li>
-          </ul>
+          <div className="grid md:grid-cols-3 gap-4 items-end">
+            <div>
+              <label className="text-sm block mb-2">Accent preset</label>
+              <Select value={preset} onValueChange={(v) => setPreset(v as ThemePreset)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select accent" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="emerald">Emerald</SelectItem>
+                  <SelectItem value="blue">Blue</SelectItem>
+                  <SelectItem value="violet">Violet</SelectItem>
+                  <SelectItem value="orange">Orange</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-sm block mb-2">Corner radius ({radius}px)</label>
+              <input
+                type="range"
+                min={8}
+                max={20}
+                value={radius}
+                onChange={(e) => setRadius(Number(e.target.value))}
+                className="w-full"
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button type="button" onClick={() => { setPreset('emerald'); setRadius(12); }}>Reset</Button>
+              {saved && <span className="text-muted-foreground self-center">Saved ✓</span>}
+            </div>
+          </div>
         </CardContent>
       </Card>
     </ResponsiveLayout>

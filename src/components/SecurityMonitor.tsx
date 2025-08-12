@@ -152,29 +152,7 @@ export function SecurityMonitor() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Settings className="h-5 w-5" />
-              Security Policies
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {policyStatus.map((policy, index) => (
-                <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <CheckCircle className={`h-5 w-5 ${policy.compliant ? 'text-green-500' : 'text-red-500'}`} />
-                    <span className="font-medium">{policy.name}</span>
-                  </div>
-                  <Badge className={policy.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
-                    {policy.status}
-                  </Badge>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+{/* Security Policies UI intentionally hidden for end users */}
       </div>
 
       <Card>

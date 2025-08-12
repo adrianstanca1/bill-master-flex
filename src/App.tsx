@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/sonner';
@@ -24,6 +24,7 @@ import ToolSetup from '@/pages/ToolSetup';
 import AccountSettings from '@/pages/AccountSettings';
 import Settings from '@/pages/Settings';
 import NotFound from '@/pages/NotFound';
+import { applyUserTheme } from '@/lib/theme';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -59,6 +60,7 @@ function ConditionalSecurityMonitor() {
 
 
 function App() {
+  useEffect(() => { applyUserTheme(); }, []);
   return (
     <QueryClientProvider client={queryClient}>
       <ErrorBoundary>
