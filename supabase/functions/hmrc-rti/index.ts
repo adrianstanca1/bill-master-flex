@@ -13,9 +13,20 @@ serve(async (req) => {
   try {
     const body = await req.json().catch(() => ({}));
     console.log('hmrc-rti invoked', body);
-    return new Response(JSON.stringify({ status: 'not_implemented', message: 'HMRC RTI stub' }), {
+    const action = body?.action || 'info';
+
+    if (action === 'fps') {
+      const submissionId = `RTI-${Date.now()}`;
+      const employeesCount = Array.isArray(body?.employees) ? body.employees.length : 0;
+      return new Response(JSON.stringify({ status: 'ok', message: 'Mock RTI FPS submitted', submissionId, employeesCount }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      });
+    }
+
+    return new Response(JSON.stringify({ status: 'ok', message: 'HMRC RTI mock ready' }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 501,
+      status: 200,
     });
   } catch (e) {
     return new Response(JSON.stringify({ error: String(e) }), {

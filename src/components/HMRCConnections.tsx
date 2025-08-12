@@ -11,10 +11,20 @@ export const HMRCConnections: React.FC = () => {
   const call = async (fn: string, payload: any = {}) => {
     try {
       setBusy(fn);
-      const { data, error } = await supabase.functions.invoke(fn as any, { body: payload });
+      const settings = (() => { try { return JSON.parse(localStorage.getItem('as-settings')||'{}'); } catch { return {}; } })();
+      const details = {
+        hmrcClientId: settings?.hmrcClientId,
+        hmrcRedirectUri: settings?.hmrcRedirectUri,
+        vatNumber: settings?.hmrcVatNumber,
+        utr: settings?.hmrcUtr,
+        companyId: settings?.companyId,
+      };
+      const { data, error } = await supabase.functions.invoke(fn as any, { body: { ...payload, mock: true, details } });
       if (error) throw new Error(error.message);
       const msg = (data as any)?.message || 'Request sent';
-      toast({ title: `HMRC: ${fn}`, description: msg });
+      const url = (data as any)?.url;
+      const desc = url ? `${msg} — ${url}` : msg;
+      toast({ title: `HMRC: ${fn}`, description: desc });
     } catch (e: any) {
       toast({ title: `HMRC: ${fn}`, description: e.message || 'Function error', variant: 'destructive' });
     } finally {
@@ -42,7 +52,7 @@ export const HMRCConnections: React.FC = () => {
             Submit RTI (FPS)
           </Button>
         </div>
-        <p className="text-xs text-muted-foreground">Sandbox stubs are in place—responses may show “not implemented” until credentials are configured.</p>
+        <p className="text-xs text-muted-foreground">Mock API is active — configure your HMRC IDs in Settings.</p>
       </CardContent>
     </Card>
   );

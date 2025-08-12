@@ -13,9 +13,21 @@ serve(async (req) => {
   try {
     const body = await req.json().catch(() => ({}));
     console.log('hmrc-vat invoked', body);
-    return new Response(JSON.stringify({ status: 'not_implemented', message: 'HMRC VAT stub' }), {
+    const action = body?.action || 'info';
+
+    if (action === 'submit_vat') {
+      const receiptId = `VAT-${Date.now()}`;
+      const periodKey = body?.periodKey || '24A1';
+      const values = body?.values || { vatDueSales: 0, vatDueAcquisitions: 0 };
+      return new Response(JSON.stringify({ status: 'ok', message: 'Mock VAT submitted', receiptId, periodKey, values }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      });
+    }
+
+    return new Response(JSON.stringify({ status: 'ok', message: 'HMRC VAT mock ready' }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 501,
+      status: 200,
     });
   } catch (e) {
     return new Response(JSON.stringify({ error: String(e) }), {

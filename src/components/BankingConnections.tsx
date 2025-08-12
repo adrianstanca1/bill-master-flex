@@ -11,9 +11,16 @@ export const BankingConnections: React.FC = () => {
   const connect = async () => {
     try {
       setBusy(true);
-      const { data, error } = await supabase.functions.invoke('banking-truelayer', { body: { action: 'consent' } });
+      const settings = (() => { try { return JSON.parse(localStorage.getItem('as-settings')||'{}'); } catch { return {}; } })();
+      const details = {
+        truelayerClientId: settings?.truelayerClientId,
+        truelayerRedirectUri: settings?.truelayerRedirectUri,
+      };
+      const { data, error } = await supabase.functions.invoke('banking-truelayer', { body: { action: 'consent', mock: true, details } });
       if (error) throw new Error(error.message);
-      toast({ title: 'Banking', description: (data as any)?.message || 'Consent started' });
+      const url = (data as any)?.url;
+      const desc = url ? `Consent URL ready: ${url}` : ((data as any)?.message || 'Consent started');
+      toast({ title: 'Banking', description: desc });
     } catch (e: any) {
       toast({ title: 'Banking', description: e.message || 'Function error', variant: 'destructive' });
     } finally {

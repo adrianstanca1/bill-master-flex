@@ -25,6 +25,13 @@ type AccountData = {
   // API Keys
   openaiApiKey?: string;
   firecrawlApiKey?: string;
+  // Mock integrations
+  hmrcClientId?: string;
+  hmrcRedirectUri?: string;
+  hmrcVatNumber?: string;
+  hmrcUtr?: string;
+  truelayerClientId?: string;
+  truelayerRedirectUri?: string;
 };
 
 const defaults: AccountData = {
@@ -36,6 +43,12 @@ const defaults: AccountData = {
   vatScheme: "standard",
   reverseCharge: true,
   cis: true,
+  hmrcClientId: "",
+  hmrcRedirectUri: "",
+  hmrcVatNumber: "",
+  hmrcUtr: "",
+  truelayerClientId: "",
+  truelayerRedirectUri: "",
 };
 
 export default function AccountSettings() {
@@ -249,6 +262,50 @@ export default function AccountSettings() {
             You only need to enter them once.
           </p>
         </div>
+      </section>
+
+      {/* HMRC & Banking (Mock) */}
+      <section className="card">
+        <h2 className="text-lg font-semibold mb-3">HMRC & Banking (Mock)</h2>
+        <div className="grid md:grid-cols-2 gap-3">
+          <input 
+            className="input" 
+            placeholder="HMRC Client ID" 
+            value={data.hmrcClientId || ""} 
+            onChange={(e) => setData({ ...data, hmrcClientId: e.target.value })} 
+          />
+          <input 
+            className="input" 
+            placeholder="HMRC Redirect URI" 
+            value={data.hmrcRedirectUri || ""} 
+            onChange={(e) => setData({ ...data, hmrcRedirectUri: e.target.value })} 
+          />
+          <input 
+            className="input" 
+            placeholder="VAT Number" 
+            value={data.hmrcVatNumber || ""} 
+            onChange={(e) => setData({ ...data, hmrcVatNumber: e.target.value })} 
+          />
+          <input 
+            className="input" 
+            placeholder="UTR" 
+            value={data.hmrcUtr || ""} 
+            onChange={(e) => setData({ ...data, hmrcUtr: e.target.value })} 
+          />
+          <input 
+            className="input" 
+            placeholder="TrueLayer Client ID" 
+            value={data.truelayerClientId || ""} 
+            onChange={(e) => setData({ ...data, truelayerClientId: e.target.value })} 
+          />
+          <input 
+            className="input" 
+            placeholder="TrueLayer Redirect URI" 
+            value={data.truelayerRedirectUri || ""} 
+            onChange={(e) => setData({ ...data, truelayerRedirectUri: e.target.value })} 
+          />
+        </div>
+        <p className="text-xs text-text-secondary mt-2">These are used only for mock flows to generate URLs and payloads.</p>
       </section>
 
       {/* Company Information */}

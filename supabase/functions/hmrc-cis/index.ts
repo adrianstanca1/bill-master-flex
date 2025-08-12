@@ -13,9 +13,20 @@ serve(async (req) => {
   try {
     const body = await req.json().catch(() => ({}));
     console.log('hmrc-cis invoked', body);
-    return new Response(JSON.stringify({ status: 'not_implemented', message: 'HMRC CIS stub' }), {
+    const action = body?.action || 'info';
+    const details = body?.details || {};
+
+    if (action === 'verify') {
+      const ref = `CIS-${Date.now()}`;
+      return new Response(JSON.stringify({ status: 'verified', message: 'Mock CIS verified', ref, details }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      });
+    }
+
+    return new Response(JSON.stringify({ status: 'ok', message: 'HMRC CIS mock ready' }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 501,
+      status: 200,
     });
   } catch (e) {
     return new Response(JSON.stringify({ error: String(e) }), {
