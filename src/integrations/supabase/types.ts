@@ -14,6 +14,84 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_interactions: {
+        Row: {
+          agent_id: string
+          company_id: string
+          created_at: string
+          duration_ms: number | null
+          id: string
+          input_data: Json | null
+          interaction_type: string
+          output_data: Json | null
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          agent_id: string
+          company_id: string
+          created_at?: string
+          duration_ms?: number | null
+          id?: string
+          input_data?: Json | null
+          interaction_type: string
+          output_data?: Json | null
+          status?: string
+          user_id?: string | null
+        }
+        Update: {
+          agent_id?: string
+          company_id?: string
+          created_at?: string
+          duration_ms?: number | null
+          id?: string
+          input_data?: Json | null
+          interaction_type?: string
+          output_data?: Json | null
+          status?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      api_integrations: {
+        Row: {
+          api_key_name: string
+          company_id: string
+          created_at: string
+          error_message: string | null
+          id: string
+          last_checked: string | null
+          response_time: number | null
+          service_name: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          api_key_name: string
+          company_id: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          last_checked?: string | null
+          response_time?: number | null
+          service_name: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          api_key_name?: string
+          company_id?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          last_checked?: string | null
+          response_time?: number | null
+          service_name?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       asset_tracking: {
         Row: {
           asset_name: string
@@ -853,6 +931,36 @@ export type Database = {
           tags?: Json | null
           taken_by?: string | null
           url?: string
+        }
+        Relationships: []
+      }
+      system_health_checks: {
+        Row: {
+          check_type: string
+          checked_at: string | null
+          company_id: string
+          created_at: string
+          details: Json | null
+          id: string
+          status: string
+        }
+        Insert: {
+          check_type: string
+          checked_at?: string | null
+          company_id: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          status?: string
+        }
+        Update: {
+          check_type?: string
+          checked_at?: string | null
+          company_id?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          status?: string
         }
         Relationships: []
       }

@@ -1,7 +1,7 @@
-
 import React, { useEffect, useMemo, useState } from "react";
 import SEO from "@/components/SEO";
 import { ResponsiveLayout } from "@/components/ResponsiveLayout";
+import { TopNavigation } from "@/components/TopNavigation";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -61,53 +61,63 @@ const Variations: React.FC = () => {
   }), []);
 
   return (
-    <ResponsiveLayout>
-      <SEO title="Variations & Change Orders | UK Construction" description="Create and manage variations/change orders." jsonLd={jsonLd} />
-      <h1 className="sr-only">Variations & Change Orders</h1>
-      <Card>
-        <CardHeader>
-          <CardTitle>New Variation</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="grid gap-2 md:grid-cols-3">
-            <Select value={form.projectId} onValueChange={(v) => setForm((s) => ({ ...s, projectId: v }))}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select project" />
-              </SelectTrigger>
-              <SelectContent>
-                {projects.map((p) => (
-                  <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Input placeholder="Title" value={form.title} onChange={(e) => setForm((s) => ({ ...s, title: e.target.value }))} />
-            <Input placeholder="Total (£)" type="number" inputMode="decimal" value={form.total} onChange={(e) => setForm((s) => ({ ...s, total: e.target.value }))} />
+    <div className="min-h-screen bg-gray-50">
+      <TopNavigation />
+      <ResponsiveLayout>
+        <SEO title="Variations & Change Orders | UK Construction" description="Create and manage variations/change orders." jsonLd={jsonLd} />
+        <div className="space-y-6">
+          <div>
+            <h1 className="text-3xl font-bold">Variations & Change Orders</h1>
+            <p className="text-muted-foreground mt-2">
+              Create and manage project variations and change orders
+            </p>
           </div>
-          <Button onClick={add}>Add Variation</Button>
-        </CardContent>
-      </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>New Variation</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid gap-2 md:grid-cols-3">
+                <Select value={form.projectId} onValueChange={(v) => setForm((s) => ({ ...s, projectId: v }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select project" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {projects.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Input placeholder="Title" value={form.title} onChange={(e) => setForm((s) => ({ ...s, title: e.target.value }))} />
+                <Input placeholder="Total (£)" type="number" inputMode="decimal" value={form.total} onChange={(e) => setForm((s) => ({ ...s, total: e.target.value }))} />
+              </div>
+              <Button onClick={add}>Add Variation</Button>
+            </CardContent>
+          </Card>
 
-      <div className="mt-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>All Variations</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-2">
-              {variations.map((v) => (
-                <li key={v.id} className="flex items-center justify-between border rounded-md p-3">
-                  <div>
-                    <div className="font-medium">{v.title}</div>
-                    <div className="text-sm text-muted-foreground">£{(v.total ?? 0).toFixed(2)} • {new Date(v.created_at).toLocaleDateString()} • {v.status}</div>
-                  </div>
-                </li>
-              ))}
-              {variations.length === 0 && <div className="text-sm text-muted-foreground">No variations yet.</div>}
-            </ul>
-          </CardContent>
-        </Card>
-      </div>
-    </ResponsiveLayout>
+          <div className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>All Variations</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2">
+                  {variations.map((v) => (
+                    <li key={v.id} className="flex items-center justify-between border rounded-md p-3">
+                      <div>
+                        <div className="font-medium">{v.title}</div>
+                        <div className="text-sm text-muted-foreground">£{(v.total ?? 0).toFixed(2)} • {new Date(v.created_at).toLocaleDateString()} • {v.status}</div>
+                      </div>
+                    </li>
+                  ))}
+                  {variations.length === 0 && <div className="text-sm text-muted-foreground">No variations yet.</div>}
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </ResponsiveLayout>
+    </div>
   );
 };
 

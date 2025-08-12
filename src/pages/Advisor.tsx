@@ -1,25 +1,43 @@
 
 import React from "react";
-import { AdvisorAgent } from "@/components/AdvisorAgent";
-import { ResponsiveLayout } from "@/components/ResponsiveLayout";
 import SEO from "@/components/SEO";
+import { ResponsiveLayout } from "@/components/ResponsiveLayout";
+import { TopNavigation } from "@/components/TopNavigation";
+import { AgentDashboard } from "@/components/AgentDashboard";
+import { AdvisorAgent } from "@/components/AdvisorAgent";
 
 const Advisor: React.FC = () => {
-
   return (
-    <ResponsiveLayout>
-      <SEO title="Business Advisor – Civix" description="AI advisor that audits, advises, and improves your operations." />
-      <header className="mb-6">
-        <h1 className="text-2xl font-semibold">Business Advisor & Supervisor</h1>
-        <p className="text-muted-foreground mt-1">Proactive insights across finance, tenders, scheduling, and compliance.</p>
-      </header>
-      <main>
-        <section aria-labelledby="advisor-section" className="grid gap-4">
-          <h2 id="advisor-section" className="sr-only">Advisor Chat</h2>
-          <AdvisorAgent />
-        </section>
-      </main>
-    </ResponsiveLayout>
+    <div className="min-h-screen bg-gray-50">
+      <TopNavigation />
+      <ResponsiveLayout>
+        <SEO 
+          title="AI Business Advisor | UK Construction" 
+          description="Get intelligent business advice and insights from our AI advisor" 
+        />
+        <div className="space-y-6">
+          <div>
+            <h1 className="text-3xl font-bold">AI Business Advisor</h1>
+            <p className="text-muted-foreground mt-2">
+              Get intelligent insights and recommendations for your construction business
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div>
+              <AgentDashboard 
+                agentId="advisor"
+                agentName="Business Advisor"
+                agentDescription="Provides strategic business insights and recommendations"
+              />
+            </div>
+            <div>
+              <AdvisorAgent />
+            </div>
+          </div>
+        </div>
+      </ResponsiveLayout>
+    </div>
   );
 };
 
