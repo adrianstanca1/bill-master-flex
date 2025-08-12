@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import SEO from "@/components/SEO";
 import { applyUserTheme, loadTheme, saveTheme, type ThemePreset } from "@/lib/theme";
-import { TopNavigation } from "@/components/TopNavigation";
+
 
 const LS = "as-settings";
 
@@ -57,7 +57,7 @@ export default function Settings() {
 
   return (
     <>
-      <TopNavigation />
+      
       <ResponsiveLayout>
       <SEO title="Settings | UK Construction" description="Manage company, VAT/CIS, and defaults for quotes and tax." noindex />
       <header className="pt-6">

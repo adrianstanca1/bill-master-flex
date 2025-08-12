@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import SEO from '@/components/SEO';
-import { TopNavigation } from '@/components/TopNavigation';
+
 import { ResponsiveLayout } from '@/components/ResponsiveLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RemindersWidget } from '@/components/RemindersWidget';
@@ -25,7 +25,7 @@ const SiteManager: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <TopNavigation />
+      
       <ResponsiveLayout>
         <SEO title="Site Manager Dashboard" description="Operational view for site managers: tasks, projects, reminders, and actions." />
         <header className="mb-6">

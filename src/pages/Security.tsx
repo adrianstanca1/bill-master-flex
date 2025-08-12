@@ -2,13 +2,13 @@
 import React from "react";
 import SEO from "@/components/SEO";
 import { ResponsiveLayout } from "@/components/ResponsiveLayout";
-import { TopNavigation } from "@/components/TopNavigation";
+
 import { EnhancedSystemMonitor } from "@/components/EnhancedSystemMonitor";
 
 const Security: React.FC = () => {
   return (
     <div className="min-h-screen bg-background">
-      <TopNavigation />
+      
       <ResponsiveLayout>
         <SEO 
           title="System Monitor | UK Construction" 

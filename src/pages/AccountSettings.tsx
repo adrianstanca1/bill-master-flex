@@ -4,7 +4,7 @@ import { Key, User, Building, Save, Eye, EyeOff, ExternalLink } from "lucide-rea
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import SEO from "@/components/SEO";
-import { TopNavigation } from "@/components/TopNavigation";
+
 
 const LS = "as-settings";
 
@@ -158,7 +158,7 @@ export default function AccountSettings() {
 
   return (
     <>
-      <TopNavigation />
+      
       <main className="container mx-auto grid gap-6 animate-fade-in">
       <SEO title="Account Settings | API Keys & Company Info" description="Manage your API keys and company information." noindex />
       

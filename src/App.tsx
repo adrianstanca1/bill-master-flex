@@ -4,11 +4,9 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/sonner';
 import { SidebarProvider } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/AppSidebar';
 import { RequireAuth } from '@/components/RequireAuth';
 import { SecurityMonitor } from '@/components/SecurityMonitor';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { useIsMobile } from '@/hooks/use-mobile';
 import Index from '@/pages/Index';
 import Auth from '@/pages/Auth';
 import Dashboard from '@/pages/Dashboard';
@@ -26,6 +24,7 @@ import Settings from '@/pages/Settings';
 import NotFound from '@/pages/NotFound';
 import { applyUserTheme } from '@/lib/theme';
 import SiteManager from '@/pages/SiteManager';
+import { TopNavigation } from '@/components/TopNavigation';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -38,12 +37,10 @@ const queryClient = new QueryClient({
 });
 
 function AppLayout({ children }: { children: React.ReactNode }) {
-  const isMobile = useIsMobile();
-  
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-background">
-        {!isMobile && <AppSidebar />}
+      <div className="min-h-screen w-full bg-background flex flex-col">
+        <TopNavigation />
         <div className="flex-1 overflow-hidden">
           {children}
         </div>
@@ -69,8 +66,8 @@ function App() {
           <ConditionalSecurityMonitor />
           <div className="min-h-screen bg-background">
             <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/auth" element={<Auth />} />
+              <Route path="/" element={<AppLayout><Index /></AppLayout>} />
+              <Route path="/auth" element={<AppLayout><Auth /></AppLayout>} />
               <Route path="/dashboard" element={<RequireAuth><AppLayout><Dashboard /></AppLayout></RequireAuth>} />
               <Route path="/site-manager" element={<RequireAuth><AppLayout><SiteManager /></AppLayout></RequireAuth>} />
               <Route path="/business-manager" element={<RequireAuth><AppLayout><BusinessManager /></AppLayout></RequireAuth>} />
@@ -84,7 +81,7 @@ function App() {
               <Route path="/tool-setup" element={<RequireAuth><AppLayout><ToolSetup /></AppLayout></RequireAuth>} />
               <Route path="/account-settings" element={<RequireAuth><AppLayout><AccountSettings /></AppLayout></RequireAuth>} />
               <Route path="/settings" element={<RequireAuth><AppLayout><Settings /></AppLayout></RequireAuth>} />
-              <Route path="*" element={<NotFound />} />
+              <Route path="*" element={<AppLayout><NotFound /></AppLayout>} />
             </Routes>
           </div>
           <Toaster />

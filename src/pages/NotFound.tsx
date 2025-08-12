@@ -1,7 +1,7 @@
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import SEO from "@/components/SEO";
-import { TopNavigation } from "@/components/TopNavigation";
+
 
 const NotFound = () => {
   const location = useLocation();
@@ -15,7 +15,7 @@ const NotFound = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <TopNavigation />
+      
       <div className="flex items-center justify-center">
         <SEO title="404 – Page not found" description="The page you are looking for does not exist." noindex />
         <div className="text-center py-24">

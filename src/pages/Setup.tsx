@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { applyUserTheme, loadTheme, saveTheme, ThemePreset, ThemeSettings } from "@/lib/theme";
 import SEO from "@/components/SEO";
-import { TopNavigation } from "@/components/TopNavigation";
+
 
 const LS = "as-settings";
 
@@ -79,7 +79,7 @@ export default function Setup() {
 
   return (
     <main className="container mx-auto grid gap-6 animate-fade-in">
-      <TopNavigation />
+      
       <SEO title="Setup | Personalize your workspace" description="Set up company info, VAT scheme, and choose your visual style." noindex />
       <header className="pt-6">
         <h1 className="text-2xl font-bold">Welcome! Let’s personalize your workspace</h1>

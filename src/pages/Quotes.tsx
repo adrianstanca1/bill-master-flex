@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import SEO from "@/components/SEO";
 import { ResponsiveLayout } from "@/components/ResponsiveLayout";
-import { TopNavigation } from "@/components/TopNavigation";
+
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -90,7 +90,7 @@ const Quotes: React.FC = () => {
 
   return (
     <>
-      <TopNavigation />
+      
       <ResponsiveLayout>
         <SEO title="Quotes | UK Construction" description="Create quotes and convert them to invoices." jsonLd={jsonLd} />
         <h1 className="sr-only">Quotes</h1>

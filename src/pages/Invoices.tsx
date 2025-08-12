@@ -3,13 +3,13 @@ import React from 'react';
 import { InvoiceManager } from '@/components/InvoiceManager';
 import { ResponsiveLayout } from '@/components/ResponsiveLayout';
 import SEO from '@/components/SEO';
-import { TopNavigation } from '@/components/TopNavigation';
+
 import MockQuoteTester from '@/components/MockQuoteTester';
 
 export default function Invoices() {
   return (
     <div className="min-h-screen bg-background">
-      <TopNavigation />
+      
       <ResponsiveLayout>
         <SEO 
           title="Invoices" 

@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import SEO from "@/components/SEO";
-import { TopNavigation } from "@/components/TopNavigation";
+
 
 export default function Auth() {
   const { toast } = useToast();
@@ -178,7 +178,7 @@ export default function Auth() {
 
   return (
     <>
-      <TopNavigation />
+      
       <main className="container max-w-md mx-auto py-10">
       <SEO title={mode === "signin" ? "Sign in" : "Create account"} description="Secure sign in/up for your dashboard" noindex />
       
