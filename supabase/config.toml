@@ -33,3 +33,11 @@ verify_jwt = true
 [functions.quotes]
 verify_jwt = true
 
+[functions.funding-bot]
+verify_jwt = true
+
+[functions.risk-bot]
+verify_jwt = true
+
+[functions.bid-package]
+verify_jwt = true

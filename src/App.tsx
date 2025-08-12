@@ -18,6 +18,7 @@ import Quotes from '@/pages/Quotes';
 import Variations from '@/pages/Variations';
 import CRM from '@/pages/CRM';
 import Advisor from '@/pages/Advisor';
+import Agents from '@/pages/Agents';
 import Security from '@/pages/Security';
 import ToolSetup from '@/pages/ToolSetup';
 import AccountSettings from '@/pages/AccountSettings';
@@ -66,6 +67,7 @@ function App() {
               <Route path="/variations" element={<RequireAuth><AppLayout><Variations /></AppLayout></RequireAuth>} />
               <Route path="/crm" element={<RequireAuth><AppLayout><CRM /></AppLayout></RequireAuth>} />
               <Route path="/advisor" element={<RequireAuth><AppLayout><Advisor /></AppLayout></RequireAuth>} />
+              <Route path="/agents" element={<RequireAuth><AppLayout><Agents /></AppLayout></RequireAuth>} />
               <Route path="/security" element={<RequireAuth><AppLayout><Security /></AppLayout></RequireAuth>} />
               <Route path="/tool-setup" element={<RequireAuth><AppLayout><ToolSetup /></AppLayout></RequireAuth>} />
               <Route path="/account-settings" element={<RequireAuth><AppLayout><AccountSettings /></AppLayout></RequireAuth>} />

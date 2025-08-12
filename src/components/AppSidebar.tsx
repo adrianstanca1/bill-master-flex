@@ -14,6 +14,7 @@ import {
   User,
   Briefcase,
   BarChart3,
+  Bot,
 } from "lucide-react";
 import {
   Sidebar,
@@ -70,6 +71,12 @@ const menuItems = [
     title: "AI Advisor",
     url: "/advisor",
     icon: MessageSquare,
+    group: "Tools"
+  },
+  {
+    title: "Agents",
+    url: "/agents",
+    icon: Bot,
     group: "Tools"
   },
   {
