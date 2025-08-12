@@ -7,21 +7,17 @@ import { ResponsiveLayout } from '@/components/ResponsiveLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Separator } from '@/components/ui/separator';
 import { 
   DollarSign, 
   TrendingUp, 
   AlertTriangle, 
   CheckCircle,
-  Calendar,
   Users,
   FileText,
   Clock,
   Building2,
   Target,
   PieChart,
-  ArrowRight,
-  Bell,
   Activity
 } from 'lucide-react';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
@@ -215,7 +211,7 @@ export const ImprovedDashboardOverview: React.FC = () => {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base">
-              <Bell className="h-5 w-5 text-primary" />
+              <Clock className="h-5 w-5 text-primary" />
               Urgent Tasks
             </CardTitle>
           </CardHeader>

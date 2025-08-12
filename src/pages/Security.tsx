@@ -11,14 +11,14 @@ const Security: React.FC = () => {
       <TopNavigation />
       <ResponsiveLayout>
         <SEO 
-          title="System Status | UK Construction" 
-          description="Monitor system health and API integrations" 
+          title="System Monitor | UK Construction" 
+          description="Monitor system health and manage API integrations" 
         />
         <div className="space-y-6">
           <div>
-            <h1 className="text-3xl font-bold">System Status</h1>
+            <h1 className="text-3xl font-bold">System Monitor</h1>
             <p className="text-muted-foreground mt-2">
-              Monitor system health, API integrations, and service availability
+              Monitor system health and manage API integrations
             </p>
           </div>
           

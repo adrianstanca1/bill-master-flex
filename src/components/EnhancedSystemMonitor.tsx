@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,18 +9,19 @@ import {
   CheckCircle, 
   XCircle, 
   AlertTriangle, 
-  Settings, 
-  Key, 
   RefreshCw,
   Database,
   Bot,
   Mail,
   Cloud,
-  Zap
+  Zap,
+  Plus,
+  Activity
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useSystemHealth } from '@/hooks/useSystemHealth';
 
 interface APIIntegration {
   id: string;
@@ -36,45 +37,34 @@ interface SystemService {
   name: string;
   status: 'online' | 'offline' | 'warning';
   icon: React.ComponentType<any>;
-  testEndpoint?: string;
-  requiresKey: boolean;
   description: string;
 }
 
 export function EnhancedSystemMonitor() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { systemHealth, isLoading: healthLoading, runHealthCheck } = useSystemHealth();
   const [isChecking, setIsChecking] = useState(false);
-  const [newApiKey, setNewApiKey] = useState({ service: '', keyValue: '' });
+  const [newApiKey, setNewApiKey] = useState({ service: '', keyName: '' });
 
   const systemServices: SystemService[] = [
     {
       name: 'Supabase Database',
-      status: 'online',
+      status: systemHealth.database,
       icon: Database,
-      requiresKey: false,
-      description: 'Main database and authentication'
+      description: 'Main database and data storage'
     },
     {
-      name: 'OpenAI API',
-      status: 'warning',
-      icon: Bot,
-      requiresKey: true,
-      description: 'AI chat and completion services'
-    },
-    {
-      name: 'Email Service',
-      status: 'offline',
-      icon: Mail,
-      requiresKey: true,
-      description: 'Email notifications and alerts'
-    },
-    {
-      name: 'Supabase Functions',
-      status: 'online',
+      name: 'Authentication',
+      status: systemHealth.auth,
       icon: Cloud,
-      requiresKey: false,
-      description: 'Edge functions and serverless logic'
+      description: 'User authentication and authorization'
+    },
+    {
+      name: 'Edge Functions',
+      status: systemHealth.functions,
+      icon: Activity,
+      description: 'Serverless functions and API endpoints'
     }
   ];
 
@@ -98,7 +88,6 @@ export function EnhancedSystemMonitor() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) throw new Error('Not authenticated');
 
-      // Get user's company
       const { data: profile } = await supabase
         .from('profiles')
         .select('company_id')
@@ -125,9 +114,9 @@ export function EnhancedSystemMonitor() {
       queryClient.invalidateQueries({ queryKey: ['api-integrations'] });
       toast({
         title: "API Integration Added",
-        description: "The API key has been configured successfully"
+        description: "The API integration has been configured successfully"
       });
-      setNewApiKey({ service: '', keyValue: '' });
+      setNewApiKey({ service: '', keyName: '' });
     },
     onError: (error: any) => {
       toast({
@@ -167,17 +156,29 @@ export function EnhancedSystemMonitor() {
   const handleSystemScan = async () => {
     setIsChecking(true);
     
-    // Simulate system scanning
-    for (const integration of apiIntegrations) {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      await testServiceMutation.mutateAsync(integration.id);
+    try {
+      // Run system health check
+      await runHealthCheck();
+      
+      // Test all API integrations
+      for (const integration of apiIntegrations) {
+        await testServiceMutation.mutateAsync(integration.id);
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+      
+      toast({
+        title: "System Scan Complete",
+        description: "All services and integrations have been tested"
+      });
+    } catch (error) {
+      toast({
+        title: "System Scan Failed",
+        description: "Some checks may have failed",
+        variant: "destructive"
+      });
+    } finally {
+      setIsChecking(false);
     }
-    
-    setIsChecking(false);
-    toast({
-      title: "System Scan Complete",
-      description: "All configured services have been tested"
-    });
   };
 
   const getStatusIcon = (status: string) => {
@@ -213,6 +214,9 @@ export function EnhancedSystemMonitor() {
   };
 
   const activeIntegrations = apiIntegrations.filter(api => api.status === 'active').length;
+  const avgResponseTime = apiIntegrations.length > 0 
+    ? Math.round(apiIntegrations.reduce((sum, api) => sum + api.response_time, 0) / apiIntegrations.length)
+    : 0;
 
   return (
     <div className="space-y-6">
@@ -221,13 +225,13 @@ export function EnhancedSystemMonitor() {
           <div>
             <CardTitle className="flex items-center gap-2">
               <Zap className="h-5 w-5" />
-              System Status & API Management
+              System Health & API Management
             </CardTitle>
             <p className="text-sm text-muted-foreground mt-1">
               Monitor system health and manage API integrations
             </p>
           </div>
-          <Button onClick={handleSystemScan} disabled={isChecking}>
+          <Button onClick={handleSystemScan} disabled={isChecking || healthLoading}>
             <RefreshCw className={`h-4 w-4 mr-2 ${isChecking ? 'animate-spin' : ''}`} />
             {isChecking ? 'Scanning...' : 'System Scan'}
           </Button>
@@ -242,13 +246,13 @@ export function EnhancedSystemMonitor() {
             </div>
             <div className="text-center p-4 border rounded-lg bg-blue-50">
               <div className="text-2xl font-bold text-blue-600">
-                {systemServices.filter(s => s.status === 'online').length}
+                {systemServices.filter(s => s.status === 'online').length}/{systemServices.length}
               </div>
               <div className="text-sm text-muted-foreground">Core Services</div>
             </div>
             <div className="text-center p-4 border rounded-lg bg-yellow-50">
               <div className="text-2xl font-bold text-yellow-600">
-                {apiIntegrations.reduce((avg, api) => avg + api.response_time, 0) / Math.max(apiIntegrations.length, 1)}ms
+                {avgResponseTime}ms
               </div>
               <div className="text-sm text-muted-foreground">Avg Response</div>
             </div>
@@ -261,12 +265,7 @@ export function EnhancedSystemMonitor() {
                 <div className="flex items-center gap-4">
                   <service.icon className="h-8 w-8 text-primary" />
                   <div>
-                    <div className="flex items-center gap-2">
-                      <h4 className="font-medium">{service.name}</h4>
-                      {service.requiresKey && (
-                        <Key className="h-4 w-4 text-yellow-500" />
-                      )}
-                    </div>
+                    <h4 className="font-medium">{service.name}</h4>
                     <p className="text-sm text-muted-foreground">{service.description}</p>
                   </div>
                 </div>
@@ -328,7 +327,7 @@ export function EnhancedSystemMonitor() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Key className="h-5 w-5" />
+            <Plus className="h-5 w-5" />
             Add New API Integration
           </CardTitle>
         </CardHeader>
@@ -338,7 +337,7 @@ export function EnhancedSystemMonitor() {
               <Label htmlFor="service">Service Name</Label>
               <Input
                 id="service"
-                placeholder="e.g., OpenAI, SendGrid"
+                placeholder="e.g., OpenAI, SendGrid, Stripe"
                 value={newApiKey.service}
                 onChange={(e) => setNewApiKey(prev => ({ ...prev, service: e.target.value }))}
               />
@@ -361,6 +360,7 @@ export function EnhancedSystemMonitor() {
             })}
             disabled={!newApiKey.service || !newApiKey.keyValue || addApiKeyMutation.isPending}
           >
+            <Plus className="h-4 w-4 mr-2" />
             Add Integration
           </Button>
         </CardContent>
