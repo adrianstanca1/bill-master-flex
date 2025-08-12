@@ -52,8 +52,11 @@ function AppLayout({ children }: { children: React.ReactNode }) {
 
 function ConditionalSecurityMonitor() {
   const location = useLocation();
-  return location.pathname !== "/" ? <SecurityMonitor /> : null;
+  // Hide security UI on home and dashboard, keep active elsewhere
+  if (location.pathname === "/" || location.pathname === "/dashboard") return null;
+  return <SecurityMonitor />;
 }
+
 
 function App() {
   return (
