@@ -2,12 +2,13 @@
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Shield, Eye, Settings, Users, AlertTriangle, Activity } from 'lucide-react';
+import { Shield, Eye, Settings, Users, AlertTriangle, Activity, Bot } from 'lucide-react';
 import { SecurityMonitor } from '@/components/SecurityMonitor';
 import { SecurityTester } from '@/components/SecurityTester';
 import { SessionManager } from '@/components/SessionManager';
-import { SecurityPolicyEnforcer } from '@/components/SecurityPolicyEnforcer';
 import { ThreatDetection } from '@/components/ThreatDetection';
+import { ServiceStatusChecker } from '@/components/ServiceStatusChecker';
+import { AgentsDashboard } from '@/components/AgentsDashboard';
 import { useSecurityMonitoring } from '@/hooks/useSecurityMonitoring';
 import { useSessionManagement } from '@/hooks/useSessionManagement';
 import SEO from '@/components/SEO';
@@ -45,7 +46,7 @@ export default function Security() {
             Security Center
           </h1>
           <p className="text-muted-foreground mt-2">
-            Advanced security monitoring, threat detection, and policy management
+            Service status monitoring, AI agents management, and security testing
           </p>
         </div>
 
@@ -55,9 +56,13 @@ export default function Security() {
               <Shield className="h-4 w-4" />
               <span className="hidden sm:inline">Overview</span>
             </TabsTrigger>
-            <TabsTrigger value="monitoring" className="flex items-center gap-2">
+            <TabsTrigger value="service-status" className="flex items-center gap-2">
               <Activity className="h-4 w-4" />
-              <span className="hidden sm:inline">Monitoring</span>
+              <span className="hidden sm:inline">Services</span>
+            </TabsTrigger>
+            <TabsTrigger value="agents" className="flex items-center gap-2">
+              <Bot className="h-4 w-4" />
+              <span className="hidden sm:inline">Agents</span>
             </TabsTrigger>
             <TabsTrigger value="threats" className="flex items-center gap-2">
               <AlertTriangle className="h-4 w-4" />
@@ -66,10 +71,6 @@ export default function Security() {
             <TabsTrigger value="sessions" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               <span className="hidden sm:inline">Sessions</span>
-            </TabsTrigger>
-            <TabsTrigger value="policies" className="flex items-center gap-2">
-              <Settings className="h-4 w-4" />
-              <span className="hidden sm:inline">Policies</span>
             </TabsTrigger>
             <TabsTrigger value="testing" className="flex items-center gap-2">
               <Eye className="h-4 w-4" />
@@ -101,10 +102,22 @@ export default function Security() {
                 <CardContent className="pt-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium">Active Alerts</p>
-                      <p className="text-2xl font-bold text-orange-600">{securityMetrics.totalAlerts}</p>
+                      <p className="text-sm font-medium">Active Services</p>
+                      <p className="text-2xl font-bold text-green-600">8/10</p>
                     </div>
-                    <AlertTriangle className="h-8 w-8 text-orange-600" />
+                    <Activity className="h-8 w-8 text-green-600" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium">AI Agents</p>
+                      <p className="text-2xl font-bold text-blue-600">6</p>
+                    </div>
+                    <Bot className="h-8 w-8 text-blue-600" />
                   </div>
                 </CardContent>
               </Card>
@@ -120,53 +133,41 @@ export default function Security() {
                   </div>
                 </CardContent>
               </Card>
-
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium">Security Events</p>
-                      <p className="text-2xl font-bold">{securityMetrics.activeThreats}</p>
-                    </div>
-                    <Activity className="h-8 w-8 text-blue-600" />
-                  </div>
-                </CardContent>
-              </Card>
             </div>
 
             {/* Quick Access Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setActiveTab('threats')}>
+              <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setActiveTab('service-status')}>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <AlertTriangle className="h-5 w-5 text-red-500" />
-                    Threat Detection
+                    <Activity className="h-5 w-5 text-green-500" />
+                    Service Status
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground">Monitor and respond to security threats in real-time</p>
+                  <p className="text-muted-foreground">Check API keys and service functionality</p>
                   <div className="mt-4 text-sm">
                     <div className="flex justify-between">
-                      <span>Active Threats:</span>
-                      <span className="font-semibold text-red-600">{securityMetrics.criticalAlerts}</span>
+                      <span>Services Online:</span>
+                      <span className="font-semibold text-green-600">8/10</span>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setActiveTab('monitoring')}>
+              <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setActiveTab('agents')}>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Activity className="h-5 w-5 text-blue-500" />
-                    Security Monitoring
+                    <Bot className="h-5 w-5 text-blue-500" />
+                    AI Agents Dashboard
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground">Real-time security event monitoring and alerts</p>
+                  <p className="text-muted-foreground">Manage and monitor AI agents performance</p>
                   <div className="mt-4 text-sm">
                     <div className="flex justify-between">
-                      <span>Events Today:</span>
-                      <span className="font-semibold">{stats?.securityEvents || 0}</span>
+                      <span>Active Agents:</span>
+                      <span className="font-semibold">6</span>
                     </div>
                   </div>
                 </CardContent>
@@ -174,8 +175,12 @@ export default function Security() {
             </div>
           </TabsContent>
 
-          <TabsContent value="monitoring">
-            <SecurityMonitor />
+          <TabsContent value="service-status">
+            <ServiceStatusChecker />
+          </TabsContent>
+
+          <TabsContent value="agents">
+            <AgentsDashboard />
           </TabsContent>
 
           <TabsContent value="threats">
@@ -184,10 +189,6 @@ export default function Security() {
 
           <TabsContent value="sessions">
             <SessionManager />
-          </TabsContent>
-
-          <TabsContent value="policies">
-            <SecurityPolicyEnforcer />
           </TabsContent>
 
           <TabsContent value="testing">
