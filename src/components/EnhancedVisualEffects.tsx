@@ -7,6 +7,7 @@ interface ParticleSystemProps {
   color?: string;
 }
 
+const DISABLE_EFFECTS = true;
 export function ParticleSystem({ 
   className = '', 
   particleCount = 50,
@@ -15,6 +16,7 @@ export function ParticleSystem({
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
+    if (DISABLE_EFFECTS) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -97,7 +99,7 @@ export function ParticleSystem({
     };
   }, [particleCount, color]);
 
-  return (
+  return DISABLE_EFFECTS ? null : (
     <canvas
       ref={canvasRef}
       className={`absolute inset-0 pointer-events-none ${className}`}
@@ -113,8 +115,7 @@ interface FloatingElementsProps {
 
 export function FloatingElements({ children, className = '' }: FloatingElementsProps) {
   return (
-    <div className={`relative ${className}`}>
-      <ParticleSystem className="opacity-30" particleCount={30} />
+    <div className={className}>
       {children}
     </div>
   );
@@ -163,10 +164,9 @@ export function AnimatedBackground({ pattern = 'mesh', className = '' }: Animate
     geometric: 'bg-gradient-radial from-emerald/5 via-transparent to-purple/5'
   };
 
-  return (
-    <div className={`absolute inset-0 ${patterns[pattern]} animate-pulse-glow ${className}`}>
-      <div className="absolute inset-0 bg-gradient-mesh opacity-50" />
-      <ParticleSystem particleCount={20} className="opacity-20" />
+  return DISABLE_EFFECTS ? null : (
+    <div className={`absolute inset-0 ${patterns[pattern]} ${className}`}>
+      {/* Visual effects disabled globally */}
     </div>
   );
 }
@@ -180,6 +180,7 @@ export function MatrixRain({ className = '', speed = 50 }: MatrixRainProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
+    if (DISABLE_EFFECTS) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -237,7 +238,7 @@ export function MatrixRain({ className = '', speed = 50 }: MatrixRainProps) {
     };
   }, [speed]);
 
-  return (
+  return DISABLE_EFFECTS ? null : (
     <canvas
       ref={canvasRef}
       className={`absolute inset-0 pointer-events-none opacity-20 ${className}`}
