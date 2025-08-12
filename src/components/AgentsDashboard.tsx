@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Bot, MessageSquare, Settings, Play, Pause, BarChart3, Brain, FileText, Calculator, Search, Shield } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { AgentChat } from '@/components/AgentChat';
+import AgentChat from '@/components/AgentChat';
 import { AdvisorAgent } from '@/components/AdvisorAgent';
 
 interface Agent {
