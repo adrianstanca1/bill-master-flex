@@ -40,7 +40,7 @@ export function TopNavigation() {
               <Building className="h-6 w-6 text-primary" />
               <span className="font-bold text-lg text-foreground">ConstructionApp</span>
             </Link>
-            <div className="hidden md:flex items-center space-x-1">
+            <div className="flex items-center space-x-1 overflow-x-auto no-scrollbar">
               {navigationItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.path;
