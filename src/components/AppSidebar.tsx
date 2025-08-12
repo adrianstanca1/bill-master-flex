@@ -129,6 +129,7 @@ export function AppSidebar() {
                     <SidebarMenuButton 
                       asChild 
                       isActive={location.pathname === item.url}
+                      className="nav-item"
                     >
                       <Link to={item.url}>
                         <item.icon />
