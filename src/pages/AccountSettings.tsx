@@ -372,5 +372,6 @@ export default function AccountSettings() {
         </div>
       </section>
     </main>
+    </>
   );
 }

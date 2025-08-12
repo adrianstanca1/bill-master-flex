@@ -213,6 +213,7 @@ const Agents: React.FC = () => {
         </Card>
       </div>
     </ResponsiveLayout>
+    </>
   );
 };
 

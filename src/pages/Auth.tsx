@@ -263,5 +263,6 @@ export default function Auth() {
         </div>
       </section>
     </main>
+    </>
   );
 }

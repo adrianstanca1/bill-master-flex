@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Users, Phone, Mail, Calendar, Plus, Edit, Trash2, Eye } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import SEO from '@/components/SEO';
+import { TopNavigation } from '@/components/TopNavigation';
 
 interface Contact {
   id: string;
@@ -588,5 +589,6 @@ export default function CRM() {
         </TabsContent>
       </Tabs>
     </ResponsiveLayout>
+    </>
   );
 }
