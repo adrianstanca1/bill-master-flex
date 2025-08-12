@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -347,8 +346,8 @@ export function EnhancedSystemMonitor() {
               <Input
                 id="keyName"
                 placeholder="e.g., OPENAI_API_KEY"
-                value={newApiKey.keyValue}
-                onChange={(e) => setNewApiKey(prev => ({ ...prev, keyValue: e.target.value }))}
+                value={newApiKey.keyName}
+                onChange={(e) => setNewApiKey(prev => ({ ...prev, keyName: e.target.value }))}
               />
             </div>
           </div>
@@ -356,9 +355,9 @@ export function EnhancedSystemMonitor() {
             className="mt-4"
             onClick={() => addApiKeyMutation.mutate({ 
               service: newApiKey.service, 
-              keyName: newApiKey.keyValue 
+              keyName: newApiKey.keyName 
             })}
-            disabled={!newApiKey.service || !newApiKey.keyValue || addApiKeyMutation.isPending}
+            disabled={!newApiKey.service || !newApiKey.keyName || addApiKeyMutation.isPending}
           >
             <Plus className="h-4 w-4 mr-2" />
             Add Integration
