@@ -140,7 +140,7 @@ export function SecurityMonitor() {
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <span>Database Response Time</span>
-              <span className="font-semibold text-green-600">< 100ms</span>
+              <span className="font-semibold text-green-600">&lt; 100ms</span>
             </div>
             <div className="flex justify-between items-center">
               <span>API Success Rate</span>

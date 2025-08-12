@@ -173,6 +173,8 @@ export default function Security() {
                 </CardContent>
               </Card>
             </div>
+
+            <SecurityMonitor />
           </TabsContent>
 
           <TabsContent value="service-status">
