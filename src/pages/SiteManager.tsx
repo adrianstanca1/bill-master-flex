@@ -5,6 +5,7 @@ import { ResponsiveLayout } from '@/components/ResponsiveLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RemindersWidget } from '@/components/RemindersWidget';
 import { supabase } from '@/integrations/supabase/client';
+import { DashboardOverview } from '@/components/DashboardOverview';
 
 const SiteManager: React.FC = () => {
   const [stats, setStats] = useState({ projects: 0, active: 0, pending: 0 });
@@ -31,6 +32,7 @@ const SiteManager: React.FC = () => {
           <h1 className="text-3xl font-bold">Site Manager</h1>
           <p className="text-muted-foreground">Today’s operations overview</p>
         </header>
+        <DashboardOverview />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card className="lg:col-span-3">
