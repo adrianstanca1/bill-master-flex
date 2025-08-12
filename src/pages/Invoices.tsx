@@ -4,6 +4,7 @@ import { InvoiceManager } from '@/components/InvoiceManager';
 import { ResponsiveLayout } from '@/components/ResponsiveLayout';
 import SEO from '@/components/SEO';
 import { TopNavigation } from '@/components/TopNavigation';
+import MockQuoteTester from '@/components/MockQuoteTester';
 
 export default function Invoices() {
   return (
@@ -19,6 +20,9 @@ export default function Invoices() {
           <p className="text-muted-foreground">
             Create, manage and track your invoices with our interactive dashboard
           </p>
+        </div>
+        <div className="mb-6">
+          <MockQuoteTester />
         </div>
         <div className="widget-container">
           <InvoiceManager />
