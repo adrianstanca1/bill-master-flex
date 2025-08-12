@@ -208,11 +208,13 @@ export default function CRM() {
   const recentActivities = activities.slice(0, 5);
 
   return (
-    <ResponsiveLayout>
-      <SEO 
-        title="CRM" 
-        description="Manage your customer relationships and sales pipeline"
-      />
+    <>
+      <TopNavigation />
+      <ResponsiveLayout>
+        <SEO 
+          title="CRM" 
+          description="Manage your customer relationships and sales pipeline"
+        />
       
       {/* Header with navigation */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">

@@ -5,6 +5,7 @@ import SmartOpsPanel from "@/components/SmartOpsPanel";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import SEO from "@/components/SEO";
+import { TopNavigation } from "@/components/TopNavigation";
 
 const Index = () => {
 
@@ -24,6 +25,7 @@ const Index = () => {
           }
         }}
       />
+      <TopNavigation />
       <header className="container mx-auto py-8">
         <h1 className="text-3xl font-bold tracking-tight">UK Construction Business Dashboard</h1>
         <p className="mt-2 text-muted-foreground max-w-3xl">

@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Widget, WidgetHeader, WidgetContent } from "@/components/ui/widget";
+import { TopNavigation } from "@/components/TopNavigation";
 
 const Agents: React.FC = () => {
   const { toast } = useToast();
@@ -91,9 +92,11 @@ const Agents: React.FC = () => {
   };
 
   return (
-    <ResponsiveLayout>
-      <SEO title="AI Agents Hub | UK Construction" description="Discover grants, assess risks, and generate bid packages with AI." jsonLd={jsonLd} />
-      <h1 className="sr-only">AI Agents Hub</h1>
+    <>
+      <TopNavigation />
+      <ResponsiveLayout>
+        <SEO title="AI Agents Hub | UK Construction" description="Discover grants, assess risks, and generate bid packages with AI." jsonLd={jsonLd} />
+        <h1 className="sr-only">AI Agents Hub</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Widget variant="floating" animated>

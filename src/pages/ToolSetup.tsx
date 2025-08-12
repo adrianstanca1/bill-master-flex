@@ -5,10 +5,12 @@ import { ResponsiveLayout } from "@/components/ResponsiveLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import SEO from "@/components/SEO";
+import { TopNavigation } from "@/components/TopNavigation";
 
 export default function ToolSetup() {
   return (
     <ResponsiveLayout>
+      <TopNavigation />
       <SEO title="Tool Setup | AI functions & keys" description="Configure API keys and verify edge functions." noindex />
       <header className="pt-6">
         <h1 className="text-2xl font-bold">Important information for tool setup</h1>

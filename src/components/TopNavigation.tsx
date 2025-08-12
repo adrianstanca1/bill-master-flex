@@ -31,20 +31,18 @@ export function TopNavigation() {
   ];
 
   return (
-    <nav className="bg-white border-b border-gray-200 px-4 py-3">
+    <nav className="sticky top-0 z-50 bg-surface border-b border-border px-4 py-3">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-8">
             <Link to="/dashboard" className="flex items-center space-x-2">
               <Building className="h-6 w-6 text-primary" />
-              <span className="font-bold text-lg">ConstructionApp</span>
+              <span className="font-bold text-lg text-foreground">ConstructionApp</span>
             </Link>
-            
             <div className="hidden md:flex items-center space-x-1">
               {navigationItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.path;
-                
                 return (
                   <Link key={item.path} to={item.path}>
                     <Button

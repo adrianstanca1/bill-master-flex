@@ -3,11 +3,12 @@ import React from 'react';
 import { InvoiceManager } from '@/components/InvoiceManager';
 import { ResponsiveLayout } from '@/components/ResponsiveLayout';
 import SEO from '@/components/SEO';
-// removed duplicate import
+import { TopNavigation } from '@/components/TopNavigation';
 
 export default function Invoices() {
   return (
     <div className="min-h-screen bg-background">
+      <TopNavigation />
       <ResponsiveLayout>
         <SEO 
           title="Invoices" 

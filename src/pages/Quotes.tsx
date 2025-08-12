@@ -2,6 +2,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import SEO from "@/components/SEO";
 import { ResponsiveLayout } from "@/components/ResponsiveLayout";
+import { TopNavigation } from "@/components/TopNavigation";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -88,35 +89,38 @@ const Quotes: React.FC = () => {
   }), []);
 
   return (
-    <ResponsiveLayout>
-      <SEO title="Quotes | UK Construction" description="Create quotes and convert them to invoices." jsonLd={jsonLd} />
-      <h1 className="sr-only">Quotes</h1>
-      <Card>
-        <CardHeader>
-          <CardTitle>Quotes</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex gap-2">
-            <Input placeholder="Quote title" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} />
-            <Button onClick={addQuote} disabled={!companyId}>New Quote</Button>
-          </div>
-          <ul className="space-y-2">
-            {quotes.map((q) => (
-              <li key={q.id} className="flex items-center justify-between border rounded-md p-3">
-                <div>
-                  <div className="font-medium">{q.title}</div>
-                  <div className="text-sm text-muted-foreground">Total £{q.total?.toFixed(2) ?? "0.00"} • {new Date(q.created_at).toLocaleDateString()}</div>
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" onClick={() => convertToInvoice(q)}>Convert to Invoice</Button>
-                </div>
-              </li>
-            ))}
-            {quotes.length === 0 && <div className="text-sm text-muted-foreground">No quotes yet.</div>}
-          </ul>
-        </CardContent>
-      </Card>
-    </ResponsiveLayout>
+    <>
+      <TopNavigation />
+      <ResponsiveLayout>
+        <SEO title="Quotes | UK Construction" description="Create quotes and convert them to invoices." jsonLd={jsonLd} />
+        <h1 className="sr-only">Quotes</h1>
+        <Card>
+          <CardHeader>
+            <CardTitle>Quotes</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex gap-2">
+              <Input placeholder="Quote title" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} />
+              <Button onClick={addQuote} disabled={!companyId}>New Quote</Button>
+            </div>
+            <ul className="space-y-2">
+              {quotes.map((q) => (
+                <li key={q.id} className="flex items-center justify-between border rounded-md p-3">
+                  <div>
+                    <div className="font-medium">{q.title}</div>
+                    <div className="text-sm text-muted-foreground">Total £{q.total?.toFixed(2) ?? "0.00"} • {new Date(q.created_at).toLocaleDateString()}</div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" onClick={() => convertToInvoice(q)}>Convert to Invoice</Button>
+                  </div>
+                </li>
+              ))}
+              {quotes.length === 0 && <div className="text-sm text-muted-foreground">No quotes yet.</div>}
+            </ul>
+          </CardContent>
+        </Card>
+      </ResponsiveLayout>
+    </>
   );
 };
 
