@@ -216,7 +216,7 @@
 
   /* Advanced Button Components */
   .cyber-button {
-    @apply relative overflow-hidden font-semibold cursor-pointer user-select-none;
+    @apply relative overflow-hidden font-semibold cursor-pointer select-none;
     background: var(--gradient-primary);
     color: hsl(var(--primary-foreground));
     border: 2px solid hsl(var(--emerald));
