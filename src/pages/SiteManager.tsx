@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RemindersWidget } from '@/components/RemindersWidget';
 import { supabase } from '@/integrations/supabase/client';
 import { DashboardOverview } from '@/components/DashboardOverview';
+import { HMRCConnections } from '@/components/HMRCConnections';
+import { BankingConnections } from '@/components/BankingConnections';
 
 const SiteManager: React.FC = () => {
   const [stats, setStats] = useState({ projects: 0, active: 0, pending: 0 });
@@ -13,11 +15,9 @@ const SiteManager: React.FC = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        const { data: projects } = await supabase.from('projects').select('id, status');
+        const { data: projects } = await supabase.from('projects').select('id');
         const total = projects?.length || 0;
-        const active = (projects || []).filter((p: any) => p.status === 'active').length;
-        const pending = (projects || []).filter((p: any) => p.status !== 'active').length;
-        setStats({ projects: total, active, pending });
+        setStats({ projects: total, active: 0, pending: 0 });
       } catch {}
     };
     load();
@@ -57,14 +57,8 @@ const SiteManager: React.FC = () => {
 
           <RemindersWidget />
 
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle>Open Actions</CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm text-muted-foreground">
-              Connect HMRC (VAT, CIS, RTI) and Banking to unlock live actions here.
-            </CardContent>
-          </Card>
+          <HMRCConnections />
+          <BankingConnections />
         </div>
       </ResponsiveLayout>
     </div>

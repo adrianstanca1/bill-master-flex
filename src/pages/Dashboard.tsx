@@ -4,6 +4,9 @@ import SEO from "@/components/SEO";
 import { ResponsiveLayout } from "@/components/ResponsiveLayout";
 import { TopNavigation } from "@/components/TopNavigation";
 import { DashboardOverview } from "@/components/DashboardOverview";
+import { RemindersWidget } from "@/components/RemindersWidget";
+import { HMRCConnections } from "@/components/HMRCConnections";
+import { BankingConnections } from "@/components/BankingConnections";
 
 const Dashboard: React.FC = () => {
   return (
@@ -23,6 +26,12 @@ const Dashboard: React.FC = () => {
           </div>
           
           <DashboardOverview />
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <RemindersWidget />
+            <HMRCConnections />
+            <BankingConnections />
+          </div>
         </div>
       </ResponsiveLayout>
     </div>

@@ -1,0 +1,49 @@
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+
+export const HMRCConnections: React.FC = () => {
+  const { toast } = useToast();
+  const [busy, setBusy] = useState<string | null>(null);
+
+  const call = async (fn: string, payload: any = {}) => {
+    try {
+      setBusy(fn);
+      const { data, error } = await supabase.functions.invoke(fn as any, { body: payload });
+      if (error) throw new Error(error.message);
+      const msg = (data as any)?.message || 'Request sent';
+      toast({ title: `HMRC: ${fn}`, description: msg });
+    } catch (e: any) {
+      toast({ title: `HMRC: ${fn}`, description: e.message || 'Function error', variant: 'destructive' });
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>HMRC Connections</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <Button onClick={() => call('hmrc-oauth', { action: 'start' })} disabled={busy!==null}>
+            Connect HMRC (OAuth)
+          </Button>
+          <Button variant="outline" onClick={() => call('hmrc-vat', { action: 'submit_vat' })} disabled={busy!==null}>
+            Submit VAT Return
+          </Button>
+          <Button variant="outline" onClick={() => call('hmrc-cis', { action: 'verify' })} disabled={busy!==null}>
+            Verify CIS Subcontractor
+          </Button>
+          <Button variant="outline" onClick={() => call('hmrc-rti', { action: 'fps' })} disabled={busy!==null}>
+            Submit RTI (FPS)
+          </Button>
+        </div>
+        <p className="text-xs text-muted-foreground">Sandbox stubs are in place—responses may show “not implemented” until credentials are configured.</p>
+      </CardContent>
+    </Card>
+  );
+};
