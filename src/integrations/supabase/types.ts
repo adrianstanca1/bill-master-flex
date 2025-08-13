@@ -1060,6 +1060,39 @@ export type Database = {
           },
         ]
       }
+      tax_calculations: {
+        Row: {
+          calculation_type: string
+          company_id: string
+          created_at: string
+          id: string
+          input_data: Json
+          results: Json
+          tax_year: string
+          updated_at: string
+        }
+        Insert: {
+          calculation_type: string
+          company_id: string
+          created_at?: string
+          id?: string
+          input_data?: Json
+          results?: Json
+          tax_year?: string
+          updated_at?: string
+        }
+        Update: {
+          calculation_type?: string
+          company_id?: string
+          created_at?: string
+          id?: string
+          input_data?: Json
+          results?: Json
+          tax_year?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       tender_packages: {
         Row: {
           checklist: Json | null

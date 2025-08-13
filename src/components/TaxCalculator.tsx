@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,7 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Calculator, PoundSterling, Info, AlertTriangle } from 'lucide-react';
+import { useCompanyId } from '@/hooks/useCompanyId';
+import { Calculator, PoundSterling, Info, AlertTriangle, History } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 interface TaxCalculation {
   grossIncome: number;
@@ -22,6 +24,15 @@ interface TaxCalculation {
   recommendations: string[];
 }
 
+interface SavedCalculation {
+  id: string;
+  calculation_type: string;
+  input_data: any;
+  results: any;
+  created_at: string;
+  tax_year: string;
+}
+
 export function TaxCalculator() {
   const [formData, setFormData] = useState({
     annualTurnover: '',
@@ -33,8 +44,82 @@ export function TaxCalculator() {
   
   const [calculation, setCalculation] = useState<TaxCalculation | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
+  const [viewMode, setViewMode] = useState<'calculator' | 'history'>('calculator');
   const [aiAdvice, setAiAdvice] = useState<string>('');
   const { toast } = useToast();
+  const companyId = useCompanyId();
+  const queryClient = useQueryClient();
+
+  // Fetch saved calculations
+  const { data: savedCalculations, isLoading } = useQuery({
+    queryKey: ['tax-calculations', companyId],
+    queryFn: async () => {
+      if (!companyId) return [];
+      const { data, error } = await supabase
+        .from('tax_calculations')
+        .select('*')
+        .eq('company_id', companyId)
+        .order('created_at', { ascending: false })
+        .limit(10);
+      if (error) throw error;
+      return data as SavedCalculation[];
+    },
+    enabled: !!companyId,
+  });
+
+  // Real-time subscription
+  useEffect(() => {
+    if (!companyId) return;
+
+    const channel = supabase
+      .channel('tax-calculations-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'tax_calculations',
+          filter: `company_id=eq.${companyId}`,
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['tax-calculations', companyId] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [companyId, queryClient]);
+
+  // Save calculation mutation
+  const saveCalculationMutation = useMutation({
+    mutationFn: async (data: { inputData: any; results: TaxCalculation }) => {
+      if (!companyId) throw new Error('No company ID');
+      
+      const { error } = await supabase
+        .from('tax_calculations')
+        .insert({
+          company_id: companyId,
+          calculation_type: data.inputData.businessType || 'general',
+          input_data: data.inputData,
+          results: data.results,
+          tax_year: '2024/25',
+        });
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast({ title: "Calculation saved successfully" });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error saving calculation",
+        description: error.message,
+        variant: "destructive"
+      });
+    },
+  });
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -139,6 +224,14 @@ export function TaxCalculator() {
       
       setCalculation(calculationResult);
       
+      // Save calculation if authenticated
+      if (companyId) {
+        saveCalculationMutation.mutate({
+          inputData: formData,
+          results: calculationResult
+        });
+      }
+      
       // Get AI advice if available
       try {
         const { data, error } = await supabase.functions.invoke('tax-bot', {
@@ -187,6 +280,64 @@ export function TaxCalculator() {
     });
   };
 
+  const loadSavedCalculation = (saved: SavedCalculation) => {
+    setFormData(saved.input_data);
+    setCalculation(saved.results);
+    setViewMode('calculator');
+  };
+
+  if (viewMode === 'history') {
+    return (
+      <div className="max-w-6xl mx-auto p-6 space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Tax Calculation History</h1>
+            <p className="text-muted-foreground">View your previous tax calculations</p>
+          </div>
+          <Button onClick={() => setViewMode('calculator')}>
+            <Calculator className="h-4 w-4 mr-2" />
+            New Calculation
+          </Button>
+        </div>
+
+        <Card>
+          <CardContent className="p-6">
+            {isLoading ? (
+              <div className="text-center py-8">Loading calculations...</div>
+            ) : savedCalculations && savedCalculations.length > 0 ? (
+              <div className="space-y-4">
+                {savedCalculations.map((calc) => (
+                  <div key={calc.id} className="border rounded-lg p-4 flex justify-between items-center">
+                    <div>
+                      <h3 className="font-semibold">{calc.calculation_type}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Turnover: £{calc.input_data.annualTurnover || 0}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {new Date(calc.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div className="text-right space-y-2">
+                      <p className="font-semibold">Take Home: £{calc.results.takeHome?.toFixed(2) || '0.00'}</p>
+                      <Button size="sm" onClick={() => loadSavedCalculation(calc)}>
+                        Load
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <History className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p>No saved calculations yet.</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -194,7 +345,15 @@ export function TaxCalculator() {
           <h1 className="text-3xl font-bold">UK Tax Calculator</h1>
           <p className="text-muted-foreground">Calculate income tax, VAT, and National Insurance for construction businesses</p>
         </div>
-        <Calculator className="h-8 w-8 text-primary" />
+        <div className="flex gap-2">
+          {companyId && savedCalculations && savedCalculations.length > 0 && (
+            <Button variant="outline" onClick={() => setViewMode('history')}>
+              <History className="h-4 w-4 mr-2" />
+              History
+            </Button>
+          )}
+          <Calculator className="h-8 w-8 text-primary" />
+        </div>
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">
