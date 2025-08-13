@@ -57,7 +57,7 @@ export function EnhancedInvoicePreview({
         </div>
 
         {/* Invoice Preview */}
-        <Card className="bg-white text-black print:shadow-none">
+        <Card className="bg-card text-card-foreground print:shadow-none">
           <CardContent className="p-8">
             {/* Header */}
             <div className="flex justify-between items-start mb-8">

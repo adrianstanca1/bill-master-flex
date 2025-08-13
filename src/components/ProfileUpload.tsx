@@ -127,7 +127,7 @@ export function ProfileUpload() {
                   <img
                     src={companyLogo}
                     alt="Company Logo"
-                    className="w-16 h-16 rounded-md object-contain border-2 border-border bg-white p-1"
+                    className="w-16 h-16 rounded-md object-contain border-2 border-border bg-surface p-1"
                   />
                   <button
                     onClick={() => removeImage('logo')}

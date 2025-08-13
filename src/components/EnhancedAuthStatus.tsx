@@ -22,17 +22,20 @@ export default function EnhancedAuthStatus() {
   }, []);
 
   const handleSecureSignOut = async () => {
-    // Log the sign-out action
-    await supabase.from('security_audit_log').insert({
-      action: 'LOGOUT',
-      resource_type: 'auth',
-      details: { 
-        logout_time: new Date().toISOString(),
-        user_agent: navigator.userAgent 
-      }
-    });
-
-    await supabase.auth.signOut();
+    try {
+      await supabase.from('security_audit_log').insert({
+        action: 'LOGOUT',
+        resource_type: 'auth',
+        details: { 
+          logout_time: new Date().toISOString(),
+          user_agent: navigator.userAgent 
+        }
+      });
+    } catch (e) {
+      console.warn('Audit log insert failed (non-blocking):', e);
+    } finally {
+      await supabase.auth.signOut();
+    }
   };
 
   if (!email) {

@@ -123,7 +123,7 @@ export default function TenderBot() {
               )}
             </div>
           ) : (
-            <pre className="text-xs text-white whitespace-pre-wrap">
+            <pre className="text-xs text-foreground whitespace-pre-wrap">
               {JSON.stringify(result, null, 2)}
             </pre>
           )}

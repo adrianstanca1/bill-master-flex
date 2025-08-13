@@ -47,7 +47,7 @@ export function InvoicePreview({ data, totals, onClose }: InvoicePreviewProps) {
         </div>
 
         {/* Invoice Preview */}
-        <Card className="bg-white text-black shadow-card print:shadow-none">
+        <Card className="bg-card text-card-foreground shadow-card print:shadow-none">
           <CardContent className="p-8">
             {/* Invoice Header */}
             <div className="flex justify-between items-start mb-8">
