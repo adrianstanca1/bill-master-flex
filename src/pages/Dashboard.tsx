@@ -13,7 +13,7 @@ const Dashboard: React.FC = () => {
   return (
     <>
       <SEO 
-        title="Dashboard | UK Construction" 
+        title="Dashboard | AS PRO" 
         description="Your construction business dashboard with real-time metrics, project tracking, and team management tools."
       />
       <ResponsiveLayout>

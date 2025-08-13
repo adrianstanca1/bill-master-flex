@@ -11,7 +11,7 @@ const Security: React.FC = () => {
       
       <ResponsiveLayout>
         <SEO 
-          title="System Monitor | UK Construction" 
+          title="System Monitor | AS PRO" 
           description="Monitor system health and manage API integrations" 
         />
         <div className="space-y-6">

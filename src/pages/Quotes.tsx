@@ -144,7 +144,7 @@ const Quotes: React.FC = () => {
   return (
     <>
       <ResponsiveLayout>
-        <SEO title="Quotes | UK Construction" description="Create quotes and convert them to invoices." jsonLd={jsonLd} />
+        <SEO title="Quotes | AS PRO" description="Create quotes and convert them to invoices." jsonLd={jsonLd} />
         <h1 className="sr-only">Quotes</h1>
         
         {viewMode === 'list' ? (

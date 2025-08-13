@@ -145,7 +145,7 @@ export function TopNavigation() {
         <Link to="/" className="flex items-center space-x-2">
           <HardHat className="h-8 w-8 text-primary" />
           <span className="font-bold text-xl bg-gradient-primary bg-clip-text text-transparent">
-            UK Construction
+            AS PRO
           </span>
         </Link>
 

@@ -113,7 +113,7 @@ const BusinessManager: React.FC = () => {
       
       <ResponsiveLayout>
         <SEO 
-          title="Business Manager | UK Construction" 
+          title="Business Manager | AS PRO" 
           description="Comprehensive business management and analytics" 
         />
         <div className="space-y-6">

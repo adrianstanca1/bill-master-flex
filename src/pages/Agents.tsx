@@ -95,7 +95,7 @@ const Agents: React.FC = () => {
     <>
       
       <ResponsiveLayout>
-        <SEO title="AI Agents Hub | UK Construction" description="Discover grants, assess risks, and generate bid packages with AI." jsonLd={jsonLd} />
+        <SEO title="AI Agents Hub | AS PRO" description="Discover grants, assess risks, and generate bid packages with AI." jsonLd={jsonLd} />
         <h1 className="sr-only">AI Agents Hub</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

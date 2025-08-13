@@ -59,7 +59,7 @@ export default function Settings() {
     <>
       
       <ResponsiveLayout>
-      <SEO title="Settings | UK Construction" description="Manage company, VAT/CIS, and defaults for quotes and tax." noindex />
+      <SEO title="Settings | AS PRO" description="Manage company, VAT/CIS, and defaults for quotes and tax." noindex />
       <header className="pt-6">
         <h1 className="text-2xl font-bold">Company Settings</h1>
         <p className="text-muted-foreground">These settings pre-fill SmartOps, Quotes and Tax tabs.</p>
