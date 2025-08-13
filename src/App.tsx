@@ -1,10 +1,10 @@
-
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/sonner';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { RequireAuth } from '@/components/RequireAuth';
+import { OptionalAuth } from '@/components/OptionalAuth';
 import { SecurityMonitor } from '@/components/SecurityMonitor';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import Index from '@/pages/Index';
@@ -56,7 +56,6 @@ function ConditionalSecurityMonitor() {
   return <SecurityMonitor />;
 }
 
-
 function App() {
   useEffect(() => { applyUserTheme(); }, []);
   return (
@@ -66,22 +65,23 @@ function App() {
           <ConditionalSecurityMonitor />
           <div className="min-h-screen bg-background">
             <Routes>
-              <Route path="/" element={<AppLayout><Index /></AppLayout>} />
-              <Route path="/auth" element={<AppLayout><Auth /></AppLayout>} />
-              <Route path="/dashboard" element={<RequireAuth><AppLayout><Dashboard /></AppLayout></RequireAuth>} />
-              <Route path="/site-manager" element={<RequireAuth><AppLayout><SiteManager /></AppLayout></RequireAuth>} />
-              <Route path="/business-manager" element={<RequireAuth><AppLayout><BusinessManager /></AppLayout></RequireAuth>} />
-              <Route path="/invoices" element={<RequireAuth><AppLayout><Invoices /></AppLayout></RequireAuth>} />
-              <Route path="/quotes" element={<RequireAuth><AppLayout><Quotes /></AppLayout></RequireAuth>} />
-              <Route path="/variations" element={<RequireAuth><AppLayout><Variations /></AppLayout></RequireAuth>} />
-              <Route path="/crm" element={<RequireAuth><AppLayout><CRM /></AppLayout></RequireAuth>} />
-              <Route path="/advisor" element={<RequireAuth><AppLayout><Advisor /></AppLayout></RequireAuth>} />
-              <Route path="/agents" element={<RequireAuth><AppLayout><Agents /></AppLayout></RequireAuth>} />
+              <Route path="/" element={<AppLayout><OptionalAuth><Index /></OptionalAuth></AppLayout>} />
+              <Route path="/auth" element={<AppLayout><OptionalAuth><Auth /></OptionalAuth></AppLayout>} />
+              <Route path="/dashboard" element={<AppLayout><OptionalAuth><Dashboard /></OptionalAuth></AppLayout>} />
+              <Route path="/site-manager" element={<AppLayout><OptionalAuth><SiteManager /></OptionalAuth></AppLayout>} />
+              <Route path="/business-manager" element={<AppLayout><OptionalAuth><BusinessManager /></OptionalAuth></AppLayout>} />
+              <Route path="/invoices" element={<AppLayout><OptionalAuth><Invoices /></OptionalAuth></AppLayout>} />
+              <Route path="/quotes" element={<AppLayout><OptionalAuth><Quotes /></OptionalAuth></AppLayout>} />
+              <Route path="/variations" element={<AppLayout><OptionalAuth><Variations /></OptionalAuth></AppLayout>} />
+              <Route path="/crm" element={<AppLayout><OptionalAuth><CRM /></OptionalAuth></AppLayout>} />
+              <Route path="/advisor" element={<AppLayout><OptionalAuth><Advisor /></OptionalAuth></AppLayout>} />
+              <Route path="/agents" element={<AppLayout><OptionalAuth><Agents /></OptionalAuth></AppLayout>} />
+              {/* Keep security features behind auth */}
               <Route path="/security" element={<RequireAuth><AppLayout><Security /></AppLayout></RequireAuth>} />
               <Route path="/tool-setup" element={<RequireAuth><AppLayout><ToolSetup /></AppLayout></RequireAuth>} />
               <Route path="/account-settings" element={<RequireAuth><AppLayout><AccountSettings /></AppLayout></RequireAuth>} />
               <Route path="/settings" element={<RequireAuth><AppLayout><Settings /></AppLayout></RequireAuth>} />
-              <Route path="*" element={<AppLayout><NotFound /></AppLayout>} />
+              <Route path="*" element={<AppLayout><OptionalAuth><NotFound /></OptionalAuth></AppLayout>} />
             </Routes>
           </div>
           <Toaster />
