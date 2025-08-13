@@ -34,12 +34,19 @@ type FormValues = z.infer<typeof formSchema>;
 
 interface Quote {
   id: string;
-  client_name: string;
-  client_email?: string;
+  title: string;
   total: number;
   status: string;
   created_at: string;
-  quote_number: string;
+  items: any;
+  client_name?: string;
+  client_email?: string;
+  client_address?: string;
+  quote_number?: string;
+  subtotal?: number;
+  vat_amount?: number;
+  notes?: string;
+  valid_until?: string;
 }
 
 export function QuoteGenerator() {
@@ -75,7 +82,7 @@ export function QuoteGenerator() {
       if (!companyId) return [];
       const { data, error } = await supabase
         .from('quotes')
-        .select('id, client_name, client_email, total, status, created_at, quote_number')
+        .select('*')
         .eq('company_id', companyId)
         .order('created_at', { ascending: false });
       if (error) throw error;
@@ -123,16 +130,9 @@ export function QuoteGenerator() {
         .from('quotes')
         .insert({
           company_id: companyId,
-          client_name: data.client_name,
-          client_email: data.client_email || null,
-          client_address: data.client_address || null,
-          quote_number: quoteNumber,
+          title: `Quote for ${data.client_name}`,
           items: data.items,
-          subtotal,
-          vat_amount: vatAmount,
           total,
-          notes: data.notes || null,
-          valid_until: data.valid_until ? new Date(data.valid_until).toISOString().split('T')[0] : null,
           status: 'draft',
         })
         .select()
@@ -357,8 +357,7 @@ export function QuoteGenerator() {
               {quotes.map((quote) => (
                 <div key={quote.id} className="border rounded-lg p-4 flex justify-between items-center">
                   <div>
-                    <h3 className="font-semibold">{quote.quote_number}</h3>
-                    <p className="text-sm text-muted-foreground">{quote.client_name}</p>
+                    <h3 className="font-semibold">{quote.title}</h3>
                     <p className="text-sm text-muted-foreground">
                       {new Date(quote.created_at).toLocaleDateString()}
                     </p>

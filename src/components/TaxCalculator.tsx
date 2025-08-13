@@ -97,13 +97,26 @@ export function TaxCalculator() {
     mutationFn: async (data: { inputData: any; results: TaxCalculation }) => {
       if (!companyId) throw new Error('No company ID');
       
+      // Convert TaxCalculation to plain object for JSON storage
+      const resultsForDb = {
+        grossIncome: data.results.grossIncome,
+        vatAmount: data.results.vatAmount,
+        netIncome: data.results.netIncome,
+        incomeTax: data.results.incomeTax,
+        nationalInsurance: data.results.nationalInsurance,
+        corporationTax: data.results.corporationTax,
+        takeHome: data.results.takeHome,
+        vatQuarterly: data.results.vatQuarterly,
+        recommendations: data.results.recommendations,
+      };
+
       const { error } = await supabase
         .from('tax_calculations')
         .insert({
           company_id: companyId,
           calculation_type: data.inputData.businessType || 'general',
           input_data: data.inputData,
-          results: data.results,
+          results: resultsForDb,
           tax_year: '2024/25',
         });
 
