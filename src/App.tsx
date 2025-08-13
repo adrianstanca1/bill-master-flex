@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/sonner';
-import { SidebarProvider } from '@/components/ui/sidebar';
+
 import { RequireAuth } from '@/components/RequireAuth';
 import { OptionalAuth } from '@/components/OptionalAuth';
 import { SecurityMonitor } from '@/components/SecurityMonitor';
@@ -24,6 +24,8 @@ import Settings from '@/pages/Settings';
 import NotFound from '@/pages/NotFound';
 import { applyUserTheme } from '@/lib/theme';
 import SiteManager from '@/pages/SiteManager';
+import Projects from '@/pages/Projects';
+import HR from '@/pages/HR';
 import { TopNavigation } from '@/components/TopNavigation';
 
 const queryClient = new QueryClient({
@@ -38,14 +40,12 @@ const queryClient = new QueryClient({
 
 function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <SidebarProvider>
-      <div className="min-h-screen w-full bg-background flex flex-col">
-        <TopNavigation />
-        <div className="flex-1 overflow-hidden">
-          {children}
-        </div>
+    <div className="min-h-screen w-full bg-background flex flex-col">
+      <TopNavigation />
+      <div className="flex-1">
+        {children}
       </div>
-    </SidebarProvider>
+    </div>
   );
 }
 
@@ -74,6 +74,8 @@ function App() {
               <Route path="/quotes" element={<AppLayout><OptionalAuth><Quotes /></OptionalAuth></AppLayout>} />
               <Route path="/variations" element={<AppLayout><OptionalAuth><Variations /></OptionalAuth></AppLayout>} />
               <Route path="/crm" element={<AppLayout><OptionalAuth><CRM /></OptionalAuth></AppLayout>} />
+              <Route path="/projects" element={<AppLayout><OptionalAuth><Projects /></OptionalAuth></AppLayout>} />
+              <Route path="/hr" element={<AppLayout><OptionalAuth><HR /></OptionalAuth></AppLayout>} />
               <Route path="/advisor" element={<AppLayout><OptionalAuth><Advisor /></OptionalAuth></AppLayout>} />
               <Route path="/agents" element={<AppLayout><OptionalAuth><Agents /></OptionalAuth></AppLayout>} />
               {/* Keep security features behind auth */}

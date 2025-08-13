@@ -36,8 +36,8 @@ export function ResponsiveLayout({
   };
 
   return (
-    <MobileOptimized className={cn(
-      'w-full mx-auto',
+    <main className={cn(
+      'w-full mx-auto min-h-[calc(100vh-4rem)]',
       maxWidthClasses[maxWidth],
       paddingClasses[padding],
       isMobile ? 'safe-area-top safe-area-bottom' : '',
@@ -49,6 +49,6 @@ export function ResponsiveLayout({
       )}>
         {children}
       </div>
-    </MobileOptimized>
+    </main>
   );
 }

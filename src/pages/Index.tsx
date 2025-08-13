@@ -25,52 +25,121 @@ const Index = () => {
         }}
       />
       
-      <div className="container mx-auto py-8">
+      {/* Hero Section */}
+      <section className="hero-section py-16 px-4">
+        <div className="container mx-auto text-center">
+          <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
+            UK Construction
+            <span className="block bg-gradient-primary bg-clip-text text-transparent">
+              Business Platform
+            </span>
+          </h1>
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
+            Your complete construction business management solution. Handle invoicing, project management, 
+            team coordination, and AI-powered business intelligence all in one professional platform.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button size="lg" asChild className="text-lg px-8 py-3">
+              <Link to="/dashboard">Get Started</Link>
+            </Button>
+            <Button size="lg" variant="outline" asChild className="text-lg px-8 py-3">
+              <Link to="/business-manager">View Demo</Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      <div className="container mx-auto py-12 px-4">
         <GuestBanner />
         
-        <header className="mb-8">
-          <h1 className="text-3xl font-bold tracking-tight">UK Construction Business Dashboard</h1>
-          <p className="mt-2 text-muted-foreground max-w-3xl">
-            Your all‑in‑one home for invoicing, pricing suggestions, tender discovery, VAT/CIS advice,
-            and admin automation. Powered by AI agents to save you time and money.
-          </p>
-          <nav className="mt-4 flex gap-3">
-            <Button asChild>
-              <Link to="/dashboard">Open Dashboard</Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link to="/invoices">Open Invoice Generator</Link>
-            </Button>
-            <Button variant="ghost" asChild>
-              <Link to="/auth">Sign in</Link>
-            </Button>
-          </nav>
-        </header>
+        {/* Features Grid */}
+        <section className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 mb-16">
+          <div className="modern-card p-6">
+            <div className="flex items-center mb-4">
+              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold ml-3">Project Management</h3>
+            </div>
+            <p className="text-muted-foreground">Complete project tracking with timesheets, progress monitoring, and team coordination.</p>
+          </div>
 
-        <main className="grid gap-8 pb-12">
-          <section className="card">
-            <h2 className="text-xl font-semibold mb-3">AI Coaches</h2>
-            <p className="text-sm text-muted-foreground mb-4">
-              Ask anything about pricing, cash flow, client emails, compliance or growth. The input box uses improved contrast for readability.
+          <div className="modern-card p-6">
+            <div className="flex items-center mb-4">
+              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold ml-3">Financial Management</h3>
+            </div>
+            <p className="text-muted-foreground">Professional invoicing, quotes, variations, and comprehensive financial tracking.</p>
+          </div>
+
+          <div className="modern-card p-6">
+            <div className="flex items-center mb-4">
+              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold ml-3">AI-Powered Tools</h3>
+            </div>
+            <p className="text-muted-foreground">Smart business intelligence, automated advisors, and AI agents to streamline operations.</p>
+          </div>
+        </section>
+
+        {/* Main Sections */}
+        <div className="grid gap-8 lg:grid-cols-2">
+          <section className="modern-card p-6">
+            <h2 className="text-2xl font-semibold mb-4">AI Business Coach</h2>
+            <p className="text-muted-foreground mb-6">
+              Get instant advice on pricing, cash flow, compliance, and business growth. Our AI understands UK construction industry specifics.
             </p>
             <AgentChat />
           </section>
 
-          <section className="card">
-            <h2 className="text-xl font-semibold mb-3">SmartOps Panel</h2>
-            <p className="text-sm text-muted-foreground mb-4">Scan your business, find tenders, generate quotes and get tax advice (UK construction).</p>
+          <section className="modern-card p-6">
+            <h2 className="text-2xl font-semibold mb-4">SmartOps Control Center</h2>
+            <p className="text-muted-foreground mb-6">
+              Automated business scanning, tender discovery, quote generation, and regulatory compliance management.
+            </p>
             <SmartOpsPanel />
           </section>
+        </div>
 
-          <aside className="card">
-            <h2 className="text-xl font-semibold mb-3">Quick tips</h2>
-            <ul className="list-disc pl-5 text-sm text-muted-foreground space-y-1">
-              <li>Use Quote tab for fast, margin‑aware estimates.</li>
-              <li>Search tenders by industry and country; save promising ones.</li>
-              <li>Draft payment reminders or client emails in AI Coaches.</li>
-            </ul>
-          </aside>
-        </main>
+        {/* Quick Access */}
+        <section className="modern-card p-6 mt-8">
+          <h2 className="text-2xl font-semibold mb-4">Quick Access</h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <Button variant="outline" size="lg" asChild className="h-16 flex-col">
+              <Link to="/invoices">
+                <span className="text-sm font-semibold">Invoices</span>
+                <span className="text-xs text-muted-foreground">Create & manage</span>
+              </Link>
+            </Button>
+            <Button variant="outline" size="lg" asChild className="h-16 flex-col">
+              <Link to="/projects">
+                <span className="text-sm font-semibold">Projects</span>
+                <span className="text-xs text-muted-foreground">Track progress</span>
+              </Link>
+            </Button>
+            <Button variant="outline" size="lg" asChild className="h-16 flex-col">
+              <Link to="/crm">
+                <span className="text-sm font-semibold">Clients</span>
+                <span className="text-xs text-muted-foreground">Manage relationships</span>
+              </Link>
+            </Button>
+            <Button variant="outline" size="lg" asChild className="h-16 flex-col">
+              <Link to="/hr">
+                <span className="text-sm font-semibold">Team</span>
+                <span className="text-xs text-muted-foreground">HR management</span>
+              </Link>
+            </Button>
+          </div>
+        </section>
       </div>
     </>
   );
