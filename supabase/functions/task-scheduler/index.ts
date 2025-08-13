@@ -12,9 +12,22 @@ serve(async (req) => {
 
   try {
     // Require secret gate for all calls (no JWT)
-    const CRON_SECRET = Deno.env.get("CRON_SECRET");
-    const provided = req.headers.get("x-cron-secret") || req.headers.get("x-cron-key");
-    if (!CRON_SECRET || !provided || provided !== CRON_SECRET) {
+    const CRON_SECRET = Deno.env.get("CRON_SECRET") || "";
+    const provided = req.headers.get("x-cron-secret") || req.headers.get("x-cron-key") || "";
+    // Constant-time compare to mitigate timing attacks
+    const safeEqual = (a: string, b: string) => {
+      const enc = new TextEncoder();
+      const aBytes = enc.encode(a);
+      const bBytes = enc.encode(b);
+      if (aBytes.length !== bBytes.length) return false;
+      let result = 0;
+      for (let i = 0; i < aBytes.length; i++) {
+        result |= aBytes[i] ^ bBytes[i];
+      }
+      return result === 0;
+    };
+    if (!CRON_SECRET || !provided || !safeEqual(provided, CRON_SECRET)) {
+      console.warn("task-scheduler forbidden request");
       return json({ error: "Forbidden" }, 403);
     }
 

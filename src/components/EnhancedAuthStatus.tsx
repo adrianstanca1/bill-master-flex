@@ -50,7 +50,7 @@ export default function EnhancedAuthStatus() {
 
       <div className="flex items-center gap-2">
         <Link to="/security">
-          <Button variant="outline" size="sm" className="flex items-center gap-1">
+          <Button variant="secondary" size="sm" className="flex items-center gap-1">
             <Shield className="h-3 w-3" />
             Security
           </Button>

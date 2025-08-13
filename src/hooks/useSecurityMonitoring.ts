@@ -16,6 +16,22 @@ interface SecurityAlert {
 export function useSecurityMonitoring() {
   const { toast } = useToast();
 
+  // Determine current user's role
+  const { data: profile } = useQuery({
+    queryKey: ['my-profile'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, role, company_id')
+        .eq('id', user.id)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+
   // Monitor for suspicious activity
   const { data: suspiciousActivity } = useQuery({
     queryKey: ['suspicious-activity'],
@@ -84,11 +100,12 @@ export function useSecurityMonitoring() {
       return alerts;
     },
     refetchInterval: 60000, // Check every minute
+    enabled: !!profile && (profile as any)?.role === 'admin',
   });
 
   // Show alerts when detected
   useEffect(() => {
-    if (suspiciousActivity && suspiciousActivity.length > 0) {
+    if ((profile as any)?.role === 'admin' && suspiciousActivity && suspiciousActivity.length > 0) {
       suspiciousActivity.forEach(alert => {
         if (alert.type === 'high') {
           toast({
@@ -104,7 +121,7 @@ export function useSecurityMonitoring() {
         }
       });
     }
-  }, [suspiciousActivity, toast]);
+  }, [suspiciousActivity, toast, profile]);
 
   // Monitor authentication events
   const { data: authEvents } = useQuery({
@@ -141,6 +158,6 @@ export function useSecurityMonitoring() {
     },
     suspiciousActivity: suspiciousActivity || [],
     authEvents,
-    isMonitoring: true
+    isMonitoring: (profile as any)?.role === 'admin'
   };
 }
