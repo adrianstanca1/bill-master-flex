@@ -1,32 +1,18 @@
 
 import React from 'react';
-import { InvoiceManager } from '@/components/InvoiceManager';
+import { InvoiceDashboard } from '@/components/InvoiceDashboard';
 import { ResponsiveLayout } from '@/components/ResponsiveLayout';
 import SEO from '@/components/SEO';
-
-import MockQuoteTester from '@/components/MockQuoteTester';
 
 export default function Invoices() {
   return (
     <div className="min-h-screen bg-background">
-      
       <ResponsiveLayout>
         <SEO 
-          title="Invoices" 
-          description="Manage your construction business invoices - create, track, and send invoices"
+          title="Invoices | UK Construction" 
+          description="Comprehensive invoice management for your construction business - create, track, and send professional invoices"
         />
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold">Invoice Management</h1>
-          <p className="text-muted-foreground">
-            Create, manage and track your invoices with our interactive dashboard
-          </p>
-        </div>
-        <div className="mb-6">
-          <MockQuoteTester />
-        </div>
-        <div className="widget-container">
-          <InvoiceManager />
-        </div>
+        <InvoiceDashboard />
       </ResponsiveLayout>
     </div>
   );
