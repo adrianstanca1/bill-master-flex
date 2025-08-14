@@ -41,3 +41,6 @@ verify_jwt = true
 
 [functions.bid-package]
 verify_jwt = true
+
+[functions.webhook-manager]
+verify_jwt = true

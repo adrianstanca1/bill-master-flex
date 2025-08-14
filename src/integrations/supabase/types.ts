@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.12 (cd3cf9e)"
@@ -1341,6 +1341,45 @@ export type Database = {
           },
         ]
       }
+      webhooks: {
+        Row: {
+          company_id: string
+          created_at: string
+          endpoint_url: string
+          event_type: string
+          id: string
+          is_active: boolean
+          last_triggered: string | null
+          retry_count: number | null
+          secret_key: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          endpoint_url: string
+          event_type: string
+          id?: string
+          is_active?: boolean
+          last_triggered?: string | null
+          retry_count?: number | null
+          secret_key: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          endpoint_url?: string
+          event_type?: string
+          id?: string
+          is_active?: boolean
+          last_triggered?: string | null
+          retry_count?: number | null
+          secret_key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -1385,9 +1424,9 @@ export type Database = {
       test_rls_policies: {
         Args: Record<PropertyKey, never>
         Returns: {
-          table_name: string
           policy_test: string
           result: boolean
+          table_name: string
         }[]
       }
     }

@@ -7,6 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import SEO from "@/components/SEO";
 import { applyUserTheme, loadTheme, saveTheme, type ThemePreset } from "@/lib/theme";
+import { WebhookManager } from "@/components/WebhookManager";
+import { BankingConnections } from "@/components/BankingConnections";
+import { HMRCConnections } from "@/components/HMRCConnections";
 
 
 const LS = "as-settings";
@@ -177,6 +180,13 @@ export default function Settings() {
           </div>
         </CardContent>
       </Card>
+
+      <div className="grid gap-6 md:grid-cols-2">
+        <BankingConnections />
+        <HMRCConnections />
+      </div>
+
+      <WebhookManager />
     </ResponsiveLayout>
     </>
   );
