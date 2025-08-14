@@ -53,37 +53,14 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-				// Enhanced Color System
-				surface: {
-					DEFAULT: 'hsl(var(--surface))',
-					hover: 'hsl(var(--surface-hover))',
-					active: 'hsl(var(--surface-active))',
-					glass: 'hsl(var(--surface-glass))'
-				},
-				emerald: {
-					DEFAULT: 'hsl(var(--emerald))',
-					dark: 'hsl(var(--emerald-dark))',
-					darker: 'hsl(var(--emerald-darker))',
-					light: 'hsl(var(--emerald-light))'
-				},
-				cyan: {
-					DEFAULT: 'hsl(var(--cyan))',
-					dark: 'hsl(var(--cyan-dark))'
-				},
-				purple: {
-					DEFAULT: 'hsl(var(--purple))',
-					dark: 'hsl(var(--purple-dark))'
-				},
-				orange: {
-					DEFAULT: 'hsl(var(--orange))',
-					dark: 'hsl(var(--orange-dark))'
-				},
-				text: {
-					primary: 'hsl(var(--text-primary))',
-					secondary: 'hsl(var(--text-secondary))',
-					muted: 'hsl(var(--text-muted))',
-					accent: 'hsl(var(--text-accent))'
-				}
+				// Futuristic Color System
+				"neon-green": "hsl(var(--neon-green))",
+				"neon-blue": "hsl(var(--neon-blue))",
+				"neon-purple": "hsl(var(--neon-purple))",
+				"neon-orange": "hsl(var(--neon-orange))",
+				"cyber-gray": "hsl(var(--cyber-gray))",
+				"dark-surface": "hsl(var(--dark-surface))",
+				"darker-surface": "hsl(var(--darker-surface))",
 			},
 			backgroundImage: {
 				'gradient-primary': 'var(--gradient-primary)',

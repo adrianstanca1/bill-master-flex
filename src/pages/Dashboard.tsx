@@ -17,36 +17,37 @@ const Dashboard: React.FC = () => {
         description="Your construction business dashboard with real-time metrics, project tracking, and team management tools."
       />
       <ResponsiveLayout>
-        <div className="space-y-6">
+        <div className="space-y-8 animate-fade-in">
           <GuestBanner />
           
-          <div>
-            <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
-            <p className="text-muted-foreground">
-              Overview of your construction business performance and activities
+          <div className="cyber-card p-8 hover-glow">
+            <h1 className="text-4xl font-bold text-gradient mb-3">Dashboard</h1>
+            <p className="text-muted-foreground text-lg">
+              Command center for your construction business operations
             </p>
           </div>
 
           {/* Quick Stats */}
-          <QuickStatsGrid />
+          <div className="cyber-grid">
+            <QuickStatsGrid />
+          </div>
 
           {/* Project Metrics */}
-          <ProjectMetrics />
+          <div className="cyber-card p-6 hover-glow">
+            <ProjectMetrics />
+          </div>
 
           {/* Main Content Grid */}
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {/* Timesheet Tracker */}
-            <div className="lg:col-span-1">
+          <div className="cyber-grid">
+            <div className="cyber-card p-6 hover-glow">
               <TimesheetTracker />
             </div>
 
-            {/* Recent Activity */}
-            <div className="lg:col-span-1">
+            <div className="cyber-card p-6 hover-glow">
               <RecentActivity />
             </div>
 
-            {/* Reminders */}
-            <div className="lg:col-span-1">
+            <div className="cyber-card p-6 hover-glow">
               <RemindersWidget />
             </div>
           </div>

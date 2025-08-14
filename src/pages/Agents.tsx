@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Widget, WidgetHeader, WidgetContent } from "@/components/ui/widget";
+
 
 
 const Agents: React.FC = () => {
@@ -98,119 +98,174 @@ const Agents: React.FC = () => {
         <SEO title="AI Agents Hub | AS PRO" description="Discover grants, assess risks, and generate bid packages with AI." jsonLd={jsonLd} />
         <h1 className="sr-only">AI Agents Hub</h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Widget variant="floating" animated>
-          <WidgetHeader title="FundingBot" subtitle="Discover grants and funding opportunities" />
-          <WidgetContent variant="padded">
-            <div className="space-y-3">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <Input placeholder="Keywords (e.g. retrofit, SME)" value={fundKeywords} onChange={(e) => setFundKeywords(e.target.value)} />
-                <Input placeholder="Location" value={fundLocation} onChange={(e) => setFundLocation(e.target.value)} />
-                <Button onClick={findFunding} disabled={loadingFunding}>
-                  {loadingFunding ? "Searching..." : "Find Grants"}
-                </Button>
-              </div>
-              <div className="space-y-2">
-                {fundResults.map((g, idx) => (
-                  <Card key={idx} className="hover-scale">
-                    <CardHeader>
-                      <CardTitle className="text-base">{g.title}</CardTitle>
-                      {g.amount && <CardDescription>Up to {g.amount}</CardDescription>}
-                    </CardHeader>
-                    <CardContent className="text-sm text-muted-foreground">
-                      <div className="flex flex-wrap gap-2">
-                        {g.deadline && <span>Deadline: {g.deadline}</span>}
-                        {g.relevance && <span>Relevance: {g.relevance}/100</span>}
-                      </div>
-                      {g.url && (
-                        <a className="story-link mt-2 inline-block" href={g.url} target="_blank" rel="noopener noreferrer" aria-label={`Open ${g.title}`}>
-                          View details ↗
-                        </a>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
-                {fundResults.length === 0 && <p className="text-sm text-muted-foreground">No results yet. Try a search.</p>}
-              </div>
+      <div className="cyber-grid">
+        <div className="cyber-card p-6 hover-glow">
+          <div className="mb-6">
+            <h2 className="text-xl font-bold text-gradient mb-2">FundingBot</h2>
+            <p className="text-muted-foreground text-sm">Discover grants and funding opportunities</p>
+          </div>
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <Input 
+                placeholder="Keywords (e.g. retrofit, SME)" 
+                value={fundKeywords} 
+                onChange={(e) => setFundKeywords(e.target.value)}
+                className="bg-cyber-gray border-border/30"
+              />
+              <Input 
+                placeholder="Location" 
+                value={fundLocation} 
+                onChange={(e) => setFundLocation(e.target.value)}
+                className="bg-cyber-gray border-border/30"
+              />
+              <Button onClick={findFunding} disabled={loadingFunding} className="btn-neon">
+                {loadingFunding ? "Searching..." : "Find Grants"}
+              </Button>
             </div>
-          </WidgetContent>
-        </Widget>
-
-        <Widget variant="glass" animated>
-          <WidgetHeader title="RiskBot" subtitle="Analyze text for compliance and financial risks" />
-          <WidgetContent variant="padded">
-            <div className="space-y-3">
-              <Textarea rows={6} placeholder="Paste a quote, invoice, or project notes to analyze risks" value={riskInput} onChange={(e) => setRiskInput(e.target.value)} />
-              <div className="flex justify-end">
-                <Button onClick={analyzeRisk} disabled={loadingRisk}>{loadingRisk ? "Analyzing..." : "Analyze"}</Button>
-              </div>
-              <ul className="space-y-2">
-                {riskResults.map((r, idx) => (
-                  <li key={idx} className="border rounded-md p-3">
-                    <div className="font-medium">{r.title || r.issue}</div>
-                    <div className="text-sm text-muted-foreground">Severity: {r.severity || r.score}</div>
-                    {r.recommendation && <div className="text-sm mt-1">Action: {r.recommendation}</div>}
-                  </li>
-                ))}
-                {riskResults.length === 0 && <p className="text-sm text-muted-foreground">No analysis yet.</p>}
-              </ul>
-            </div>
-          </WidgetContent>
-        </Widget>
-
-        <Widget variant="neon" animated>
-          <WidgetHeader title="Bid Package Generator" subtitle="Assemble cover letter, checklist, and summaries" />
-          <WidgetContent variant="padded">
-            <div className="space-y-3">
-              <Input placeholder="Tender URL (optional)" value={tenderUrl} onChange={(e) => setTenderUrl(e.target.value)} />
-              <Textarea rows={4} placeholder="Company strengths or requirements (optional)" value={companyNotes} onChange={(e) => setCompanyNotes(e.target.value)} />
-              <div className="flex justify-end">
-                <Button onClick={generateBid} disabled={loadingBid}>{loadingBid ? "Generating..." : "Generate"}</Button>
-              </div>
-
-              {bidResult && (
-                <div className="space-y-4">
-                  {bidResult.cover_letter && (
-                    <Card>
-                      <CardHeader><CardTitle>Cover Letter</CardTitle></CardHeader>
-                      <CardContent className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap">
-                        {bidResult.cover_letter}
-                      </CardContent>
-                    </Card>
+            <div className="space-y-3 max-h-96 overflow-y-auto">
+              {fundResults.map((g, idx) => (
+                <div key={idx} className="glass-card p-4 hover-lift">
+                  <h3 className="font-semibold mb-1">{g.title}</h3>
+                  {g.amount && <p className="text-neon-green text-sm">Up to {g.amount}</p>}
+                  <div className="flex flex-wrap gap-2 mt-2 text-xs">
+                    {g.deadline && <span className="status-warning">Deadline: {g.deadline}</span>}
+                    {g.relevance && <span className="status-online">Relevance: {g.relevance}/100</span>}
+                  </div>
+                  {g.url && (
+                    <a 
+                      className="text-neon-blue hover:text-neon-green transition-colors mt-2 inline-block text-sm" 
+                      href={g.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                    >
+                      View details ↗
+                    </a>
                   )}
-                  {bidResult.compliance_checklist && (
-                    <Card>
-                      <CardHeader><CardTitle>Compliance Checklist</CardTitle></CardHeader>
-                      <CardContent>
-                        <ul className="list-disc pl-5 space-y-1">
-                          {bidResult.compliance_checklist.map((c: string, i: number) => <li key={i}>{c}</li>)}
-                        </ul>
-                      </CardContent>
-                    </Card>
-                  )}
-                  {bidResult.summary && (
-                    <Card>
-                      <CardHeader><CardTitle>Summary</CardTitle></CardHeader>
-                      <CardContent className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap">
-                        {bidResult.summary}
-                      </CardContent>
-                    </Card>
-                  )}
+                </div>
+              ))}
+              {fundResults.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground">
+                  <p>No results yet. Try a search.</p>
                 </div>
               )}
             </div>
-          </WidgetContent>
-        </Widget>
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Procurement Manager</CardTitle>
-            <CardDescription>Track materials, requests, and supplier notes (basic)</CardDescription>
-          </CardHeader>
-          <CardContent className="text-sm text-muted-foreground">
-            <p>This is a lightweight UI placeholder. We can wire this to your database when ready.</p>
-          </CardContent>
-        </Card>
+        <div className="cyber-card p-6 hover-glow">
+          <div className="mb-6">
+            <h2 className="text-xl font-bold text-gradient mb-2">RiskBot</h2>
+            <p className="text-muted-foreground text-sm">Analyze text for compliance and financial risks</p>
+          </div>
+          <div className="space-y-4">
+            <Textarea 
+              rows={6} 
+              placeholder="Paste a quote, invoice, or project notes to analyze risks" 
+              value={riskInput} 
+              onChange={(e) => setRiskInput(e.target.value)}
+              className="bg-cyber-gray border-border/30"
+            />
+            <div className="flex justify-end">
+              <Button onClick={analyzeRisk} disabled={loadingRisk} className="btn-neon">
+                {loadingRisk ? "Analyzing..." : "Analyze"}
+              </Button>
+            </div>
+            <div className="space-y-3 max-h-64 overflow-y-auto">
+              {riskResults.map((r, idx) => (
+                <div key={idx} className="glass-card p-4">
+                  <div className="font-medium mb-1">{r.title || r.issue}</div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="status-warning">Severity: {r.severity || r.score}</span>
+                  </div>
+                  {r.recommendation && (
+                    <div className="text-sm text-muted-foreground">
+                      Action: {r.recommendation}
+                    </div>
+                  )}
+                </div>
+              ))}
+              {riskResults.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground">
+                  <p>No analysis yet.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="cyber-card p-6 hover-glow">
+          <div className="mb-6">
+            <h2 className="text-xl font-bold text-gradient mb-2">Bid Package Generator</h2>
+            <p className="text-muted-foreground text-sm">Assemble cover letter, checklist, and summaries</p>
+          </div>
+          <div className="space-y-4">
+            <Input 
+              placeholder="Tender URL (optional)" 
+              value={tenderUrl} 
+              onChange={(e) => setTenderUrl(e.target.value)}
+              className="bg-cyber-gray border-border/30"
+            />
+            <Textarea 
+              rows={4} 
+              placeholder="Company strengths or requirements (optional)" 
+              value={companyNotes} 
+              onChange={(e) => setCompanyNotes(e.target.value)}
+              className="bg-cyber-gray border-border/30"
+            />
+            <div className="flex justify-end">
+              <Button onClick={generateBid} disabled={loadingBid} className="btn-neon">
+                {loadingBid ? "Generating..." : "Generate"}
+              </Button>
+            </div>
+
+            {bidResult && (
+              <div className="space-y-4 max-h-96 overflow-y-auto">
+                {bidResult.cover_letter && (
+                  <div className="glass-card p-4">
+                    <h3 className="font-semibold mb-3 text-gradient">Cover Letter</h3>
+                    <div className="text-sm whitespace-pre-wrap text-muted-foreground">
+                      {bidResult.cover_letter}
+                    </div>
+                  </div>
+                )}
+                {bidResult.compliance_checklist && (
+                  <div className="glass-card p-4">
+                    <h3 className="font-semibold mb-3 text-gradient">Compliance Checklist</h3>
+                    <ul className="space-y-1 text-sm">
+                      {bidResult.compliance_checklist.map((c: string, i: number) => (
+                        <li key={i} className="flex items-start gap-2">
+                          <span className="text-neon-green">•</span>
+                          <span>{c}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {bidResult.summary && (
+                  <div className="glass-card p-4">
+                    <h3 className="font-semibold mb-3 text-gradient">Summary</h3>
+                    <div className="text-sm whitespace-pre-wrap text-muted-foreground">
+                      {bidResult.summary}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="cyber-card p-6 hover-glow">
+          <div className="mb-4">
+            <h2 className="text-xl font-bold text-gradient mb-2">Procurement Manager</h2>
+            <p className="text-muted-foreground text-sm">Track materials, requests, and supplier notes</p>
+          </div>
+          <div className="text-center py-8 text-muted-foreground">
+            <p className="text-sm">Advanced procurement features coming soon...</p>
+            <div className="mt-4 inline-block status-warning">
+              Development Phase
+            </div>
+          </div>
+        </div>
       </div>
     </ResponsiveLayout>
     </>
