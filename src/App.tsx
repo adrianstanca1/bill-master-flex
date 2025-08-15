@@ -5,7 +5,7 @@ import { Toaster } from '@/components/ui/sonner';
 
 import { RequireAuth } from '@/components/RequireAuth';
 import { OptionalAuth } from '@/components/OptionalAuth';
-import { SecurityMonitor } from '@/components/SecurityMonitor';
+
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import Index from '@/pages/Index';
 import Auth from '@/pages/Auth';
@@ -49,12 +49,6 @@ function AppLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-function ConditionalSecurityMonitor() {
-  const location = useLocation();
-  // Hide security UI on home and dashboard, keep active elsewhere
-  if (location.pathname === "/" || location.pathname === "/dashboard") return null;
-  return <SecurityMonitor />;
-}
 
 function App() {
   useEffect(() => { applyUserTheme(); }, []);
@@ -62,7 +56,6 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ErrorBoundary>
         <Router>
-          <ConditionalSecurityMonitor />
           <div className="min-h-screen bg-background">
             <Routes>
               <Route path="/" element={<AppLayout><OptionalAuth><Index /></OptionalAuth></AppLayout>} />
