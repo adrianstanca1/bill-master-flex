@@ -152,6 +152,36 @@ export type Database = {
         }
         Relationships: []
       }
+      business_analytics: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          metric_date: string
+          metric_type: string
+          metric_value: number
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          metric_date?: string
+          metric_type: string
+          metric_value: number
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          metric_date?: string
+          metric_type?: string
+          metric_value?: number
+        }
+        Relationships: []
+      }
       checklist_responses: {
         Row: {
           checklist_id: string
@@ -541,6 +571,135 @@ export type Database = {
         }
         Relationships: []
       }
+      project_assignments: {
+        Row: {
+          assigned_at: string | null
+          assigned_by: string | null
+          company_id: string
+          id: string
+          project_id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          company_id: string
+          id?: string
+          project_id: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          company_id?: string
+          id?: string
+          project_id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_assignments_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_milestones: {
+        Row: {
+          company_id: string
+          completed_at: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          due_date: string | null
+          id: string
+          priority: string | null
+          project_id: string
+          status: string | null
+          title: string
+        }
+        Insert: {
+          company_id: string
+          completed_at?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          priority?: string | null
+          project_id: string
+          status?: string | null
+          title: string
+        }
+        Update: {
+          company_id?: string
+          completed_at?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          priority?: string | null
+          project_id?: string
+          status?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_milestones_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_status_history: {
+        Row: {
+          changed_at: string | null
+          changed_by: string | null
+          company_id: string
+          id: string
+          new_status: string
+          notes: string | null
+          old_status: string | null
+          project_id: string
+        }
+        Insert: {
+          changed_at?: string | null
+          changed_by?: string | null
+          company_id: string
+          id?: string
+          new_status: string
+          notes?: string | null
+          old_status?: string | null
+          project_id: string
+        }
+        Update: {
+          changed_at?: string | null
+          changed_by?: string | null
+          company_id?: string
+          id?: string
+          new_status?: string
+          notes?: string | null
+          old_status?: string | null
+          project_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_status_history_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_tools: {
         Row: {
           created_at: string
@@ -579,42 +738,57 @@ export type Database = {
       }
       projects: {
         Row: {
+          budget: number | null
           client: string | null
           company_id: string
           created_at: string
           end_date: string | null
+          estimated_completion: string | null
           id: string
           location: string | null
           meta: Json
           name: string
+          progress: number | null
           project_manager_user_id: string | null
+          spent: number | null
           start_date: string | null
+          status: string | null
           updated_at: string
         }
         Insert: {
+          budget?: number | null
           client?: string | null
           company_id: string
           created_at?: string
           end_date?: string | null
+          estimated_completion?: string | null
           id?: string
           location?: string | null
           meta?: Json
           name: string
+          progress?: number | null
           project_manager_user_id?: string | null
+          spent?: number | null
           start_date?: string | null
+          status?: string | null
           updated_at?: string
         }
         Update: {
+          budget?: number | null
           client?: string | null
           company_id?: string
           created_at?: string
           end_date?: string | null
+          estimated_completion?: string | null
           id?: string
           location?: string | null
           meta?: Json
           name?: string
+          progress?: number | null
           project_manager_user_id?: string | null
+          spent?: number | null
           start_date?: string | null
+          status?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -1385,6 +1559,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_project_health: {
+        Args: { project_id: string }
+        Returns: number
+      }
       is_checklist_company_member: {
         Args: { _checklist_id: string }
         Returns: boolean
