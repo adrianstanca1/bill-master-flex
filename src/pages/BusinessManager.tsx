@@ -8,57 +8,38 @@ import { ProjectsOverview } from "@/components/ProjectsOverview";
 import { FinancialSummary } from "@/components/FinancialSummary";
 import { QuickActionsPanel } from "@/components/QuickActionsPanel";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
+import { useBusinessAnalytics } from "@/hooks/useBusinessAnalytics";
 import { useNavigate } from "react-router-dom";
+import { cn } from "@/lib/utils";
 
 const BusinessManager: React.FC = () => {
   const navigate = useNavigate();
   const { totalRevenue, pendingInvoices, overdueAmount, activeProjects, recentInvoices, loading } = useDashboardStats();
+  const { insights, dashboardData } = useBusinessAnalytics();
 
-  // Mock data for BusinessMetrics
+  // Enhanced business metrics with real analytics
   const businessMetricsData = {
     revenue: {
       current: totalRevenue,
-      target: totalRevenue * 1.2, // 20% above current as target
-      growth: 12.5
+      target: totalRevenue * 1.2,
+      growth: insights.revenueGrowth
     },
     projects: {
       active: activeProjects,
-      completed: Math.floor(activeProjects * 0.8),
+      completed: Math.floor(dashboardData.performance.deliveryRate || 0),
       pending: Math.floor(activeProjects * 0.3)
     },
     team: {
-      utilization: 85,
+      utilization: insights.teamUtilization,
       capacity: 100
+    },
+    financial: {
+      profitMargin: insights.profitMargin,
+      cashFlow: insights.cashFlowHealth,
+      budgetVariance: insights.budgetVariance
     }
   };
 
-  // Mock projects data
-  const mockProjects = [
-    {
-      id: "1",
-      name: "Office Complex Development",
-      client: "ABC Construction Ltd",
-      location: "London, UK",
-      status: "active" as const,
-      progress: 65,
-      startDate: "2024-01-15",
-      endDate: "2024-06-30",
-      budget: 250000,
-      spent: 162500
-    },
-    {
-      id: "2",
-      name: "Residential Extension",
-      client: "Johnson Family",
-      location: "Birmingham, UK",
-      status: "pending" as const,
-      progress: 0,
-      startDate: "2024-03-01",
-      endDate: "2024-08-15",
-      budget: 85000,
-      spent: 0
-    }
-  ];
 
   // Financial summary data
   const financialData = {
@@ -79,13 +60,11 @@ const BusinessManager: React.FC = () => {
   };
 
   const handleViewProject = (id: string) => {
-    console.log('Viewing project:', id);
-    // Navigate to project details when implemented
+    navigate(`/projects?view=${id}`);
   };
 
   const handleCreateProject = () => {
-    console.log('Creating new project');
-    // Navigate to project creation when implemented
+    navigate('/projects?mode=create');
   };
 
   const handleViewFinancials = () => {
@@ -98,10 +77,10 @@ const BusinessManager: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-background/90">
         <ResponsiveLayout>
           <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <div className="cyber-loader"></div>
           </div>
         </ResponsiveLayout>
       </div>
@@ -109,26 +88,36 @@ const BusinessManager: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-background/90">
       <ResponsiveLayout>
         <SEO 
           title="Business Manager | AS PRO" 
-          description="Comprehensive business management and analytics" 
+          description="Comprehensive business management and analytics dashboard with real-time insights" 
         />
         <div className="space-y-6">
-          <div>
-            <h1 className="text-3xl font-bold">Business Manager</h1>
-            <p className="text-muted-foreground mt-2">
-              Comprehensive overview and management of your construction business
+          <div className="cyber-header">
+            <h1 className="text-4xl font-bold text-gradient cyber-glow">Business Manager</h1>
+            <p className="text-muted-foreground mt-2 text-lg">
+              Advanced business intelligence and project management platform
             </p>
+            <div className="flex items-center gap-4 mt-4 text-sm">
+              <div className="cyber-stat">
+                <span className="text-cyber-primary font-medium">Health Score:</span>
+                <span className="ml-1">{Math.round(insights.cashFlowHealth)}%</span>
+              </div>
+              <div className="cyber-stat">
+                <span className="text-cyber-primary font-medium">Growth:</span>
+                <span className={cn("ml-1", insights.revenueGrowth >= 0 ? 'text-success' : 'text-destructive')}>
+                  {insights.revenueGrowth > 0 ? '+' : ''}{insights.revenueGrowth.toFixed(1)}%
+                </span>
+              </div>
+            </div>
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
               <BusinessMetrics data={businessMetricsData} />
               <ProjectsOverview 
-                projects={mockProjects}
                 onViewProject={handleViewProject}
                 onCreateProject={handleCreateProject}
               />
