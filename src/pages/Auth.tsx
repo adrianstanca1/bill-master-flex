@@ -134,6 +134,20 @@ export default function Auth() {
           }
         } else if (data?.session) {
           toast({ title: "Welcome!", description: "Account created successfully." });
+          
+          // Send welcome email
+          try {
+            await supabase.functions.invoke('welcome-email', {
+              body: {
+                email: email.trim(),
+                firstName: data.user?.user_metadata?.first_name || '',
+                lastName: data.user?.user_metadata?.last_name || '',
+                userId: data.user?.id
+              }
+            });
+          } catch (emailError) {
+            console.warn('Failed to send welcome email:', emailError);
+          }
         } else if (data?.user && !data?.session) {
           toast({ 
             title: "Check your email", 
