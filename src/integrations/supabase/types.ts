@@ -1599,6 +1599,14 @@ export type Database = {
         Args: { _tender_id: string }
         Returns: boolean
       }
+      setup_user_company: {
+        Args: {
+          company_country?: string
+          company_industry?: string
+          company_name: string
+        }
+        Returns: string
+      }
       test_rls_policies: {
         Args: Record<PropertyKey, never>
         Returns: {

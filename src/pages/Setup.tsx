@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { applyUserTheme, loadTheme, saveTheme, ThemePreset, ThemeSettings } from "@/lib/theme";
+import { useCompanySetup } from "@/hooks/useCompanySetup";
 import SEO from "@/components/SEO";
-
 
 const LS = "as-settings";
 
@@ -36,8 +36,8 @@ const defaults: SettingsData = {
 export default function Setup() {
   const [data, setData] = useState<SettingsData>(defaults);
   const [theme, setTheme] = useState<ThemeSettings>(loadTheme());
-  const [saving, setSaving] = useState(false);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const { setupCompany, loading } = useCompanySetup();
 
   useEffect(() => {
     // Load existing settings only
@@ -68,13 +68,28 @@ export default function Setup() {
     reader.readAsDataURL(file);
   }
 
-  function save() {
-    setSaving(true);
-    const toSave = { ...data, onboarded: true };
-    localStorage.setItem(LS, JSON.stringify(toSave));
-    saveTheme(theme);
-    applyUserTheme(theme);
-    setTimeout(() => setSaving(false), 600);
+  async function save() {
+    if (!data.companyName?.trim()) {
+      return;
+    }
+
+    try {
+      // Set up company in Supabase
+      await setupCompany({
+        companyName: data.companyName,
+        country: data.country,
+        industry: data.industry
+      });
+
+      // Save theme and other settings
+      const toSave = { ...data, onboarded: true };
+      localStorage.setItem(LS, JSON.stringify(toSave));
+      saveTheme(theme);
+      applyUserTheme(theme);
+    } catch (error) {
+      // Error is handled in the hook
+      console.error('Setup save error:', error);
+    }
   }
 
   return (
@@ -86,17 +101,59 @@ export default function Setup() {
         <p className="text-text-secondary">These settings power SmartOps, Quotes, and Tax tools. You can change them anytime.</p>
       </header>
 
-      <section className="card">
-        <h2 className="text-lg font-semibold mb-3">Company details</h2>
+      <section className="cyber-card p-6">
+        <h2 className="text-lg font-semibold mb-3 text-gradient">Company details</h2>
         <div className="grid md:grid-cols-2 gap-3">
-          <input className="input" placeholder="Company name" value={data.companyName||""} onChange={(e)=>setData({ ...data, companyName: e.target.value })} />
-          <input className="input" placeholder="Company ID" value={data.companyId||""} onChange={(e)=>setData({ ...data, companyId: e.target.value })} />
-          <input className="input" placeholder="Country" value={data.country||""} onChange={(e)=>setData({ ...data, country: e.target.value })} />
-          <input className="input" placeholder="Industry" value={data.industry||""} onChange={(e)=>setData({ ...data, industry: e.target.value })} />
-          <input className="input md:col-span-2" placeholder="Address" value={data.address||""} onChange={(e)=>setData({ ...data, address: e.target.value })} />
-          <input className="input" placeholder="Website" value={data.website||""} onChange={(e)=>setData({ ...data, website: e.target.value })} />
-          <input className="input" placeholder="Phone" value={data.phone||""} onChange={(e)=>setData({ ...data, phone: e.target.value })} />
-          <input className="input" type="email" placeholder="Contact email" value={data.contactEmail||""} onChange={(e)=>setData({ ...data, contactEmail: e.target.value })} />
+          <input 
+            className="w-full px-4 py-3 rounded-lg bg-muted border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" 
+            placeholder="Company name *" 
+            value={data.companyName||""} 
+            onChange={(e)=>setData({ ...data, companyName: e.target.value })} 
+            required
+          />
+          <input 
+            className="w-full px-4 py-3 rounded-lg bg-muted border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" 
+            placeholder="Company ID" 
+            value={data.companyId||""} 
+            onChange={(e)=>setData({ ...data, companyId: e.target.value })} 
+          />
+          <input 
+            className="w-full px-4 py-3 rounded-lg bg-muted border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" 
+            placeholder="Country" 
+            value={data.country||""} 
+            onChange={(e)=>setData({ ...data, country: e.target.value })} 
+          />
+          <input 
+            className="w-full px-4 py-3 rounded-lg bg-muted border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" 
+            placeholder="Industry" 
+            value={data.industry||""} 
+            onChange={(e)=>setData({ ...data, industry: e.target.value })} 
+          />
+          <input 
+            className="w-full px-4 py-3 rounded-lg bg-muted border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all md:col-span-2" 
+            placeholder="Address" 
+            value={data.address||""} 
+            onChange={(e)=>setData({ ...data, address: e.target.value })} 
+          />
+          <input 
+            className="w-full px-4 py-3 rounded-lg bg-muted border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" 
+            placeholder="Website" 
+            value={data.website||""} 
+            onChange={(e)=>setData({ ...data, website: e.target.value })} 
+          />
+          <input 
+            className="w-full px-4 py-3 rounded-lg bg-muted border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" 
+            placeholder="Phone" 
+            value={data.phone||""} 
+            onChange={(e)=>setData({ ...data, phone: e.target.value })} 
+          />
+          <input 
+            className="w-full px-4 py-3 rounded-lg bg-muted border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" 
+            type="email" 
+            placeholder="Contact email" 
+            value={data.contactEmail||""} 
+            onChange={(e)=>setData({ ...data, contactEmail: e.target.value })} 
+          />
         </div>
       </section>
 
@@ -147,9 +204,15 @@ export default function Setup() {
         </div>
       </section>
 
-      <section className="card">
+      <section className="cyber-card p-6">
         <div className="flex gap-2">
-          <button className="button" onClick={save} disabled={saving}>{saving?"Saving…":"Save and continue"}</button>
+          <button 
+            className="btn-neon" 
+            onClick={save} 
+            disabled={loading || !data.companyName?.trim()}
+          >
+            {loading ? "Setting up..." : "Save and continue"}
+          </button>
         </div>
       </section>
     </main>
