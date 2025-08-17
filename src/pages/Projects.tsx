@@ -103,7 +103,6 @@ export default function Projects() {
 
             <TabsContent value="overview" className="space-y-6">
               <ProjectsOverview 
-                projects={mockProjects}
                 onViewProject={handleViewProject}
                 onCreateProject={handleCreateProject}
               />
