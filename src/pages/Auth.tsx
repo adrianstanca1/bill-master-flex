@@ -196,15 +196,15 @@ export default function Auth() {
         </p>
       </div>
 
-      <section className="card">
-        <form className="grid gap-4" onSubmit={submit}>
+      <section className="cyber-card p-8">
+        <form className="space-y-6" onSubmit={submit}>
           <div className="space-y-2">
-            <label htmlFor="email" className="text-sm font-medium">
+            <label htmlFor="email" className="block text-sm font-medium text-foreground">
               Email address
             </label>
             <input 
               id="email"
-              className="input" 
+              className="w-full px-4 py-3 rounded-lg bg-muted border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" 
               type="email" 
               placeholder="Enter your email"
               value={email} 
@@ -215,12 +215,12 @@ export default function Auth() {
           </div>
           
           <div className="space-y-2">
-            <label htmlFor="password" className="text-sm font-medium">
+            <label htmlFor="password" className="block text-sm font-medium text-foreground">
               Password
             </label>
             <input 
               id="password"
-              className="input" 
+              className="w-full px-4 py-3 rounded-lg bg-muted border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" 
               type="password" 
               placeholder="Enter your password"
               value={password} 
@@ -232,7 +232,7 @@ export default function Auth() {
           </div>
           
           <button 
-            className="button" 
+            className="btn-neon w-full py-3 px-6 rounded-lg font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed" 
             type="submit" 
             disabled={loading || !email || !password}
           >
@@ -242,20 +242,20 @@ export default function Auth() {
         
         <div className="mt-6 text-center">
           {mode === "signin" ? (
-            <p className="text-sm">
+            <p className="text-sm text-muted-foreground">
               Don't have an account?{" "}
               <button 
-                className="link font-medium" 
+                className="text-primary hover:text-primary/80 font-medium underline-offset-4 hover:underline transition-colors" 
                 onClick={()=>setMode("signup")}
               >
                 Create one here
               </button>
             </p>
           ) : (
-            <p className="text-sm">
+            <p className="text-sm text-muted-foreground">
               Already have an account?{" "}
               <button 
-                className="link font-medium" 
+                className="text-primary hover:text-primary/80 font-medium underline-offset-4 hover:underline transition-colors" 
                 onClick={()=>setMode("signin")}
               >
                 Sign in instead
