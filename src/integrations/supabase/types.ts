@@ -1066,6 +1066,48 @@ export type Database = {
         }
         Relationships: []
       }
+      security_events: {
+        Row: {
+          client_info: Json | null
+          created_at: string | null
+          details: Json | null
+          event_type: string
+          id: string
+          ip_address: unknown | null
+          request_method: string | null
+          request_path: string | null
+          severity: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          client_info?: Json | null
+          created_at?: string | null
+          details?: Json | null
+          event_type: string
+          id?: string
+          ip_address?: unknown | null
+          request_method?: string | null
+          request_path?: string | null
+          severity?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          client_info?: Json | null
+          created_at?: string | null
+          details?: Json | null
+          event_type?: string
+          id?: string
+          ip_address?: unknown | null
+          request_method?: string | null
+          request_path?: string | null
+          severity?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       site_photos: {
         Row: {
           ai_analysis: Json | null
@@ -1559,9 +1601,22 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      analyze_security_events: {
+        Args: { p_interval?: unknown; p_severity?: string }
+        Returns: {
+          event_summary: Json
+          top_sources: Json
+          total_events: number
+          unique_users: number
+        }[]
+      }
       calculate_project_health: {
         Args: { project_id: string }
         Returns: number
+      }
+      is_authenticated_user: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
       }
       is_checklist_company_member: {
         Args: { _checklist_id: string }
@@ -1598,6 +1653,19 @@ export type Database = {
       is_tender_company_member: {
         Args: { _tender_id: string }
         Returns: boolean
+      }
+      log_security_event: {
+        Args: {
+          p_details?: Json
+          p_event_type: string
+          p_ip_address?: unknown
+          p_request_method?: string
+          p_request_path?: string
+          p_severity?: string
+          p_user_agent?: string
+          p_user_id?: string
+        }
+        Returns: string
       }
       setup_user_company: {
         Args: {

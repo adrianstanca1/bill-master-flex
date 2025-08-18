@@ -28,10 +28,11 @@ export function useCompanySetup() {
         throw error;
       }
 
-      // Mark as onboarded in localStorage
+      // Mark as onboarded in localStorage and save company ID
       const settings = {
         onboarded: true,
         companyName: data.companyName,
+        companyId: result, // Save the returned company UUID
         country: data.country || 'UK',
         industry: data.industry || 'construction'
       };

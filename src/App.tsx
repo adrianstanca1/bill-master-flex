@@ -22,6 +22,7 @@ import ToolSetup from '@/pages/ToolSetup';
 import AccountSettings from '@/pages/AccountSettings';
 import Settings from '@/pages/Settings';
 import NotFound from '@/pages/NotFound';
+import Setup from '@/pages/Setup';
 import { applyUserTheme } from '@/lib/theme';
 import SiteManager from '@/pages/SiteManager';
 import Projects from '@/pages/Projects';
@@ -60,6 +61,7 @@ function App() {
             <Routes>
               <Route path="/" element={<AppLayout><OptionalAuth><Index /></OptionalAuth></AppLayout>} />
               <Route path="/auth" element={<AppLayout><OptionalAuth><Auth /></OptionalAuth></AppLayout>} />
+              <Route path="/setup" element={<AppLayout><RequireAuth><Setup /></RequireAuth></AppLayout>} />
               <Route path="/dashboard" element={<AppLayout><OptionalAuth><Dashboard /></OptionalAuth></AppLayout>} />
               <Route path="/site-manager" element={<AppLayout><OptionalAuth><SiteManager /></OptionalAuth></AppLayout>} />
               <Route path="/business-manager" element={<AppLayout><OptionalAuth><BusinessManager /></OptionalAuth></AppLayout>} />
