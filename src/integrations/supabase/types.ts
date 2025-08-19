@@ -390,6 +390,36 @@ export type Database = {
           },
         ]
       }
+      connection_logs: {
+        Row: {
+          connection_type: string | null
+          id: number
+          ip_address: unknown | null
+          metadata: Json | null
+          timestamp: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          connection_type?: string | null
+          id?: never
+          ip_address?: unknown | null
+          metadata?: Json | null
+          timestamp?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          connection_type?: string | null
+          id?: never
+          ip_address?: unknown | null
+          metadata?: Json | null
+          timestamp?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       dayworks: {
         Row: {
           company_id: string
@@ -1602,12 +1632,13 @@ export type Database = {
     }
     Functions: {
       analyze_security_events: {
-        Args: { p_interval?: unknown; p_severity?: string }
+        Args:
+          | { lookback_hours?: number; target_company_id: string }
+          | { p_interval?: unknown; p_severity?: string }
         Returns: {
-          event_summary: Json
-          top_sources: Json
-          total_events: number
-          unique_users: number
+          event_type: string
+          severity_distribution: Json
+          total_count: number
         }[]
       }
       calculate_project_health: {
@@ -1655,16 +1686,24 @@ export type Database = {
         Returns: boolean
       }
       log_security_event: {
-        Args: {
-          p_details?: Json
-          p_event_type: string
-          p_ip_address?: unknown
-          p_request_method?: string
-          p_request_path?: string
-          p_severity?: string
-          p_user_agent?: string
-          p_user_id?: string
-        }
+        Args:
+          | {
+              additional_details?: Json
+              company_id: string
+              description: string
+              event_type: string
+              severity: string
+            }
+          | {
+              p_details?: Json
+              p_event_type: string
+              p_ip_address?: unknown
+              p_request_method?: string
+              p_request_path?: string
+              p_severity?: string
+              p_user_agent?: string
+              p_user_id?: string
+            }
         Returns: string
       }
       setup_user_company: {
@@ -1682,6 +1721,10 @@ export type Database = {
           result: boolean
           table_name: string
         }[]
+      }
+      track_auth_events: {
+        Args: { additional_details?: Json; event_type: string; user_id: string }
+        Returns: undefined
       }
     }
     Enums: {
