@@ -1,138 +1,107 @@
 
-import React from "react";
-import {
-  Building2,
-  Calculator,
-  CreditCard,
-  FileText,
-  LayoutDashboard,
-  MessageSquare,
-  Shield,
-  Users,
-  Wrench,
-  Settings,
-  User,
-  Briefcase,
-  BarChart3,
-  Bot,
-} from "lucide-react";
+import * as React from "react";
+import { Link, useLocation } from "react-router-dom";
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarHeader,
+  SidebarFooter,
 } from "@/components/ui/sidebar";
-import { Link, useLocation } from "react-router-dom";
-import AuthStatus from "@/components/AuthStatus";
+import {
+  Home,
+  FileText,
+  Calculator,
+  Users,
+  Briefcase,
+  Settings,
+  Shield,
+  Bot,
+  Building2,
+  Receipt,
+  Wrench,
+  CreditCard,
+  UserCheck,
+  BarChart3,
+  Camera,
+  Clock,
+} from "lucide-react";
 
-const menuItems = [
+const navigationItems = [
   {
-    title: "Dashboard",
-    url: "/dashboard",
-    icon: LayoutDashboard,
-    group: "Overview"
+    title: "Overview",
+    items: [
+      { title: "Dashboard", url: "/", icon: Home },
+      { title: "Projects", url: "/projects", icon: Briefcase },
+      { title: "Business Manager", url: "/business-manager", icon: Building2 },
+    ],
   },
   {
-    title: "Business Manager",
-    url: "/business-manager",
-    icon: Briefcase,
-    group: "Business"
+    title: "Financial",
+    items: [
+      { title: "Invoices", url: "/invoices", icon: FileText },
+      { title: "Quotes", url: "/quotes", icon: Calculator },
+      { title: "Expenses", url: "/expenses", icon: Receipt },
+      { title: "VAT Settings", url: "/vat-settings", icon: CreditCard },
+    ],
   },
   {
-    title: "Invoices",
-    url: "/invoices",
-    icon: FileText,
-    group: "Business"
+    title: "Operations",
+    items: [
+      { title: "Site Manager", url: "/site-manager", icon: Camera },
+      { title: "Tools", url: "/tools", icon: Wrench },
+      { title: "Time Tracking", url: "/business-manager?tab=timesheets", icon: Clock },
+      { title: "CRM", url: "/crm", icon: Users },
+    ],
   },
   {
-    title: "Quotes",
-    url: "/quotes",
-    icon: Calculator,
-    group: "Business"
+    title: "AI & Analytics", 
+    items: [
+      { title: "AI Agents", url: "/agents", icon: Bot },
+      { title: "Advisor", url: "/advisor", icon: BarChart3 },
+    ],
   },
   {
-    title: "Variations",
-    url: "/variations",
-    icon: BarChart3,
-    group: "Business"
-  },
-  {
-    title: "CRM",
-    url: "/crm",
-    icon: Users,
-    group: "Business"
-  },
-  {
-    title: "AI Advisor",
-    url: "/advisor",
-    icon: MessageSquare,
-    group: "Tools"
-  },
-  {
-    title: "Agents",
-    url: "/agents",
-    icon: Bot,
-    group: "Tools"
-  },
-  {
-    title: "Security",
-    url: "/security",
-    icon: Shield,
-    group: "Tools"
-  },
-  {
-    title: "Tool Setup",
-    url: "/tool-setup",
-    icon: Wrench,
-    group: "Settings"
-  },
-  {
-    title: "Account Settings",
-    url: "/account-settings",
-    icon: User,
-    group: "Settings"
-  },
-  {
-    title: "Settings",
-    url: "/settings",
-    icon: Settings,
-    group: "Settings"
+    title: "Administration",
+    items: [
+      { title: "HR Management", url: "/hr", icon: UserCheck },
+      { title: "Security", url: "/security", icon: Shield },
+      { title: "Settings", url: "/settings", icon: Settings },
+    ],
   },
 ];
-
-const groupedItems = menuItems.reduce((acc, item) => {
-  if (!acc[item.group]) {
-    acc[item.group] = [];
-  }
-  acc[item.group].push(item);
-  return acc;
-}, {} as Record<string, typeof menuItems>);
 
 export function AppSidebar() {
   const location = useLocation();
 
   return (
     <Sidebar>
+      <SidebarHeader className="p-4">
+        <div className="flex items-center gap-2">
+          <Building2 className="h-6 w-6" />
+          <span className="font-semibold">Construction Suite</span>
+        </div>
+      </SidebarHeader>
+      
       <SidebarContent>
-        {Object.entries(groupedItems).map(([group, items]) => (
-          <SidebarGroup key={group}>
-            <SidebarGroupLabel>{group}</SidebarGroupLabel>
+        {navigationItems.map((group) => (
+          <SidebarGroup key={group.title}>
+            <SidebarGroupLabel>{group.title}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {items.map((item) => (
+                {group.items.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton 
-                      asChild 
+                      asChild
                       isActive={location.pathname === item.url}
-                      className="nav-item"
                     >
                       <Link to={item.url}>
-                        <item.icon />
+                        <item.icon className="h-4 w-4" />
                         <span>{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
@@ -143,8 +112,11 @@ export function AppSidebar() {
           </SidebarGroup>
         ))}
       </SidebarContent>
-      <SidebarFooter>
-        <AuthStatus />
+      
+      <SidebarFooter className="p-4">
+        <div className="text-xs text-muted-foreground">
+          Construction Management Suite v2.0
+        </div>
       </SidebarFooter>
     </Sidebar>
   );
