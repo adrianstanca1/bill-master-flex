@@ -1,183 +1,169 @@
 
-import React, { useState } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import React, { useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Shield, AlertTriangle, Activity, CheckCircle, Clock, Settings } from 'lucide-react';
+import { Shield, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 export function SecurityMonitor() {
   const { toast } = useToast();
-  const [isScanning, setIsScanning] = useState(false);
 
-  const systemMetrics = {
-    uptime: '99.9%',
-    responseTime: '120ms',
-    errorRate: '0.1%',
-    lastUpdate: new Date().toISOString()
-  };
+  // Monitor for security violations in real-time
+  const { data: securityViolations } = useQuery({
+    queryKey: ['security-violations'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('security_audit_log')
+        .select('*')
+        .eq('action', 'SECURITY_VIOLATION')
+        .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+        .order('created_at', { ascending: false })
+        .limit(10);
 
-  const systemAlerts = [
-    {
-      id: '1',
-      type: 'info',
-      message: 'System backup completed successfully',
-      timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-      severity: 'low'
+      if (error) throw error;
+      return data || [];
     },
-    {
-      id: '2',
-      type: 'warning',
-      message: 'API rate limit approaching for external service',
-      timestamp: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
-      severity: 'medium'
+    refetchInterval: 30000, // Check every 30 seconds
+  });
+
+  // Check company isolation integrity
+  const { data: companyIsolationCheck } = useQuery({
+    queryKey: ['company-isolation-check'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return { status: 'unauthenticated', issues: [] };
+
+      // Check if user has proper company association
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('id, company_id, role')
+        .eq('id', user.id)
+        .single();
+
+      if (error) throw error;
+
+      const issues = [];
+      if (!profile.company_id) {
+        issues.push('User has no company association');
+      }
+
+      return {
+        status: issues.length === 0 ? 'secure' : 'vulnerable',
+        issues,
+        profile
+      };
+    },
+    refetchInterval: 60000, // Check every minute
+  });
+
+  // Alert on security violations
+  useEffect(() => {
+    if (securityViolations && securityViolations.length > 0) {
+      const recentViolations = securityViolations.filter(
+        v => new Date(v.created_at) > new Date(Date.now() - 5 * 60 * 1000) // Last 5 minutes
+      );
+
+      if (recentViolations.length > 0) {
+        toast({
+          title: "Security Alert",
+          description: `${recentViolations.length} security violation(s) detected`,
+          variant: "destructive"
+        });
+      }
     }
-  ];
-
-  const policyStatus = [
-    { name: 'Data Encryption', status: 'active', compliant: true },
-    { name: 'Access Control', status: 'active', compliant: true },
-    { name: 'Audit Logging', status: 'active', compliant: true },
-    { name: 'Backup Policy', status: 'active', compliant: true }
-  ];
-
-  const handleSystemScan = async () => {
-    setIsScanning(true);
-    toast({
-      title: "System Scan Started",
-      description: "Running comprehensive security scan...",
-    });
-    
-    setTimeout(() => {
-      setIsScanning(false);
-      toast({
-        title: "Scan Complete",
-        description: "No security issues detected",
-      });
-    }, 3000);
-  };
-
-  const getSeverityColor = (severity: string) => {
-    switch (severity) {
-      case 'high': return 'bg-red-500';
-      case 'medium': return 'bg-yellow-500';
-      case 'low': return 'bg-blue-500';
-      default: return 'bg-gray-500';
-    }
-  };
+  }, [securityViolations, toast]);
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium">System Uptime</p>
-                <p className="text-2xl font-bold text-green-600">{systemMetrics.uptime}</p>
-              </div>
-              <Activity className="h-8 w-8 text-green-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium">Response Time</p>
-                <p className="text-2xl font-bold text-blue-600">{systemMetrics.responseTime}</p>
-              </div>
-              <Clock className="h-8 w-8 text-blue-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium">Error Rate</p>
-                <p className="text-2xl font-bold text-green-600">{systemMetrics.errorRate}</p>
-              </div>
-              <CheckCircle className="h-8 w-8 text-green-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium">Security Score</p>
-                <p className="text-2xl font-bold text-green-600">A+</p>
-              </div>
-              <Shield className="h-8 w-8 text-green-600" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5" />
-              System Alerts
-            </CardTitle>
-            <Button 
-              size="sm" 
-              onClick={handleSystemScan}
-              disabled={isScanning}
-            >
-              {isScanning ? "Scanning..." : "Run Scan"}
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {systemAlerts.map((alert) => (
-                <div key={alert.id} className="flex items-start gap-3 p-3 border rounded-lg">
-                  <Badge className={getSeverityColor(alert.severity)}>
-                    {alert.severity}
-                  </Badge>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{alert.message}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(alert.timestamp).toLocaleString()}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-{/* Security Policies UI intentionally hidden for end users */}
-      </div>
-
       <Card>
         <CardHeader>
-          <CardTitle>System Performance</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Shield className="h-5 w-5" />
+            Security Status Monitor
+          </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">256</div>
-              <div className="text-sm text-muted-foreground">Active Connections</div>
+        <CardContent className="space-y-4">
+          {/* Company Isolation Status */}
+          <div className="flex items-center justify-between p-3 border rounded-lg">
+            <div className="flex items-center gap-2">
+              <span className="font-medium">Company Isolation</span>
             </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">1.2GB</div>
-              <div className="text-sm text-muted-foreground">Memory Usage</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-yellow-600">45%</div>
-              <div className="text-sm text-muted-foreground">CPU Usage</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-purple-600">890MB</div>
-              <div className="text-sm text-muted-foreground">Network I/O</div>
+            <div className="flex items-center gap-2">
+              {companyIsolationCheck?.status === 'secure' ? (
+                <CheckCircle className="h-4 w-4 text-green-500" />
+              ) : companyIsolationCheck?.status === 'vulnerable' ? (
+                <XCircle className="h-4 w-4 text-red-500" />
+              ) : (
+                <AlertTriangle className="h-4 w-4 text-yellow-500" />
+              )}
+              <Badge 
+                className={
+                  companyIsolationCheck?.status === 'secure' ? 'bg-green-500' :
+                  companyIsolationCheck?.status === 'vulnerable' ? 'bg-red-500' :
+                  'bg-yellow-500'
+                }
+              >
+                {companyIsolationCheck?.status || 'checking...'}
+              </Badge>
             </div>
           </div>
+
+          {/* Security Violations */}
+          {securityViolations && securityViolations.length > 0 && (
+            <Alert className="border-red-200 bg-red-50">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                <strong>Security Violations Detected</strong>
+                <div className="mt-2 space-y-1">
+                  {securityViolations.slice(0, 3).map((violation, index) => (
+                    <div key={violation.id} className="text-sm">
+                      • {violation.details?.violation_type || 'Unknown violation'} 
+                      <span className="text-xs text-muted-foreground ml-2">
+                        {new Date(violation.created_at).toLocaleString()}
+                      </span>
+                    </div>
+                  ))}
+                  {securityViolations.length > 3 && (
+                    <div className="text-sm text-muted-foreground">
+                      +{securityViolations.length - 3} more violations
+                    </div>
+                  )}
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Company Isolation Issues */}
+          {companyIsolationCheck?.issues && companyIsolationCheck.issues.length > 0 && (
+            <Alert className="border-red-200 bg-red-50">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                <strong>Company Isolation Issues</strong>
+                <div className="mt-2 space-y-1">
+                  {companyIsolationCheck.issues.map((issue, index) => (
+                    <div key={index} className="text-sm">• {issue}</div>
+                  ))}
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* All Clear */}
+          {(!securityViolations || securityViolations.length === 0) && 
+           companyIsolationCheck?.status === 'secure' && (
+            <Alert className="border-green-200 bg-green-50">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <AlertDescription>
+                <strong>Security Status: All Clear</strong>
+                <div className="text-sm text-muted-foreground mt-1">
+                  No security violations detected. Company isolation is properly configured.
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
         </CardContent>
       </Card>
     </div>

@@ -2,6 +2,7 @@
 import { ReactNode, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
+import { SecurityAlert } from "./SecurityAlert";
 
 export function OptionalAuth({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
@@ -9,9 +10,27 @@ export function OptionalAuth({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     // Listen for auth state changes FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setSession(session);
       setLoading(false);
+      
+      // Enhanced security logging for all auth events
+      if (session) {
+        try {
+          await supabase.from('security_audit_log').insert({
+            action: _event || 'SESSION_CHECK',
+            resource_type: 'auth',
+            details: { 
+              event_type: _event,
+              timestamp: new Date().toISOString(),
+              user_agent: navigator.userAgent,
+              location: window.location.pathname
+            }
+          });
+        } catch (error) {
+          console.warn('Failed to log security event:', error);
+        }
+      }
     });
 
     // THEN check for existing session
@@ -44,5 +63,10 @@ export function OptionalAuth({ children }: { children: ReactNode }) {
     );
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      {session && <SecurityAlert />}
+      {children}
+    </>
+  );
 }
