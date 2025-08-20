@@ -95,7 +95,7 @@ const SEO: React.FC<SEOProps> = ({ title, description, keywords, canonical, noin
       script.text = JSON.stringify(jsonLd);
       document.head.appendChild(script);
     }
-  }, [title, description, keywords, canonical, noindex, JSON.stringify(jsonLd), JSON.stringify(openGraph)]);
+  }, [title, description, keywords, canonical, noindex, jsonLd, openGraph]);
 
   return null;
 };
