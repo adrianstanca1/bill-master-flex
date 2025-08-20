@@ -60,6 +60,17 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
+## Supabase & Offline Sync
+
+Set the following environment variables to configure Supabase:
+
+```
+VITE_SUPABASE_URL=<your-supabase-url>
+VITE_SUPABASE_ANON_KEY=<your-anon-key>
+```
+
+The app includes a basic [PowerSync](https://www.powersync.com) setup to enable offline data access. Update `src/integrations/powersync/client.ts` with your schema and synchronization logic to start syncing data locally.
+
 ## How can I deploy this project?
 
 Simply open [Lovable](https://lovable.dev/projects/5295eab3-6497-4c88-8ecf-70d77bf6640d) and click on Share -> Publish.
