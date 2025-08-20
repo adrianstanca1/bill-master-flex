@@ -44,7 +44,9 @@ export default function Setup() {
     try {
       const raw = localStorage.getItem(LS);
       if (raw) setData({ ...defaults, ...(JSON.parse(raw) as SettingsData) });
-    } catch {}
+    } catch (err) {
+      console.error('Failed to load setup settings', err);
+    }
   }, []);
 
   const presets: { key: ThemePreset; name: string }[] = useMemo(

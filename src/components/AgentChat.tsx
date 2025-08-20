@@ -29,7 +29,9 @@ export default function AgentChat() {
   useEffect(() => {
     try {
       setInvoices(JSON.parse(localStorage.getItem(LS_KEY) || "[]"));
-    } catch {}
+    } catch (err) {
+      console.error("Failed to parse invoices from localStorage", err);
+    }
   }, []);
 
   useEffect(() => {
@@ -105,7 +107,9 @@ export default function AgentChat() {
           onClick={() => {
             try {
               setInvoices(JSON.parse(localStorage.getItem(LS_KEY) || "[]"));
-            } catch {}
+            } catch (err) {
+              console.error("Failed to reload invoices from localStorage", err);
+            }
           }}
           title="Reload invoices from tracker"
         >

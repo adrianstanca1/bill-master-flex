@@ -44,7 +44,9 @@ export default function Settings() {
     try {
       const raw = localStorage.getItem(LS);
       if (raw) setData({ ...defaults, ...(JSON.parse(raw) as SettingsData) });
-    } catch {}
+    } catch (err) {
+      console.error('Failed to load settings', err);
+    }
   }, []);
 
   useEffect(() => {

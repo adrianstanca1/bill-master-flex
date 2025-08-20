@@ -70,7 +70,9 @@ serve(async (req) => {
         const body = await req.json();
         if (body?.keyword) keyword = body.keyword;
         if (body?.location) location = body.location;
-      } catch {}
+      } catch (err) {
+        console.error("failed to parse request body", err);
+      }
     }
 
     const url = buildContractsFinderUrl(keyword, location, 1);
@@ -158,8 +160,12 @@ serve(async (req) => {
       JSON.stringify({ rawTenders: tenders, summary, sourceUrl: url }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
-  } catch (e: any) {
-    console.error("tenders suggestions error", e?.message || e);
+  } catch (e: unknown) {
+    if (e instanceof Error) {
+      console.error("tenders suggestions error", e.message);
+    } else {
+      console.error("tenders suggestions error", e);
+    }
     return new Response(JSON.stringify({ error: "Internal error" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
