@@ -18,7 +18,9 @@ const SiteManager: React.FC = () => {
         const { data: projects } = await supabase.from('projects').select('id');
         const total = projects?.length || 0;
         setStats({ projects: total, active: 0, pending: 0 });
-      } catch {}
+      } catch (err) {
+        console.error('Failed to load project stats', err);
+      }
     };
     load();
   }, []);

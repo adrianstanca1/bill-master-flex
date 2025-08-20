@@ -65,7 +65,9 @@ export default function AccountSettings() {
       if (raw) {
         setData({ ...defaults, ...(JSON.parse(raw) as AccountData) });
       }
-    } catch {}
+    } catch (err) {
+      console.error('Failed to load account settings', err);
+    }
 
     // Check API key statuses
     checkApiKeyStatuses();
