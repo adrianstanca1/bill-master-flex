@@ -6,6 +6,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
+import { AuthProvider } from "@/components/auth/AuthProvider";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Invoices from "./pages/Invoices";
@@ -25,7 +27,6 @@ import Settings from "./pages/Settings";
 import Setup from "./pages/Setup";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
-import { OptionalAuth } from "./components/OptionalAuth";
 
 const queryClient = new QueryClient();
 
@@ -35,34 +36,98 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <OptionalAuth>
+        <AuthProvider>
           <SidebarProvider>
             <AppSidebar />
             <SidebarInset>
               <Routes>
                 <Route path="/" element={<Index />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/invoices" element={<Invoices />} />
-                <Route path="/quotes" element={<Quotes />} />
-                <Route path="/expenses" element={<Expenses />} />
-                <Route path="/tools" element={<Tools />} />
-                <Route path="/vat-settings" element={<VATSettings />} />
-                <Route path="/projects" element={<Projects />} />
-                <Route path="/business-manager" element={<BusinessManager />} />
-                <Route path="/site-manager" element={<SiteManager />} />
-                <Route path="/crm" element={<CRM />} />
-                <Route path="/agents" element={<Agents />} />
-                <Route path="/advisor" element={<Advisor />} />
-                <Route path="/hr" element={<HR />} />
-                <Route path="/security" element={<Security />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/setup" element={<Setup />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/setup" element={
+                  <ProtectedRoute>
+                    <Setup />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard" element={
+                  <ProtectedRoute requireSetup>
+                    <Dashboard />
+                  </ProtectedRoute>
+                } />
+                <Route path="/invoices" element={
+                  <ProtectedRoute requireSetup>
+                    <Invoices />
+                  </ProtectedRoute>
+                } />
+                <Route path="/quotes" element={
+                  <ProtectedRoute requireSetup>
+                    <Quotes />
+                  </ProtectedRoute>
+                } />
+                <Route path="/expenses" element={
+                  <ProtectedRoute requireSetup>
+                    <Expenses />
+                  </ProtectedRoute>
+                } />
+                <Route path="/tools" element={
+                  <ProtectedRoute requireSetup>
+                    <Tools />
+                  </ProtectedRoute>
+                } />
+                <Route path="/vat-settings" element={
+                  <ProtectedRoute requireSetup>
+                    <VATSettings />
+                  </ProtectedRoute>
+                } />
+                <Route path="/projects" element={
+                  <ProtectedRoute requireSetup>
+                    <Projects />
+                  </ProtectedRoute>
+                } />
+                <Route path="/business-manager" element={
+                  <ProtectedRoute requireSetup>
+                    <BusinessManager />
+                  </ProtectedRoute>
+                } />
+                <Route path="/site-manager" element={
+                  <ProtectedRoute requireSetup>
+                    <SiteManager />
+                  </ProtectedRoute>
+                } />
+                <Route path="/crm" element={
+                  <ProtectedRoute requireSetup>
+                    <CRM />
+                  </ProtectedRoute>
+                } />
+                <Route path="/agents" element={
+                  <ProtectedRoute requireSetup>
+                    <Agents />
+                  </ProtectedRoute>
+                } />
+                <Route path="/advisor" element={
+                  <ProtectedRoute requireSetup>
+                    <Advisor />
+                  </ProtectedRoute>
+                } />
+                <Route path="/hr" element={
+                  <ProtectedRoute requireSetup>
+                    <HR />
+                  </ProtectedRoute>
+                } />
+                <Route path="/security" element={
+                  <ProtectedRoute requireSetup>
+                    <Security />
+                  </ProtectedRoute>
+                } />
+                <Route path="/settings" element={
+                  <ProtectedRoute requireSetup>
+                    <Settings />
+                  </ProtectedRoute>
+                } />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </SidebarInset>
           </SidebarProvider>
-        </OptionalAuth>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

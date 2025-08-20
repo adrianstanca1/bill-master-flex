@@ -1,4 +1,6 @@
 
+import { AuthStatus } from "./auth/AuthStatus";
+
 import * as React from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
@@ -113,7 +115,8 @@ export function AppSidebar() {
         ))}
       </SidebarContent>
       
-      <SidebarFooter className="p-4">
+      <SidebarFooter className="p-4 space-y-3">
+        <AuthStatus />
         <div className="text-xs text-muted-foreground">
           Construction Management Suite v2.0
         </div>

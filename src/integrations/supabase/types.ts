@@ -599,7 +599,15 @@ export type Database = {
           role?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       project_assignments: {
         Row: {
@@ -1645,6 +1653,20 @@ export type Database = {
         Args: { project_id: string }
         Returns: number
       }
+      get_user_profile: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          avatar_url: string
+          company_id: string
+          created_at: string
+          first_name: string
+          id: string
+          last_name: string
+          phone: string
+          role: string
+          updated_at: string
+        }[]
+      }
       is_authenticated_user: {
         Args: Record<PropertyKey, never>
         Returns: boolean
@@ -1671,6 +1693,10 @@ export type Database = {
       }
       is_schedule_company_member: {
         Args: { _schedule_id: string }
+        Returns: boolean
+      }
+      is_setup_complete: {
+        Args: Record<PropertyKey, never>
         Returns: boolean
       }
       is_task_company_member: {
@@ -1705,6 +1731,10 @@ export type Database = {
               p_user_id?: string
             }
         Returns: string
+      }
+      no_public_access: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
       }
       setup_user_company: {
         Args: {
