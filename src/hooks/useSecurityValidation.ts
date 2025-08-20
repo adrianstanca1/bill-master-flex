@@ -58,11 +58,23 @@ export function useSecurityValidation() {
         if (!profile.company_id) {
           violations.push('User has no company association - security isolation compromised');
           
-          // Log security violation
-          await supabase.rpc('log_security_violation', {
-            violation_type: 'MISSING_COMPANY_ASSOCIATION',
-            details: { user_id: user.id }
-          }).catch(console.error);
+          // Log security violation using direct insert instead of RPC
+          try {
+            await supabase
+              .from('security_audit_log')
+              .insert({
+                user_id: user.id,
+                action: 'SECURITY_VIOLATION',
+                resource_type: 'company_isolation',
+                details: { 
+                  violation_type: 'MISSING_COMPANY_ASSOCIATION',
+                  user_id: user.id,
+                  timestamp: new Date().toISOString()
+                }
+              });
+          } catch (logError) {
+            console.error('Failed to log security violation:', logError);
+          }
         }
 
         // Check for suspicious activity patterns

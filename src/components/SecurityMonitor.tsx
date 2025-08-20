@@ -118,14 +118,23 @@ export function SecurityMonitor() {
               <AlertDescription>
                 <strong>Security Violations Detected</strong>
                 <div className="mt-2 space-y-1">
-                  {securityViolations.slice(0, 3).map((violation, index) => (
-                    <div key={violation.id} className="text-sm">
-                      • {violation.details?.violation_type || 'Unknown violation'} 
-                      <span className="text-xs text-muted-foreground ml-2">
-                        {new Date(violation.created_at).toLocaleString()}
-                      </span>
-                    </div>
-                  ))}
+                  {securityViolations.slice(0, 3).map((violation, index) => {
+                    // Safely parse the details JSON
+                    const details = typeof violation.details === 'string' 
+                      ? JSON.parse(violation.details) 
+                      : violation.details as any;
+                    
+                    const violationType = details?.violation_type || 'Unknown violation';
+                    
+                    return (
+                      <div key={violation.id} className="text-sm">
+                        • {violationType}
+                        <span className="text-xs text-muted-foreground ml-2">
+                          {new Date(violation.created_at).toLocaleString()}
+                        </span>
+                      </div>
+                    );
+                  })}
                   {securityViolations.length > 3 && (
                     <div className="text-sm text-muted-foreground">
                       +{securityViolations.length - 3} more violations
