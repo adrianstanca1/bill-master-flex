@@ -60,6 +60,17 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
+## Supabase & Offline Sync
+
+Set the following environment variables to configure Supabase:
+
+```
+VITE_SUPABASE_URL=<your-supabase-url>
+VITE_SUPABASE_ANON_KEY=<your-anon-key>
+```
+
+The app includes a [PowerSync](https://www.powersync.com) setup that keeps the `reminders` table available offline. Local changes are stored in a small SQLite database and automatically pushed to Supabase when `syncOfflineData` runs during app startup.
+
 ## How can I deploy this project?
 
 Simply open [Lovable](https://lovable.dev/projects/5295eab3-6497-4c88-8ecf-70d77bf6640d) and click on Share -> Publish.
