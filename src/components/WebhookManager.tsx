@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -42,13 +42,7 @@ export const WebhookManager: React.FC = () => {
     'reminder.due',
   ];
 
-  useEffect(() => {
-    if (companyId) {
-      loadWebhooks();
-    }
-  }, [companyId]);
-
-  const loadWebhooks = async () => {
+  const loadWebhooks = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('webhooks')
@@ -67,7 +61,13 @@ export const WebhookManager: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [companyId, toast]);
+
+  useEffect(() => {
+    if (companyId) {
+      loadWebhooks();
+    }
+  }, [companyId, loadWebhooks]);
 
   const createWebhook = async () => {
     if (!formData.endpoint_url || !formData.event_type) {
