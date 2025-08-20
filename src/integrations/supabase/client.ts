@@ -2,16 +2,31 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = "https://tjgbyygllssqsywxpxqe.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqZ2J5eWdsbHNzcXN5d3hweHFlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM2NjU0OTQsImV4cCI6MjA2OTI0MTQ5NH0.FA1X97r-Y7nMcDqBQiGHYYE4yo46ZHOKHiw2AAM8pRA";
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  throw new Error('Supabase credentials are missing. Check environment variables.');
+}
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
     storage: localStorage,
     persistSession: true,
     autoRefreshToken: true,
   }
 });
+
+export async function checkSupabaseConnection(): Promise<boolean> {
+  try {
+    const { error } = await supabase.auth.getSession();
+    if (error) throw error;
+    return true;
+  } catch (err) {
+    console.error('Supabase connection failed', err);
+    return false;
+  }
+}

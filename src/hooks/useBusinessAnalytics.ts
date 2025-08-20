@@ -229,7 +229,16 @@ export const useBusinessAnalytics = () => {
     };
 
     recordDailyMetrics();
-  }, [companyId, totalRevenue, activeProjects, pendingInvoices, overdueAmount]);
+  }, [
+    companyId,
+    totalRevenue,
+    activeProjects,
+    pendingInvoices,
+    overdueAmount,
+    metrics,
+    projectAnalytics.averageHealthScore,
+    recordMetricMutation,
+  ]);
 
   return {
     metrics,
