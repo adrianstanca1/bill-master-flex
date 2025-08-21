@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import SEO from "@/components/SEO";
 import { useAuthContext } from "@/components/auth/AuthProvider";
+import { EmailConfirmationBanner } from "@/components/EmailConfirmationBanner";
 
 export default function Auth() {
   const { toast } = useToast();
@@ -18,6 +19,8 @@ export default function Auth() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showEmailConfirmation, setShowEmailConfirmation] = useState(false);
+  const [isResendingEmail, setIsResendingEmail] = useState(false);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -65,6 +68,7 @@ export default function Auth() {
         if (!result.error) {
           // Check if user needs to verify email or can proceed
           // The signUp function handles the toast messages
+          setShowEmailConfirmation(true);
         } else if (result.error.message.includes("User already registered")) {
           setMode("signin");
         }
@@ -81,6 +85,40 @@ export default function Auth() {
       });
     } finally {
       setLoading(false);
+    }
+  }
+
+  const handleResendEmail = async () => {
+    if (!email) {
+      toast({
+        title: "Email required",
+        description: "Please enter your email address to resend confirmation.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsResendingEmail(true);
+    try {
+      const result = await signUp(email, password, { 
+        firstName: firstName.trim(), 
+        lastName: lastName.trim() 
+      });
+      
+      if (!result.error) {
+        toast({
+          title: "Email sent",
+          description: "Check your inbox for the confirmation link.",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Failed to resend",
+        description: "Please try again later.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsResendingEmail(false);
     }
   }
 
@@ -101,6 +139,13 @@ export default function Auth() {
           }
         </p>
       </div>
+
+      {showEmailConfirmation && mode === "signup" && (
+        <EmailConfirmationBanner 
+          onResendEmail={handleResendEmail}
+          isResending={isResendingEmail}
+        />
+      )}
 
       <section className="cyber-card p-8">
         <form className="space-y-6" onSubmit={handleSubmit}>

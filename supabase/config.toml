@@ -1,1 +1,28 @@
 project_id = "tjgbyygllssqsywxpxqe"
+
+[auth]
+enabled = true
+site_url = "https://5295eab3-6497-4c88-8ecf-70d77bf6640d.sandbox.lovable.dev"
+additional_redirect_urls = ["https://5295eab3-6497-4c88-8ecf-70d77bf6640d.sandbox.lovable.dev/**"]
+jwt_expiry = 3600
+refresh_token_rotation_enabled = true
+security_update_password_require_reauthentication = true
+security_captcha_enabled = false
+
+[auth.email]
+enable_signup = true
+double_confirm_changes = true
+enable_confirmations = true
+secure_email_change_enabled = true
+max_frequency = "1m"
+
+[auth.email.smtp]
+enabled = false
+
+# Auth webhook for email confirmation
+[auth.hook.send_email]
+enabled = true
+uri = "https://tjgbyygllssqsywxpxqe.supabase.co/functions/v1/send-confirmation"
+
+[functions.send-confirmation]
+verify_jwt = false

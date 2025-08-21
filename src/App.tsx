@@ -10,6 +10,7 @@ import { AuthProvider } from "@/components/auth/AuthProvider";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { SecurityHeaders } from "@/components/SecurityHeaders";
 import { SecurityAlert } from "@/components/SecurityAlert";
+import { AuthRedirectHandler } from "@/components/AuthRedirectHandler";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Invoices from "./pages/Invoices";
@@ -40,6 +41,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <SecurityAlert />
+        <AuthRedirectHandler />
         <AuthProvider>
           <SidebarProvider>
             <AppSidebar />

@@ -143,7 +143,7 @@ export function useAuth(): AuthState & AuthActions {
         email: email.trim(),
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/`,
+          emailRedirectTo: `${window.location.origin}/dashboard`,
           data: {
             first_name: userData.firstName || '',
             last_name: userData.lastName || '',
