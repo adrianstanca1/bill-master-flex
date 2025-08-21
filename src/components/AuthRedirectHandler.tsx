@@ -56,6 +56,9 @@ export function AuthRedirectHandler() {
         // Redirect to password reset form
         window.history.replaceState({}, document.title, '/reset-password');
       }
+      if (accessToken && !type) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
     };
 
     // Only run on mount and if there are auth-related hash parameters

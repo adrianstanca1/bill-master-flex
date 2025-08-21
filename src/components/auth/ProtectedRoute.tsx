@@ -9,8 +9,18 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children, requireSetup = false }: ProtectedRouteProps) {
-  const { user, loading, isAuthenticated } = useAuthContext();
+  const { loading, isAuthenticated } = useAuthContext();
   const location = useLocation();
+
+  const [isSetupComplete, setIsSetupComplete] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    if (requireSetup) {
+      import('@/components/SecureStorage').then(({ SecureStorage }) => {
+        SecureStorage.isSetupComplete().then(setIsSetupComplete);
+      });
+    }
+  }, [requireSetup]);
 
   if (loading) {
     return (
@@ -29,15 +39,6 @@ export function ProtectedRoute({ children, requireSetup = false }: ProtectedRout
 
   // Check if setup is required but not completed
   if (requireSetup) {
-    // Use server-side validation for setup completion
-    const [isSetupComplete, setIsSetupComplete] = useState<boolean | null>(null);
-    
-    useEffect(() => {
-      import('@/components/SecureStorage').then(({ SecureStorage }) => {
-        SecureStorage.isSetupComplete().then(setIsSetupComplete);
-      });
-    }, []);
-
     if (isSetupComplete === null) {
       return (
         <div className="flex items-center justify-center min-h-screen">
