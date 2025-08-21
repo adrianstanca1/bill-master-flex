@@ -17,10 +17,10 @@ serve(async (req) => {
     const { action, webhookId, secretValue, payload } = await req.json();
 
     switch (action) {
-      case 'create_secret':
+      case 'create_secret': {
         // Generate cryptographically secure secret
         const secret = crypto.randomUUID() + '-' + Date.now();
-        
+
         // Store encrypted secret
         const { data, error } = await supabase
           .from('webhook_secrets')
@@ -31,15 +31,16 @@ serve(async (req) => {
 
         if (error) throw error;
 
-        return new Response(JSON.stringify({ 
-          success: true, 
+        return new Response(JSON.stringify({
+          success: true,
           secretId: data[0]?.id,
           secret: secret // Only return once for initial setup
         }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
+      }
 
-      case 'validate_webhook':
+      case 'validate_webhook': {
         const signature = req.headers.get('x-webhook-signature');
         if (!signature) {
           throw new Error('Missing webhook signature');
@@ -91,12 +92,13 @@ serve(async (req) => {
           }
         });
 
-        return new Response(JSON.stringify({ 
-          success: true, 
-          validated: true 
+        return new Response(JSON.stringify({
+          success: true,
+          validated: true
         }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
+      }
 
       default:
         throw new Error('Invalid action');

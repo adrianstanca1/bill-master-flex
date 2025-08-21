@@ -1,10 +1,8 @@
 import React from 'npm:react@18.3.1'
 import { Webhook } from 'https://esm.sh/standardwebhooks@1.0.0'
-import { Resend } from 'npm:resend@4.0.0'
 import { renderAsync } from 'npm:@react-email/components@0.0.22'
 import { WelcomeEmail } from './_templates/welcome-email.tsx'
-
-const resend = new Resend(Deno.env.get('RESEND_API_KEY') as string)
+import { resend } from '../_shared/resend.ts'
 const hookSecret = Deno.env.get('SEND_EMAIL_HOOK_SECRET') as string
 
 const corsHeaders = {

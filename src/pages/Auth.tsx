@@ -5,13 +5,15 @@ import { useToast } from "@/hooks/use-toast";
 import SEO from "@/components/SEO";
 import { useAuthContext } from "@/components/auth/AuthProvider";
 import { EmailConfirmationBanner } from "@/components/EmailConfirmationBanner";
+import { Button } from "@/components/ui/button";
+import { Chrome, Github } from 'lucide-react';
 
 export default function Auth() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation() as any;
   const redirectTo = (location.state?.from?.pathname as string) || "/dashboard";
-  const { isAuthenticated, signIn, signUp, loading: authLoading } = useAuthContext();
+  const { isAuthenticated, signIn, signUp, signInWithOAuth, loading: authLoading } = useAuthContext();
 
   const [mode, setMode] = useState<"signin"|"signup">("signin");
   const [email, setEmail] = useState("");
@@ -148,6 +150,20 @@ export default function Auth() {
       )}
 
       <section className="cyber-card p-8">
+          <div className="space-y-4">
+            <Button type="button" variant="outline" className="w-full" onClick={() => signInWithOAuth('google')}>
+              <Chrome className="mr-2 h-4 w-4" /> Continue with Google
+            </Button>
+            <Button type="button" variant="outline" className="w-full" onClick={() => signInWithOAuth('github')}>
+              <Github className="mr-2 h-4 w-4" /> Continue with GitHub
+            </Button>
+          </div>
+
+          <div className="my-6 text-center relative">
+            <span className="absolute inset-0 flex items-center"><span className="w-full border-t" /></span>
+            <span className="relative px-2 text-xs text-muted-foreground">or continue with email</span>
+          </div>
+
         <form className="space-y-6" onSubmit={handleSubmit}>
           {mode === "signup" && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

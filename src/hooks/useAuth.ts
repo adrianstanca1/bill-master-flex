@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { User, Session, AuthError } from '@supabase/supabase-js';
+import { User, Session, AuthError, Provider } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -13,6 +13,7 @@ interface AuthState {
 interface AuthActions {
   signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
   signUp: (email: string, password: string, userData?: any) => Promise<{ error: AuthError | null }>;
+  signInWithOAuth: (provider: Provider) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<{ error: AuthError | null }>;
   resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
 }
@@ -129,6 +130,33 @@ export function useAuth(): AuthState & AuthActions {
         title: "Sign In Error",
         description: "An unexpected error occurred. Please try again.",
         variant: "destructive"
+      });
+      return { error: err };
+    } finally {
+      setLoading(false);
+    }
+  }, [toast]);
+  const signInWithOAuth = useCallback(async (provider: Provider) => {
+    try {
+      setLoading(true);
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: { redirectTo: `${window.location.origin}/dashboard` }
+      });
+      if (error) {
+        toast({
+          title: "Sign In Error",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+      return { error };
+    } catch (err: any) {
+      console.error('OAuth sign in error:', err);
+      toast({
+        title: "Sign In Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
       });
       return { error: err };
     } finally {
@@ -288,6 +316,7 @@ export function useAuth(): AuthState & AuthActions {
     isAuthenticated,
     signIn,
     signUp,
+    signInWithOAuth,
     signOut,
     resetPassword
   };

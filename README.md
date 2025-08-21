@@ -36,6 +36,19 @@ npm i
 npm run dev
 ```
 
+## Environment variables
+
+This project uses [Supabase](https://supabase.com) for authentication and [Resend](https://resend.com) for transactional emails. Set the following environment variables before running the app or add them to your `.env` file:
+
+```sh
+VITE_SUPABASE_URL="your_supabase_url"
+VITE_SUPABASE_PUBLISHABLE_KEY="your_supabase_anon_key"
+VITE_SUPABASE_PROJECT_ID="your_project_id"
+RESEND_API_KEY="your_resend_api_key"
+```
+
+To enable OAuth providers (e.g., Google, GitHub), configure them in your Supabase dashboard and add your site's URL to the list of redirect URLs.
+
 **Edit a file directly in GitHub**
 
 - Navigate to the desired file(s).
