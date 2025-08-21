@@ -36,6 +36,14 @@ npm i
 npm run dev
 ```
 
+## Environment variables
+
+This project uses [Resend](https://resend.com) for transactional emails. To enable email sending, set the following environment variable before running the app or add it to your `.env` file:
+
+```sh
+export RESEND_API_KEY="your_resend_api_key"
+```
+
 **Edit a file directly in GitHub**
 
 - Navigate to the desired file(s).
