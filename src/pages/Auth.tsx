@@ -22,14 +22,12 @@ export default function Auth() {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated && !authLoading) {
-      const onboarded = (() => {
-        try {
-          return !!(JSON.parse(localStorage.getItem('as-settings') || '{}')?.onboarded);
-        } catch {
-          return false;
-        }
-      })();
-      navigate(onboarded ? redirectTo : '/setup', { replace: true });
+      // Use server-side validation for setup completion
+      import('@/components/SecureStorage').then(({ SecureStorage }) => {
+        SecureStorage.isSetupComplete().then((isSetupComplete) => {
+          navigate(isSetupComplete ? redirectTo : '/setup', { replace: true });
+        });
+      });
     }
   }, [isAuthenticated, authLoading, navigate, redirectTo]);
 

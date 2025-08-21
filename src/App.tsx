@@ -8,6 +8,8 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { SecurityHeaders } from "@/components/SecurityHeaders";
+import { SecurityAlert } from "@/components/SecurityAlert";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Invoices from "./pages/Invoices";
@@ -33,6 +35,8 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
+      <SecurityHeaders />
+      <SecurityAlert />
       <Toaster />
       <Sonner />
       <BrowserRouter>

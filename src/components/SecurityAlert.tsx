@@ -3,12 +3,12 @@ import React from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, Shield } from 'lucide-react';
-import { useSecurityValidation } from '@/hooks/useSecurityValidation';
+import { useSecureValidation } from '@/hooks/useSecureValidation';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 
 export function SecurityAlert() {
-  const { isValid, violations } = useSecurityValidation();
+  const { isValid, violations } = useSecureValidation();
   const navigate = useNavigate();
 
   const handleSecurityAction = async () => {

@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, useState, useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuthContext } from './AuthProvider';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
@@ -29,13 +29,25 @@ export function ProtectedRoute({ children, requireSetup = false }: ProtectedRout
 
   // Check if setup is required but not completed
   if (requireSetup) {
-    const isSetupComplete = (() => {
-      try {
-        return !!(JSON.parse(localStorage.getItem('as-settings') || '{}')?.onboarded);
-      } catch {
-        return false;
-      }
-    })();
+    // Use server-side validation for setup completion
+    const [isSetupComplete, setIsSetupComplete] = useState<boolean | null>(null);
+    
+    useEffect(() => {
+      import('@/components/SecureStorage').then(({ SecureStorage }) => {
+        SecureStorage.isSetupComplete().then(setIsSetupComplete);
+      });
+    }, []);
+
+    if (isSetupComplete === null) {
+      return (
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <LoadingSpinner />
+            <p className="mt-4 text-muted-foreground">Validating setup...</p>
+          </div>
+        </div>
+      );
+    }
 
     if (!isSetupComplete) {
       return <Navigate to="/setup" replace />;
