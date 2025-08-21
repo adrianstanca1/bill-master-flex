@@ -1146,6 +1146,42 @@ export type Database = {
         }
         Relationships: []
       }
+      security_policies: {
+        Row: {
+          company_id: string
+          configuration: Json
+          created_at: string
+          created_by: string | null
+          enabled: boolean
+          id: string
+          policy_name: string
+          policy_type: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          configuration?: Json
+          created_at?: string
+          created_by?: string | null
+          enabled?: boolean
+          id?: string
+          policy_name: string
+          policy_type: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          configuration?: Json
+          created_at?: string
+          created_by?: string | null
+          enabled?: boolean
+          id?: string
+          policy_name?: string
+          policy_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       site_photos: {
         Row: {
           ai_analysis: Json | null
@@ -1682,6 +1718,10 @@ export type Database = {
         Args: { project_id: string }
         Returns: number
       }
+      enforce_company_isolation: {
+        Args: { target_company_id: string }
+        Returns: boolean
+      }
       get_user_profile: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -1765,6 +1805,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      set_secure_search_path: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       setup_user_company: {
         Args: {
           company_country?: string
@@ -1784,6 +1828,10 @@ export type Database = {
       track_auth_events: {
         Args: { additional_details?: Json; event_type: string; user_id: string }
         Returns: undefined
+      }
+      validate_security_context: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
       }
     }
     Enums: {
