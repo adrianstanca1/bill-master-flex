@@ -36,10 +36,10 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <SecurityHeaders />
-      <SecurityAlert />
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <SecurityAlert />
         <AuthProvider>
           <SidebarProvider>
             <AppSidebar />
