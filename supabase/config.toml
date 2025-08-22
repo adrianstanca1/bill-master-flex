@@ -2,8 +2,10 @@ project_id = "tjgbyygllssqsywxpxqe"
 
 [auth]
 enabled = true
-site_url = "https://5295eab3-6497-4c88-8ecf-70d77bf6640d.sandbox.lovable.dev"
+site_url = "https://yourdomain.com"
 additional_redirect_urls = [
+  "https://yourdomain.com/**",
+  "https://yourdomain.com/auth/callback",
   "https://5295eab3-6497-4c88-8ecf-70d77bf6640d.sandbox.lovable.dev/**",
   "https://5295eab3-6497-4c88-8ecf-70d77bf6640d.sandbox.lovable.dev/auth/callback"
 ]
