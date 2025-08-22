@@ -28,6 +28,7 @@ import Agents from "./pages/Agents";
 import Advisor from "./pages/Advisor";
 import HR from "./pages/HR";
 import Security from "./pages/Security";
+import AuthConfiguration from "./pages/AuthConfiguration";
 import Settings from "./pages/Settings";
 import Setup from "./pages/Setup";
 import Auth from "./pages/Auth";
@@ -129,6 +130,11 @@ const App = () => (
                 <Route path="/security" element={
                   <ProtectedRoute requireSetup>
                     <Security />
+                  </ProtectedRoute>
+                } />
+                <Route path="/auth-config" element={
+                  <ProtectedRoute requireSetup>
+                    <AuthConfiguration />
                   </ProtectedRoute>
                 } />
                 <Route path="/settings" element={
