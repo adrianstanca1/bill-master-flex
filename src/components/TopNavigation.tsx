@@ -35,7 +35,7 @@ import {
   Bot,
   Shield,
   Settings,
-  HardHat,
+  Zap,
   Calculator,
   PieChart,
   Clock,
@@ -142,9 +142,12 @@ export function TopNavigation() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between px-4">
         {/* Logo */}
-        <Link to="/" className="flex items-center space-x-2">
-          <HardHat className="h-8 w-8 text-primary" />
-          <span className="font-bold text-xl bg-gradient-primary bg-clip-text text-transparent">
+        <Link to="/" className="flex items-center space-x-3 group">
+          <div className="relative">
+            <Zap className="h-10 w-10 text-primary group-hover:drop-shadow-[0_0_12px_hsl(var(--primary))] transition-all duration-300" />
+            <div className="absolute inset-0 rounded-full bg-primary/10 blur-sm animate-pulse-glow"></div>
+          </div>
+          <span className="font-bold text-2xl bg-gradient-primary bg-clip-text text-transparent tracking-wide">
             AS PRO
           </span>
         </Link>
