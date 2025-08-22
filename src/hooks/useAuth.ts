@@ -98,12 +98,6 @@ export function useAuth(): AuthState & AuthActions {
     try {
       setLoading(true);
       
-      // Check for brute force attempts before attempting sign in
-      const userQuery = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('id', 'temp'); // We'll get the actual user ID after auth
-        
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password

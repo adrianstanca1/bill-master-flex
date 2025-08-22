@@ -2,12 +2,10 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useBruteForceProtection } from '@/hooks/useBruteForceProtection';
 
 export function SecurityMiddleware() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { isBlocked } = useBruteForceProtection();
 
   useEffect(() => {
     // Enhanced session validation
@@ -113,17 +111,6 @@ export function SecurityMiddleware() {
       };
     };
 
-    // Check for brute force protection
-    if (isBlocked) {
-      toast({
-        title: "Account Temporarily Locked",
-        description: "Too many failed attempts. Please try again later.",
-        variant: "destructive",
-      });
-      navigate('/auth');
-      return;
-    }
-
     validateSession();
     monitorSecurityEvents();
 
@@ -133,7 +120,7 @@ export function SecurityMiddleware() {
     return () => {
       clearInterval(interval);
     };
-  }, [navigate, toast, isBlocked]);
+  }, [navigate, toast]);
 
   return null;
 }
