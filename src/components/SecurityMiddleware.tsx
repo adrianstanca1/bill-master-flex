@@ -31,14 +31,18 @@ export function SecurityMiddleware() {
               await supabase.auth.signOut();
               navigate('/auth');
             }
-          } else if (validation?.reason === 'User has no company association') {
+          } else if (validation?.reason === 'User profile not found') {
             toast({
-              title: "Setup Required",
-              description: "Please complete your company setup.",
+              title: "Profile Error",
+              description: "Please contact support if this persists.",
               variant: "destructive",
             });
-            navigate('/setup');
+            await supabase.auth.signOut();
+            navigate('/auth');
           }
+        } else if (validation?.requires_setup) {
+          // Handle users without company association - redirect to setup
+          navigate('/setup');
         }
       } catch (error) {
         console.error('Session validation error:', error);
@@ -60,9 +64,29 @@ export function SecurityMiddleware() {
             details: {
               url: typeof args[0] === 'string' ? args[0] : args[0]?.toString(),
               status: response.status,
-              timestamp: new Date().toISOString()
+              timestamp: new Date().toISOString(),
+              user_agent: navigator.userAgent,
+              referrer: document.referrer || 'direct'
             }
           });
+        }
+        
+        // Log suspicious repeated failures
+        if (!response.ok && response.status >= 400) {
+          const failureKey = `failures_${typeof args[0] === 'string' ? args[0] : 'unknown'}`;
+          const currentFailures = parseInt(sessionStorage.getItem(failureKey) || '0');
+          if (currentFailures > 5) {
+            await supabase.from('security_audit_log').insert({
+              action: 'REPEATED_API_FAILURES',
+              resource_type: 'api_security',
+              details: {
+                url: typeof args[0] === 'string' ? args[0] : args[0]?.toString(),
+                failure_count: currentFailures,
+                timestamp: new Date().toISOString()
+              }
+            });
+          }
+          sessionStorage.setItem(failureKey, (currentFailures + 1).toString());
         }
         
         return response;

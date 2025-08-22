@@ -8,9 +8,8 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import { SecurityHeaders } from "@/components/SecurityHeaders";
+import { EnhancedSecurityWrapper } from "@/components/EnhancedSecurityWrapper";
 import { SecurityAlert } from "@/components/SecurityAlert";
-import { SecurityMiddleware } from "@/components/SecurityMiddleware";
 import { EnhancedSecurityAlert } from "@/components/EnhancedSecurityAlert";
 import { AuthCallbackHandler } from "@/components/auth/AuthCallbackHandler";
 import Index from "./pages/Index";
@@ -50,7 +49,6 @@ function App() {
   return (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <SecurityHeaders />
       <Toaster />
       <Sonner />
       <BrowserRouter>
@@ -58,7 +56,7 @@ function App() {
         <EnhancedSecurityAlert />
         
         <AuthProvider>
-          <SecurityMiddleware />
+          <EnhancedSecurityWrapper>
           <SidebarProvider>
             <AppSidebar />
             <SidebarInset>
@@ -156,6 +154,7 @@ function App() {
               </Routes>
             </SidebarInset>
           </SidebarProvider>
+          </EnhancedSecurityWrapper>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
