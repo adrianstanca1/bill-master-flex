@@ -26,23 +26,22 @@ const Index = () => {
       />
       
       {/* Hero Section */}
-      <section className="relative py-20 px-4 overflow-hidden">
-        <div className="absolute inset-0 bg-cyber-grid opacity-20"></div>
+      <section className="relative py-16 px-4 overflow-hidden">
         <div className="container mx-auto text-center relative z-10">
-          <h1 className="text-6xl md:text-8xl font-bold text-gradient mb-6 animate-glow">
+          <h1 className="text-5xl md:text-7xl font-bold text-gradient mb-6">
             AS PRO
           </h1>
           <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-8">
-            Next-generation construction management platform powered by AI
+            Professional construction management platform for modern businesses
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/dashboard">
-              <button className="btn-neon">
+              <button className="btn-primary">
                 Enter Dashboard
               </button>
             </Link>
             <Link to="/agents">
-              <button className="glass-card px-6 py-3 hover-glow">
+              <button className="btn-secondary">
                 AI Agents
               </button>
             </Link>
@@ -54,32 +53,32 @@ const Index = () => {
         <GuestBanner />
         
         {/* Features Grid */}
-        <section className="cyber-grid">
-          <div className="glass-card p-8 text-center hover-lift">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-primary flex items-center justify-center animate-pulse-glow">
+        <section className="content-grid">
+          <div className="feature-card hover-lift">
+            <div className="feature-icon">
               <span className="text-2xl">🏗️</span>
             </div>
-            <h3 className="text-xl font-semibold text-gradient mb-3">Project Management</h3>
+            <h3 className="text-xl font-semibold mb-3">Project Management</h3>
             <p className="text-muted-foreground">
               Advanced project tracking with real-time updates and team collaboration tools
             </p>
           </div>
 
-          <div className="glass-card p-8 text-center hover-lift">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-secondary flex items-center justify-center animate-pulse-glow">
+          <div className="feature-card hover-lift">
+            <div className="feature-icon bg-gradient-secondary">
               <span className="text-2xl">💰</span>
             </div>
-            <h3 className="text-xl font-semibold text-gradient-secondary mb-3">Financial Control</h3>
+            <h3 className="text-xl font-semibold mb-3">Financial Control</h3>
             <p className="text-muted-foreground">
               Professional invoicing, quotes, variations, and comprehensive financial tracking
             </p>
           </div>
 
-          <div className="glass-card p-8 text-center hover-lift">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-primary flex items-center justify-center animate-pulse-glow">
+          <div className="feature-card hover-lift">
+            <div className="feature-icon">
               <span className="text-2xl">🤖</span>
             </div>
-            <h3 className="text-xl font-semibold text-gradient mb-3">AI Intelligence</h3>
+            <h3 className="text-xl font-semibold mb-3">AI Intelligence</h3>
             <p className="text-muted-foreground">
               Smart business intelligence, automated advisors, and AI agents
             </p>
@@ -87,48 +86,48 @@ const Index = () => {
         </section>
 
         {/* Main Sections */}
-        <div className="cyber-grid lg:grid-cols-2">
-          <div className="cyber-card p-8 hover-glow">
-            <h2 className="text-2xl font-semibold text-gradient mb-4">AI Business Coach</h2>
+        <div className="content-grid lg:grid-cols-2">
+          <div className="elevated-card p-8">
+            <h2 className="text-2xl font-semibold mb-4">AI Business Coach</h2>
             <p className="text-muted-foreground mb-6">
               Get instant advice on pricing, cash flow, compliance, and business growth. Our AI understands UK construction industry specifics.
             </p>
-            <div className="glass-card p-4">
+            <div className="pro-card p-4">
               <AgentChat />
             </div>
           </div>
 
-          <div className="cyber-card p-8 hover-glow">
-            <h2 className="text-2xl font-semibold text-gradient mb-4">SmartOps Control Center</h2>
+          <div className="elevated-card p-8">
+            <h2 className="text-2xl font-semibold mb-4">SmartOps Control Center</h2>
             <p className="text-muted-foreground mb-6">
               Automated business scanning, tender discovery, quote generation, and regulatory compliance management.
             </p>
-            <div className="glass-card p-4">
+            <div className="pro-card p-4">
               <SmartOpsPanel />
             </div>
           </div>
         </div>
 
         {/* Quick Access */}
-        <section className="cyber-card p-8 hover-glow">
-          <h2 className="text-2xl font-semibold text-gradient mb-6">Quick Access</h2>
-          <div className="cyber-grid sm:grid-cols-2 lg:grid-cols-4">
-            <Link to="/invoices" className="glass-card p-6 hover-lift text-center">
+        <section className="elevated-card p-8">
+          <h2 className="text-2xl font-semibold mb-6">Quick Access</h2>
+          <div className="content-grid sm:grid-cols-2 lg:grid-cols-4">
+            <Link to="/invoices" className="pro-card p-6 hover-lift text-center interactive-link">
               <div className="text-2xl mb-2">📋</div>
               <div className="font-semibold mb-1">Invoices</div>
               <div className="text-xs text-muted-foreground">Create & manage</div>
             </Link>
-            <Link to="/projects" className="glass-card p-6 hover-lift text-center">
+            <Link to="/projects" className="pro-card p-6 hover-lift text-center interactive-link">
               <div className="text-2xl mb-2">🏗️</div>
               <div className="font-semibold mb-1">Projects</div>
               <div className="text-xs text-muted-foreground">Track progress</div>
             </Link>
-            <Link to="/crm" className="glass-card p-6 hover-lift text-center">
+            <Link to="/crm" className="pro-card p-6 hover-lift text-center interactive-link">
               <div className="text-2xl mb-2">👥</div>
               <div className="font-semibold mb-1">Clients</div>
               <div className="text-xs text-muted-foreground">Manage relationships</div>
             </Link>
-            <Link to="/hr" className="glass-card p-6 hover-lift text-center">
+            <Link to="/hr" className="pro-card p-6 hover-lift text-center interactive-link">
               <div className="text-2xl mb-2">👨‍💼</div>
               <div className="font-semibold mb-1">Team</div>
               <div className="text-xs text-muted-foreground">HR management</div>
