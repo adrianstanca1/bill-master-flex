@@ -15,6 +15,7 @@ interface AuthActions {
   signUp: (email: string, password: string, userData?: any) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<{ error: AuthError | null }>;
   resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
+  signInWithOAuth: (provider: 'google' | 'azure' | 'github') => Promise<{ error: AuthError | null }>;
 }
 
 export function useAuth(): AuthState & AuthActions {
@@ -281,6 +282,35 @@ export function useAuth(): AuthState & AuthActions {
     }
   }, [toast]);
 
+  const signInWithOAuth = useCallback(async (provider: 'google' | 'azure' | 'github') => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`
+        }
+      });
+
+      if (error) {
+        toast({
+          title: `${provider.charAt(0).toUpperCase() + provider.slice(1)} Sign In Error`,
+          description: error.message,
+          variant: "destructive"
+        });
+      }
+
+      return { error };
+    } catch (err: any) {
+      console.error(`${provider} OAuth error:`, err);
+      toast({
+        title: "OAuth Error",
+        description: "An unexpected error occurred during OAuth sign in.",
+        variant: "destructive"
+      });
+      return { error: err };
+    }
+  }, [toast]);
+
   return {
     user,
     session,
@@ -289,6 +319,7 @@ export function useAuth(): AuthState & AuthActions {
     signIn,
     signUp,
     signOut,
-    resetPassword
+    resetPassword,
+    signInWithOAuth
   };
 }

@@ -10,7 +10,7 @@ import { AuthProvider } from "@/components/auth/AuthProvider";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { SecurityHeaders } from "@/components/SecurityHeaders";
 import { SecurityAlert } from "@/components/SecurityAlert";
-import { AuthRedirectHandler } from "@/components/AuthRedirectHandler";
+import { AuthCallbackHandler } from "@/components/auth/AuthCallbackHandler";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Invoices from "./pages/Invoices";
@@ -29,6 +29,7 @@ import Security from "./pages/Security";
 import Settings from "./pages/Settings";
 import Setup from "./pages/Setup";
 import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,7 +42,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <SecurityAlert />
-        <AuthRedirectHandler />
+        
         <AuthProvider>
           <SidebarProvider>
             <AppSidebar />
@@ -49,6 +50,8 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/auth/callback" element={<AuthCallbackHandler />} />
+                <Route path="/auth/reset-password" element={<ResetPassword />} />
                 <Route path="/setup" element={
                   <ProtectedRoute>
                     <Setup />
