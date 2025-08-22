@@ -43,10 +43,11 @@ export default function ResetPassword() {
       return;
     }
 
-    if (password.length < 6) {
+    // Enhanced password validation
+    if (password.length < 8) {
       toast({
-        title: "Password too short",
-        description: "Password must be at least 6 characters long.",
+        title: "Password too weak",
+        description: "Password must be at least 8 characters long.",
         variant: "destructive"
       });
       return;
@@ -74,11 +75,39 @@ export default function ResetPassword() {
           description: error.message,
           variant: "destructive"
         });
+        
+        // Log failed password reset attempt
+        try {
+          await supabase.from('security_audit_log').insert({
+            action: 'PASSWORD_RESET_FAILED',
+            resource_type: 'authentication',
+            details: {
+              error: error.message,
+              timestamp: new Date().toISOString()
+            }
+          });
+        } catch (logError) {
+          console.error('Failed to log security event:', logError);
+        }
       } else {
         toast({
           title: "Password Updated",
           description: "Your password has been successfully updated."
         });
+        
+        // Log successful password reset
+        try {
+          await supabase.from('security_audit_log').insert({
+            action: 'PASSWORD_RESET_SUCCESS',
+            resource_type: 'authentication',
+            details: {
+              timestamp: new Date().toISOString()
+            }
+          });
+        } catch (logError) {
+          console.error('Failed to log security event:', logError);
+        }
+        
         navigate('/dashboard');
       }
     } catch (err: any) {

@@ -34,8 +34,8 @@ export default function Auth() {
   useEffect(() => {
     if (isAuthenticated && !authLoading) {
       // Use server-side validation for setup completion
-      import('@/components/SecureStorage').then(({ SecureStorage }) => {
-        SecureStorage.isSetupComplete().then((isSetupComplete) => {
+      import('@/components/auth/SecureDataStore').then(({ SecureDataStore }) => {
+        SecureDataStore.isSetupComplete().then((isSetupComplete) => {
           navigate(isSetupComplete ? redirectTo : '/setup', { replace: true });
         });
       });

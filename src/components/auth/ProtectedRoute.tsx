@@ -33,8 +33,8 @@ export function ProtectedRoute({ children, requireSetup = false }: ProtectedRout
     const [isSetupComplete, setIsSetupComplete] = useState<boolean | null>(null);
     
     useEffect(() => {
-      import('@/components/SecureStorage').then(({ SecureStorage }) => {
-        SecureStorage.isSetupComplete().then(setIsSetupComplete);
+      import('@/components/auth/SecureDataStore').then(({ SecureDataStore }) => {
+        SecureDataStore.isSetupComplete().then(setIsSetupComplete);
       });
     }, []);
 
