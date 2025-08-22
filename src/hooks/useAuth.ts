@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { User, Session, AuthError } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useBruteForceProtection } from '@/hooks/useBruteForceProtection';
 
 interface AuthState {
   user: User | null;
@@ -23,6 +24,7 @@ export function useAuth(): AuthState & AuthActions {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { checkBruteForce, logFailedAttempt } = useBruteForceProtection();
 
   const isAuthenticated = !!session?.user;
 
@@ -95,12 +97,22 @@ export function useAuth(): AuthState & AuthActions {
   const signIn = useCallback(async (email: string, password: string) => {
     try {
       setLoading(true);
+      
+      // Check for brute force attempts before attempting sign in
+      const userQuery = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', 'temp'); // We'll get the actual user ID after auth
+        
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password
       });
 
       if (error) {
+        // Log failed attempt
+        await logFailedAttempt(email, 'login');
+        
         let message = 'An error occurred during sign in';
         
         if (error.message.includes('Invalid login credentials')) {
@@ -117,6 +129,13 @@ export function useAuth(): AuthState & AuthActions {
           variant: "destructive"
         });
       } else if (data.session) {
+        // Check for brute force attempts after successful auth
+        const isBlocked = await checkBruteForce(data.user.id);
+        if (isBlocked) {
+          await supabase.auth.signOut();
+          return { error: { message: 'Account temporarily locked' } as AuthError };
+        }
+        
         toast({
           title: "Welcome back!",
           description: "Successfully signed in."
@@ -126,6 +145,7 @@ export function useAuth(): AuthState & AuthActions {
       return { error };
     } catch (err: any) {
       console.error('Sign in error:', err);
+      await logFailedAttempt(email, 'login');
       toast({
         title: "Sign In Error",
         description: "An unexpected error occurred. Please try again.",
@@ -135,7 +155,7 @@ export function useAuth(): AuthState & AuthActions {
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [toast, checkBruteForce, logFailedAttempt]);
 
   const signUp = useCallback(async (email: string, password: string, userData: any = {}) => {
     try {
@@ -258,6 +278,9 @@ export function useAuth(): AuthState & AuthActions {
       });
 
       if (error) {
+        // Log failed password reset attempt
+        await logFailedAttempt(email, 'password_reset');
+        
         toast({
           title: "Reset Password Error",
           description: error.message,
@@ -273,6 +296,7 @@ export function useAuth(): AuthState & AuthActions {
       return { error };
     } catch (err: any) {
       console.error('Reset password error:', err);
+      await logFailedAttempt(email, 'password_reset');
       toast({
         title: "Reset Password Error",
         description: "An unexpected error occurred. Please try again.",
@@ -280,7 +304,7 @@ export function useAuth(): AuthState & AuthActions {
       });
       return { error: err };
     }
-  }, [toast]);
+  }, [toast, logFailedAttempt]);
 
   const signInWithOAuth = useCallback(async (provider: 'google' | 'azure' | 'github') => {
     try {
