@@ -1073,6 +1073,7 @@ export type Database = {
           details: Json | null
           id: string
           ip_address: unknown | null
+          request_metadata: Json | null
           resource_id: string | null
           resource_type: string
           user_agent: string | null
@@ -1085,6 +1086,7 @@ export type Database = {
           details?: Json | null
           id?: string
           ip_address?: unknown | null
+          request_metadata?: Json | null
           resource_id?: string | null
           resource_type: string
           user_agent?: string | null
@@ -1097,6 +1099,7 @@ export type Database = {
           details?: Json | null
           id?: string
           ip_address?: unknown | null
+          request_metadata?: Json | null
           resource_id?: string | null
           resource_type?: string
           user_agent?: string | null
@@ -1658,6 +1661,33 @@ export type Database = {
           },
         ]
       }
+      webhook_rate_limits: {
+        Row: {
+          created_at: string | null
+          id: string
+          ip_address: unknown
+          request_count: number | null
+          webhook_id: string
+          window_start: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          ip_address: unknown
+          request_count?: number | null
+          webhook_id: string
+          window_start?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown
+          request_count?: number | null
+          webhook_id?: string
+          window_start?: string | null
+        }
+        Relationships: []
+      }
       webhook_secrets: {
         Row: {
           created_at: string | null
@@ -1745,6 +1775,10 @@ export type Database = {
         Args: { project_id: string }
         Returns: number
       }
+      detect_brute_force_attempts: {
+        Args: { check_user_id: string }
+        Returns: boolean
+      }
       enforce_company_isolation: {
         Args: { target_company_id: string }
         Returns: boolean
@@ -1807,6 +1841,10 @@ export type Database = {
         Args: { _tender_id: string }
         Returns: boolean
       }
+      log_password_reset_attempt: {
+        Args: { success: boolean; user_email: string }
+        Returns: undefined
+      }
       log_security_event: {
         Args:
           | {
@@ -1856,8 +1894,16 @@ export type Database = {
         Args: { additional_details?: Json; event_type: string; user_id: string }
         Returns: undefined
       }
+      validate_oauth_providers: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       validate_security_context: {
         Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      validate_webhook_signature: {
+        Args: { payload: string; signature: string; webhook_id: string }
         Returns: boolean
       }
     }

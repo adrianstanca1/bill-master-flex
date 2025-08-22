@@ -45,38 +45,39 @@ serve(async (req) => {
           throw new Error('Missing webhook signature');
         }
 
-        // Validate HMAC signature
-        const encoder = new TextEncoder();
-        const data = encoder.encode(JSON.stringify(payload));
-        
-        // Get webhook secret
-        const { data: secretData, error: secretError } = await supabase
-          .from('webhook_secrets')
-          .select('encrypted_secret')
+        // Rate limiting check
+        const clientIP = req.headers.get('x-forwarded-for') || 'unknown';
+        const { data: rateLimitData } = await supabase
+          .from('webhook_rate_limits')
+          .select('request_count, window_start')
           .eq('webhook_id', webhookId)
+          .eq('ip_address', clientIP)
+          .gte('window_start', new Date(Date.now() - 3600000).toISOString()) // Last hour
           .single();
 
-        if (secretError || !secretData) {
-          throw new Error('Invalid webhook configuration');
+        if (rateLimitData && rateLimitData.request_count > 100) {
+          throw new Error('Rate limit exceeded');
         }
 
-        const secret = atob(secretData.encrypted_secret);
-        const key = await crypto.subtle.importKey(
-          'raw',
-          encoder.encode(secret),
-          { name: 'HMAC', hash: 'SHA-256' },
-          false,
-          ['sign', 'verify']
+        // Update rate limiting
+        await supabase.from('webhook_rate_limits').upsert({
+          webhook_id: webhookId,
+          ip_address: clientIP,
+          request_count: (rateLimitData?.request_count || 0) + 1,
+          window_start: rateLimitData?.window_start || new Date().toISOString()
+        });
+
+        // Enhanced HMAC signature validation using database function
+        const { data: isValid, error: validationError } = await supabase.rpc(
+          'validate_webhook_signature',
+          {
+            webhook_id: webhookId,
+            payload: JSON.stringify(payload),
+            signature: signature
+          }
         );
 
-        const expectedSignature = await crypto.subtle.sign('HMAC', key, data);
-        const expectedHex = Array.from(new Uint8Array(expectedSignature))
-          .map(b => b.toString(16).padStart(2, '0'))
-          .join('');
-
-        const providedSignature = signature.replace('sha256=', '');
-        
-        if (expectedHex !== providedSignature) {
+        if (validationError || !isValid) {
           throw new Error('Invalid webhook signature');
         }
 

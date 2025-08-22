@@ -53,6 +53,16 @@ export default function ResetPassword() {
       return;
     }
 
+    // Additional security checks
+    if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
+      toast({
+        title: "Password too weak",
+        description: "Password must contain uppercase, lowercase, and number characters.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (password !== confirmPassword) {
       toast({
         title: "Passwords don't match",
