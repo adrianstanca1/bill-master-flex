@@ -3,7 +3,10 @@ project_id = "tjgbyygllssqsywxpxqe"
 [auth]
 enabled = true
 site_url = "https://5295eab3-6497-4c88-8ecf-70d77bf6640d.sandbox.lovable.dev"
-additional_redirect_urls = ["https://5295eab3-6497-4c88-8ecf-70d77bf6640d.sandbox.lovable.dev/**"]
+additional_redirect_urls = [
+  "https://5295eab3-6497-4c88-8ecf-70d77bf6640d.sandbox.lovable.dev/**",
+  "https://5295eab3-6497-4c88-8ecf-70d77bf6640d.sandbox.lovable.dev/auth/callback"
+]
 jwt_expiry = 3600
 refresh_token_rotation_enabled = true
 security_update_password_require_reauthentication = true
