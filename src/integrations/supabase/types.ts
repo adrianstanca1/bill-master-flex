@@ -568,7 +568,7 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
-          company_id: string | null
+          company_id: string
           created_at: string
           first_name: string | null
           id: string
@@ -579,7 +579,7 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
-          company_id?: string | null
+          company_id: string
           created_at?: string
           first_name?: string | null
           id: string
@@ -590,7 +590,7 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           first_name?: string | null
           id?: string
@@ -1775,6 +1775,15 @@ export type Database = {
         Args: { project_id: string }
         Returns: number
       }
+      check_rate_limit: {
+        Args: {
+          action_type: string
+          max_attempts?: number
+          time_window?: unknown
+          user_identifier: string
+        }
+        Returns: boolean
+      }
       detect_brute_force_attempts: {
         Args: { check_user_id: string }
         Returns: boolean
@@ -1894,6 +1903,10 @@ export type Database = {
         Args: { additional_details?: Json; event_type: string; user_id: string }
         Returns: undefined
       }
+      validate_csrf_token: {
+        Args: { expected: string; token: string }
+        Returns: boolean
+      }
       validate_oauth_providers: {
         Args: Record<PropertyKey, never>
         Returns: Json
@@ -1901,6 +1914,10 @@ export type Database = {
       validate_security_context: {
         Args: Record<PropertyKey, never>
         Returns: boolean
+      }
+      validate_session_security: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
       }
       validate_webhook_signature: {
         Args: { payload: string; signature: string; webhook_id: string }
