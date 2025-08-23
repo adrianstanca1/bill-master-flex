@@ -9,6 +9,7 @@ import { RemindersWidget } from "@/components/RemindersWidget";
 import { GuestBanner } from "@/components/GuestBanner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart3, Activity, Zap } from "lucide-react";
+import ThemeSwitcher from "@/components/ThemeSwitcher";
 
 const Dashboard: React.FC = () => {
   return (
@@ -26,6 +27,11 @@ const Dashboard: React.FC = () => {
             <p className="text-muted-foreground text-lg">
               Command center for your construction business operations
             </p>
+          </div>
+
+          <div className="cyber-card p-6 hover-glow">
+            <h2 className="text-lg font-semibold mb-3">Theme</h2>
+            <ThemeSwitcher />
           </div>
 
           {/* Enhanced Dashboard with Tabs */}

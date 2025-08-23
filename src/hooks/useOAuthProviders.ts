@@ -25,10 +25,15 @@ export function useOAuthProviders() {
         
         if (data) {
           // Type the response data properly
-          const providerData = data as { google_enabled?: boolean; microsoft_enabled?: boolean; custom_enabled?: boolean };
+          const providerData = data as {
+            google_enabled?: boolean;
+            microsoft_enabled?: boolean;
+            github_enabled?: boolean;
+            custom_enabled?: boolean;
+          };
           setEnabledProviders({
             google: providerData.google_enabled || false,
-            github: false,
+            github: providerData.github_enabled || false,
             azure: providerData.microsoft_enabled || false,
             custom: providerData.custom_enabled || false
           });

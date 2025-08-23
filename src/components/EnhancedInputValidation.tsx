@@ -70,7 +70,7 @@ export function EnhancedInputValidation({
     // Third pass - length and character validation
     sanitized = sanitized
       .replace(/[<>]/g, '') // Remove any remaining angle brackets
-      .replace(/\x00/g, '') // Remove null bytes
+      .split('\0').join('') // Remove null bytes without regex
       .trim();
 
     // Log suspicious input if significant changes made
@@ -307,20 +307,20 @@ export const commonValidationRules: ValidationRules = {
     sanitize: false // Don't sanitize passwords
   },
   phone: {
-    pattern: /^[\+]?[1-9][\d]{0,15}$/,
+    pattern: /^\+?[1-9]\d{0,15}$/,
     maxLength: 20,
     minLength: 10,
     sanitize: true
   },
   name: {
-    pattern: /^[a-zA-Z\s\-'\.]+$/,
+    pattern: /^[a-zA-Z\s'.-]+$/,
     minLength: 2, // Increased from 1
     maxLength: 50, // Reduced from 100 for security
     required: true,
     sanitize: true
   },
   company: {
-    pattern: /^[a-zA-Z0-9\s\-&'\.]+$/,
+    pattern: /^[a-zA-Z0-9\s&'.-]+$/,
     minLength: 2,
     maxLength: 100, // Reduced from 200 for security
     required: true,
