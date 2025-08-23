@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { useEnhancedRoleAccess } from '@/hooks/useEnhancedRoleAccess';
 import { useSecureAuth } from '@/hooks/useSecureAuth';
 import { useSecurityEnhancements } from '@/hooks/useSecurityEnhancements';
@@ -8,7 +8,8 @@ import { secureStorage } from '@/lib/SecureStorage';
 import { SecurityAlert } from './SecurityAlert';
 import { SessionSecurityManager } from './SessionSecurityManager';
 import { EnhancedSessionManager } from './EnhancedSessionManager';
-import { EnhancedInputValidation, commonValidationRules } from './EnhancedInputValidation';
+import { EnhancedInputValidation } from './EnhancedInputValidation';
+import { commonValidationRules } from '@/lib/validationRules';
 
 interface EnhancedSecurityManagerProps {
   children: React.ReactNode;
@@ -21,6 +22,48 @@ export function EnhancedSecurityManager({ children }: EnhancedSecurityManagerPro
   const { isBlocked, checkBruteForce } = useSecurityBruteForce();
   const { toast } = useToast();
 
+  const migrateLegacyStorage = useCallback(async () => {
+    try {
+      const legacyKeys = [
+        'user_preferences',
+        'dashboard_settings',
+        'form_drafts',
+        'ui_state'
+      ];
+
+      for (const key of legacyKeys) {
+        const legacyData = localStorage.getItem(key);
+        if (legacyData) {
+          try {
+            const parsedData = JSON.parse(legacyData);
+            await secureStorage.setItem(key, parsedData, { 
+              encrypt: true, 
+              serverSide: true 
+            });
+            localStorage.removeItem(key);
+          } catch (parseError) {
+            console.warn(`Failed to migrate ${key}:`, parseError);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Storage migration failed:', error);
+    }
+  }, []);
+
+  const logSecurityEvent = useCallback(async (eventType: string, details: any) => {
+    try {
+      await secureStorage.setItem(`security_event_${Date.now()}`, {
+        event_type: eventType,
+        user_id: user?.id,
+        timestamp: new Date().toISOString(),
+        details
+      }, { encrypt: true, serverSide: true });
+    } catch (error) {
+      console.error('Failed to log security event:', error);
+    }
+  }, [user?.id]);
+
   // Enhanced security validation on component mount
   useEffect(() => {
     const performSecurityChecks = async () => {
@@ -29,7 +72,7 @@ export function EnhancedSecurityManager({ children }: EnhancedSecurityManagerPro
       try {
         // Check for brute force attempts
         const bruteForceResult = await checkBruteForce(user.id);
-        
+
         if (bruteForceResult.isBlocked) {
           toast({
             title: "Security Alert",
@@ -61,51 +104,18 @@ export function EnhancedSecurityManager({ children }: EnhancedSecurityManagerPro
     };
 
     performSecurityChecks();
-  }, [isAuthenticated, user, canAccessFinancials, userRole, roleLoading]);
-
-  // Migrate legacy localStorage data to secure storage
-  const migrateLegacyStorage = async () => {
-    try {
-      const legacyKeys = [
-        'user_preferences',
-        'dashboard_settings',
-        'form_drafts',
-        'ui_state'
-      ];
-
-      for (const key of legacyKeys) {
-        const legacyData = localStorage.getItem(key);
-        if (legacyData) {
-          try {
-            const parsedData = JSON.parse(legacyData);
-            await secureStorage.setItem(key, parsedData, { 
-              encrypt: true, 
-              serverSide: true 
-            });
-            localStorage.removeItem(key);
-          } catch (parseError) {
-            console.warn(`Failed to migrate ${key}:`, parseError);
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Storage migration failed:', error);
-    }
-  };
-
-  // Log security events
-  const logSecurityEvent = async (eventType: string, details: any) => {
-    try {
-      await secureStorage.setItem(`security_event_${Date.now()}`, {
-        event_type: eventType,
-        user_id: user?.id,
-        timestamp: new Date().toISOString(),
-        details
-      }, { encrypt: true, serverSide: true });
-    } catch (error) {
-      console.error('Failed to log security event:', error);
-    }
-  };
+  }, [
+    isAuthenticated,
+    user,
+    canAccessFinancials,
+    userRole,
+    roleLoading,
+    checkBruteForce,
+    migrateLegacyStorage,
+    logSecurityEvent,
+    securityStatus.sessionValid,
+    toast,
+  ]);
 
   // Handle validation errors
   const handleValidationError = (field: string, error: string) => {

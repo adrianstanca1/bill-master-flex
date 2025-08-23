@@ -7,117 +7,101 @@
 
 @layer base {
   :root {
-    /* 3-Color Design System - Primary, Secondary, Neutral */
+    /* Professional Light Theme */
     --background: 0 0% 100%;
-    --foreground: 220 91% 10%;
+    --foreground: 222.2 84% 4.9%;
     
     --card: 0 0% 100%;
-    --card-foreground: 220 91% 10%;
+    --card-foreground: 222.2 84% 4.9%;
     
     --popover: 0 0% 100%;
-    --popover-foreground: 220 91% 10%;
+    --popover-foreground: 222.2 84% 4.9%;
     
-    /* PRIMARY COLOR: Deep Blue */
-    --primary: 220 91% 35%;
-    --primary-foreground: 0 0% 100%;
-    --primary-light: 220 91% 45%;
-    --primary-dark: 220 91% 25%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
     
-    /* SECONDARY COLOR: Emerald Green */
-    --secondary: 142 76% 36%;
-    --secondary-foreground: 0 0% 100%;
-    --secondary-light: 142 76% 46%;
-    --secondary-dark: 142 76% 26%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 84% 4.9%;
     
-    /* NEUTRAL COLOR: Sophisticated Gray */
-    --neutral: 215 16% 47%;
-    --neutral-light: 215 16% 65%;
-    --neutral-dark: 215 16% 30%;
-    --neutral-foreground: 0 0% 100%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
     
-    /* System Colors derived from 3-color palette */
-    --muted: 215 16% 95%;
-    --muted-foreground: 215 16% 47%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 84% 4.9%;
     
-    --accent: 142 76% 95%;
-    --accent-foreground: 142 76% 26%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
     
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
     
-    --border: 215 16% 90%;
-    --input: 215 16% 90%;
-    --ring: 220 91% 35%;
-    
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
-    /* 3-Color Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-light)));
-    --gradient-secondary: linear-gradient(135deg, hsl(var(--secondary)), hsl(var(--secondary-light)));
-    --gradient-neutral: linear-gradient(135deg, hsl(var(--neutral)), hsl(var(--neutral-light)));
-    --gradient-accent: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)));
-    --gradient-surface: linear-gradient(180deg, hsl(var(--background)), hsl(var(--muted)));
+    /* Professional Color Palette */
+    --brand-blue: 221.2 83.2% 53.3%;
+    --brand-blue-light: 221.2 83.2% 63.3%;
+    --brand-blue-dark: 221.2 83.2% 43.3%;
+    --construction-orange: 24.6 95% 53.1%;
+    --success-green: 142.1 76.2% 36.3%;
+    --warning-amber: 47.9 95.8% 53.1%;
+    --neutral-gray: 215.4 16.3% 46.9%;
+    --surface-light: 210 40% 98%;
+    --surface-medium: 210 40% 96%;
+
+    /* Professional Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--brand-blue)), hsl(var(--brand-blue-light)));
+    --gradient-secondary: linear-gradient(135deg, hsl(var(--construction-orange)), hsl(var(--warning-amber)));
+    --gradient-surface: linear-gradient(135deg, hsl(var(--surface-light)), hsl(var(--surface-medium)));
+    --gradient-subtle: linear-gradient(180deg, hsl(var(--background)), hsl(var(--surface-light)));
     
-    /* Elegant Shadows */
-    --shadow-soft: 0 2px 8px hsl(var(--primary) / 0.08);
-    --shadow-medium: 0 4px 16px hsl(var(--primary) / 0.12);
-    --shadow-large: 0 8px 32px hsl(var(--primary) / 0.16);
-    --shadow-glow: 0 0 24px hsl(var(--secondary) / 0.25);
+    /* Professional Shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.1), 0 2px 4px -2px hsl(0 0% 0% / 0.1);
+    --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.1), 0 4px 6px -4px hsl(0 0% 0% / 0.1);
+    --shadow-xl: 0 20px 25px -5px hsl(0 0% 0% / 0.1), 0 8px 10px -6px hsl(0 0% 0% / 0.1);
+    --shadow-elevated: 0 25px 50px -12px hsl(0 0% 0% / 0.25);
     
-    /* Smooth Transitions */
-    --transition-fast: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-medium: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-slow: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Subtle Transitions */
+    --transition-fast: all 0.15s ease-in-out;
+    --transition-normal: all 0.2s ease-in-out;
+    --transition-slow: all 0.3s ease-in-out;
   }
 
   .dark {
-    /* 3-Color Dark Theme */
-    --background: 220 91% 6%;
-    --foreground: 0 0% 98%;
+    /* Professional Dark Theme */
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
     
-    --card: 220 91% 8%;
-    --card-foreground: 0 0% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
     
-    --popover: 220 91% 8%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
     
-    /* PRIMARY COLOR: Bright Blue */
-    --primary: 220 91% 55%;
-    --primary-foreground: 220 91% 6%;
-    --primary-light: 220 91% 65%;
-    --primary-dark: 220 91% 45%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 84% 4.9%;
     
-    /* SECONDARY COLOR: Bright Green */
-    --secondary: 142 76% 46%;
-    --secondary-foreground: 220 91% 6%;
-    --secondary-light: 142 76% 56%;
-    --secondary-dark: 142 76% 36%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
     
-    /* NEUTRAL COLOR: Dark Gray */
-    --neutral: 215 16% 25%;
-    --neutral-light: 215 16% 35%;
-    --neutral-dark: 215 16% 15%;
-    --neutral-foreground: 0 0% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
     
-    /* System Colors for dark theme */
-    --muted: 220 91% 12%;
-    --muted-foreground: 215 16% 65%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
     
-    --accent: 220 91% 12%;
-    --accent-foreground: 142 76% 46%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
     
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
-    
-    --border: 220 91% 15%;
-    --input: 220 91% 15%;
-    --ring: 220 91% 55%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 94.1%;
 
-    /* Dark gradients */
-    --gradient-surface: linear-gradient(180deg, hsl(var(--background)), hsl(var(--muted)));
-    --shadow-soft: 0 2px 8px hsl(0 0% 0% / 0.3);
-    --shadow-medium: 0 4px 16px hsl(0 0% 0% / 0.4);
-    --shadow-large: 0 8px 32px hsl(0 0% 0% / 0.5);
+    /* Dark theme adjustments */
+    --surface-light: 217.2 32.6% 17.5%;
+    --surface-medium: 217.2 32.6% 15.5%;
+    --gradient-surface: linear-gradient(135deg, hsl(var(--surface-light)), hsl(var(--surface-medium)));
   }
 }
 
@@ -129,7 +113,7 @@
   body {
     @apply bg-background text-foreground font-sans;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-    background: var(--gradient-surface);
+    background: var(--gradient-subtle);
     min-height: 100vh;
   }
 
@@ -153,76 +137,57 @@
 }
 
 @layer components {
-  /* 3-Color Card System */
+  /* Professional Card System */
   .pro-card {
-    @apply relative rounded-xl border bg-card overflow-hidden;
-    box-shadow: var(--shadow-soft);
-    transition: var(--transition-medium);
-    border-color: hsl(var(--border));
+    @apply relative rounded-lg border bg-card overflow-hidden;
+    box-shadow: var(--shadow-md);
+    transition: var(--transition-normal);
   }
 
   .pro-card:hover {
-    box-shadow: var(--shadow-medium);
-    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-1px);
   }
 
-  /* Elevated Cards with gradient borders */
+  /* Elevated Cards */
   .elevated-card {
-    @apply relative rounded-xl bg-card overflow-hidden;
-    box-shadow: var(--shadow-medium);
-    transition: var(--transition-medium);
-    border: 1px solid transparent;
-    background: linear-gradient(hsl(var(--card)), hsl(var(--card))) padding-box,
-                var(--gradient-accent) border-box;
+    @apply relative rounded-lg border bg-card overflow-hidden;
+    box-shadow: var(--shadow-lg);
+    transition: var(--transition-normal);
   }
 
   .elevated-card:hover {
-    box-shadow: var(--shadow-large);
-    transform: translateY(-3px);
+    box-shadow: var(--shadow-xl);
+    transform: translateY(-2px);
   }
 
-  /* Primary Button - Deep Blue */
+  /* Professional Buttons */
   .btn-primary {
-    @apply relative px-6 py-3 rounded-lg font-semibold text-sm;
+    @apply relative px-6 py-2.5 rounded-md font-medium text-sm;
     background: var(--gradient-primary);
     color: hsl(var(--primary-foreground));
-    border: none;
-    box-shadow: var(--shadow-soft);
-    transition: var(--transition-medium);
+    border: 1px solid hsl(var(--primary));
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition-normal);
   }
 
   .btn-primary:hover {
-    box-shadow: var(--shadow-glow);
+    box-shadow: var(--shadow-md);
     transform: translateY(-1px);
   }
 
-  /* Secondary Button - Emerald Green */
   .btn-secondary {
-    @apply relative px-6 py-3 rounded-lg font-semibold text-sm;
-    background: var(--gradient-secondary);
+    @apply relative px-6 py-2.5 rounded-md font-medium text-sm;
+    background: hsl(var(--secondary));
     color: hsl(var(--secondary-foreground));
-    border: none;
-    box-shadow: var(--shadow-soft);
-    transition: var(--transition-medium);
+    border: 1px solid hsl(var(--border));
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition-normal);
   }
 
   .btn-secondary:hover {
-    box-shadow: var(--shadow-medium);
-    transform: translateY(-1px);
-  }
-
-  /* Neutral Button */
-  .btn-neutral {
-    @apply relative px-6 py-3 rounded-lg font-semibold text-sm;
-    background: var(--gradient-neutral);
-    color: hsl(var(--neutral-foreground));
-    border: none;
-    box-shadow: var(--shadow-soft);
-    transition: var(--transition-medium);
-  }
-
-  .btn-neutral:hover {
-    box-shadow: var(--shadow-medium);
+    background: hsl(var(--accent));
+    box-shadow: var(--shadow-md);
     transform: translateY(-1px);
   }
 
