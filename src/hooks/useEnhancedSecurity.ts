@@ -28,7 +28,7 @@ export function useEnhancedSecurity() {
     queryKey: ['security-profile'],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return null;
+      if (!user?.id) return null;
       
       const { data, error } = await supabase
         .from('profiles')
@@ -36,9 +36,14 @@ export function useEnhancedSecurity() {
         .eq('id', user.id)
         .maybeSingle();
       
-      if (error) throw error;
+      if (error) {
+        console.warn('Profile fetch error:', error);
+        return null;
+      }
       return data;
     },
+    enabled: true,
+    retry: false,
   });
 
   // Monitor security audit logs for suspicious activity

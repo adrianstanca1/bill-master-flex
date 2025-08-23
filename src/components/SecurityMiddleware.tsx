@@ -8,9 +8,14 @@ export function SecurityMiddleware() {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Enhanced session validation
+    // Enhanced session validation - only when user is authenticated
     const validateSession = async () => {
       try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user) {
+          return; // Skip validation for unauthenticated users
+        }
+
         const { data: sessionValidation } = await supabase.rpc('validate_session_security');
         const validation = sessionValidation as any;
         
@@ -21,29 +26,19 @@ export function SecurityMiddleware() {
             // Attempt to refresh the session
             const { error } = await supabase.auth.refreshSession();
             if (error) {
-              toast({
-                title: "Session Expired",
-                description: "Please sign in again for security.",
-                variant: "destructive",
-              });
+              console.warn('Session refresh failed, signing out');
               await supabase.auth.signOut();
-              navigate('/auth');
             }
           } else if (validation?.reason === 'User profile not found') {
-            toast({
-              title: "Profile Error",
-              description: "Please contact support if this persists.",
-              variant: "destructive",
-            });
-            await supabase.auth.signOut();
-            navigate('/auth');
+            // Don't show toast or force sign out - this might be a new user
+            console.warn('User profile not found - possible new user');
           }
         } else if (validation?.requires_setup) {
           // Handle users without company association - redirect to setup
           navigate('/setup');
         }
       } catch (error) {
-        console.error('Session validation error:', error);
+        console.warn('Session validation error:', error);
       }
     };
 
@@ -111,14 +106,21 @@ export function SecurityMiddleware() {
       };
     };
 
-    validateSession();
+    // Only run validation for authenticated routes
+    const currentPath = window.location.pathname;
+    if (currentPath !== '/auth' && currentPath !== '/') {
+      validateSession();
+    }
+    
     monitorSecurityEvents();
 
-    // Set up periodic validation
-    const interval = setInterval(validateSession, 5 * 60 * 1000); // Every 5 minutes
+    // Set up periodic validation only for authenticated routes
+    const interval = currentPath !== '/auth' && currentPath !== '/' 
+      ? setInterval(validateSession, 5 * 60 * 1000) // Every 5 minutes
+      : null;
 
     return () => {
-      clearInterval(interval);
+      if (interval) clearInterval(interval);
     };
   }, [navigate, toast]);
 
