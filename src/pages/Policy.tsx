@@ -2,8 +2,10 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ResponsiveLayout } from '@/components/ResponsiveLayout';
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 import SEO from '@/components/SEO';
-import { Shield, FileText, Database, Cookie } from 'lucide-react';
+import { Shield, Database, Cookie, ExternalLink } from 'lucide-react';
 
 export default function Policy() {
   return (
@@ -22,15 +24,20 @@ export default function Policy() {
             </p>
           </div>
 
+          <div className="mb-6">
+            <Button asChild>
+              <Link to="/terms" className="flex items-center gap-2">
+                View Terms of Service
+                <ExternalLink className="h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+
           <Tabs defaultValue="privacy" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="privacy" className="flex items-center gap-2">
                 <Shield className="h-4 w-4" />
                 Privacy Policy
-              </TabsTrigger>
-              <TabsTrigger value="terms" className="flex items-center gap-2">
-                <FileText className="h-4 w-4" />
-                Terms of Service
               </TabsTrigger>
               <TabsTrigger value="data" className="flex items-center gap-2">
                 <Database className="h-4 w-4" />
@@ -100,68 +107,6 @@ export default function Policy() {
                     <p>
                       If you have any questions about this Privacy Policy, please contact us at 
                       privacy@ascladdingroofing.com
-                    </p>
-                  </section>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="terms" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Terms of Service</CardTitle>
-                </CardHeader>
-                <CardContent className="prose prose-sm max-w-none">
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Last updated: {new Date().toLocaleDateString()}
-                  </p>
-
-                  <section className="space-y-4">
-                    <h3 className="font-semibold">1. Acceptance of Terms</h3>
-                    <p>
-                      By accessing and using AS Cladding & Roofing's construction management platform, 
-                      you accept and agree to be bound by the terms and provision of this agreement.
-                    </p>
-
-                    <h3 className="font-semibold">2. Description of Service</h3>
-                    <p>
-                      Our platform provides construction management tools including project tracking, 
-                      invoicing, quote generation, and business analytics for construction professionals.
-                    </p>
-
-                    <h3 className="font-semibold">3. User Accounts</h3>
-                    <ul className="list-disc pl-6 space-y-1">
-                      <li>You must provide accurate and complete information when creating an account</li>
-                      <li>You are responsible for maintaining the security of your account</li>
-                      <li>You must notify us immediately of any unauthorized access</li>
-                      <li>One person or legal entity may not maintain more than one account</li>
-                    </ul>
-
-                    <h3 className="font-semibold">4. Acceptable Use</h3>
-                    <p>You agree not to:</p>
-                    <ul className="list-disc pl-6 space-y-1">
-                      <li>Use the service for any unlawful purpose</li>
-                      <li>Attempt to gain unauthorized access to the service</li>
-                      <li>Interfere with or disrupt the service</li>
-                      <li>Upload malicious code or spam</li>
-                    </ul>
-
-                    <h3 className="font-semibold">5. Payment Terms</h3>
-                    <p>
-                      If you choose a paid plan, you agree to pay all fees associated with your account. 
-                      Fees are non-refundable except as required by law.
-                    </p>
-
-                    <h3 className="font-semibold">6. Limitation of Liability</h3>
-                    <p>
-                      AS Cladding & Roofing shall not be liable for any indirect, incidental, special, 
-                      consequential, or punitive damages resulting from your use of the service.
-                    </p>
-
-                    <h3 className="font-semibold">7. Termination</h3>
-                    <p>
-                      We may terminate or suspend your account at any time for violation of these terms. 
-                      You may terminate your account at any time by contacting us.
                     </p>
                   </section>
                 </CardContent>
