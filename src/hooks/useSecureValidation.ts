@@ -91,10 +91,26 @@ export function useSecureValidation() {
   };
 
   useEffect(() => {
-    validateSecurityContext();
+    // Only validate security context for authenticated users
+    const checkAndValidate = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        validateSecurityContext();
+      } else {
+        // Set default state for unauthenticated users
+        setValidationResult({
+          isValid: true, // Don't show security alerts on auth page
+          violations: [],
+          companyId: null,
+          userId: null
+        });
+      }
+    };
+
+    checkAndValidate();
     
-    // Re-validate every 5 minutes
-    const interval = setInterval(validateSecurityContext, 5 * 60 * 1000);
+    // Re-validate every 5 minutes only if user is authenticated
+    const interval = setInterval(checkAndValidate, 5 * 60 * 1000);
     
     return () => clearInterval(interval);
   }, []);
