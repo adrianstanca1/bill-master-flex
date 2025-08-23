@@ -10,6 +10,7 @@ import { EmailConfirmationBanner } from "@/components/EmailConfirmationBanner";
 import { SecurityEnhancedForm } from "@/components/SecurityEnhancedForm";
 import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicator";
 import { usePasswordSecurity } from "@/hooks/usePasswordSecurity";
+import { PasswordSecurityBannerFixed } from "@/components/PasswordSecurityBannerFixed";
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -306,6 +307,7 @@ export default function Auth() {
           noindex 
         />
         
+        <PasswordSecurityBannerFixed />
         
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">

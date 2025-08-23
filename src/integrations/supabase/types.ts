@@ -1809,6 +1809,15 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      check_auth_rate_limit: {
+        Args: {
+          action_type?: string
+          identifier: string
+          max_attempts?: number
+          window_minutes?: number
+        }
+        Returns: Json
+      }
       check_rate_limit: {
         Args: {
           action_type: string
@@ -1964,6 +1973,14 @@ export type Database = {
       }
       store_oauth_state: {
         Args: { session_id?: string; token: string }
+        Returns: string
+      }
+      store_oauth_state_secure: {
+        Args: {
+          expires_minutes?: number
+          session_id?: string
+          state_token: string
+        }
         Returns: string
       }
       test_rls_policies: {

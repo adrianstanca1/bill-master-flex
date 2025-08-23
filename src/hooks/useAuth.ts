@@ -48,24 +48,7 @@ export function useAuth(): AuthState & AuthActions {
         setUser(session?.user ?? null);
         setLoading(false);
 
-        // Log authentication events for security monitoring
-        if (session?.user && event === 'SIGNED_IN') {
-          setTimeout(async () => {
-            try {
-              await supabase.from('security_audit_log').insert({
-                action: 'SIGN_IN',
-                resource_type: 'auth',
-                details: { 
-                  sign_in_time: new Date().toISOString(),
-                  user_agent: navigator.userAgent,
-                  location: window.location.pathname
-                }
-              });
-            } catch (error) {
-              console.warn('Failed to log sign in event:', error);
-            }
-          }, 0);
-        }
+        // Server-side authentication logging is now handled by database triggers
       }
     );
 
@@ -110,15 +93,36 @@ export function useAuth(): AuthState & AuthActions {
     try {
       setLoading(true);
       
+      // Check rate limit before attempting login using new secure function
+      const rateLimitCheck = await supabase.rpc('check_auth_rate_limit', {
+        identifier: email.trim(),
+        action_type: 'authentication',
+        max_attempts: 5,
+        window_minutes: 15
+      });
+
+      if (rateLimitCheck.data && typeof rateLimitCheck.data === 'object' && 'allowed' in rateLimitCheck.data && !rateLimitCheck.data.allowed) {
+        const resetTime = 'reset_time' in rateLimitCheck.data && typeof rateLimitCheck.data.reset_time === 'string' 
+          ? rateLimitCheck.data.reset_time 
+          : '';
+        
+        toast({
+          title: "Too many attempts",
+          description: resetTime 
+            ? `Please wait before trying again. Reset at: ${new Date(resetTime).toLocaleTimeString()}`
+            : "Please wait before trying again.",
+          variant: "destructive"
+        });
+        
+        return { error: new AuthError('Rate limit exceeded', 429, 'rate_limit_exceeded') };
+      }
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password
       });
 
       if (error) {
-        // Log failed attempt
-        await logFailedAttempt(email, 'login');
-        
         let message = 'An error occurred during sign in';
         
         if (error.message.includes('Invalid login credentials')) {
@@ -151,7 +155,6 @@ export function useAuth(): AuthState & AuthActions {
       return { error };
     } catch (err: any) {
       console.error('Sign in error:', err);
-      await logFailedAttempt(email, 'login');
       toast({
         title: "Sign In Error",
         description: "An unexpected error occurred. Please try again.",
@@ -161,7 +164,7 @@ export function useAuth(): AuthState & AuthActions {
     } finally {
       setLoading(false);
     }
-  }, [toast, checkBruteForce, logFailedAttempt]);
+  }, [toast, checkBruteForce]);
 
   const signUp = useCallback(async (email: string, password: string, userData: any = {}) => {
     try {
@@ -239,22 +242,6 @@ export function useAuth(): AuthState & AuthActions {
 
   const signOut = useCallback(async () => {
     try {
-      // Log sign out event
-      if (user?.id) {
-        try {
-          await supabase.from('security_audit_log').insert({
-            action: 'SIGN_OUT',
-            resource_type: 'auth',
-            details: { 
-              sign_out_time: new Date().toISOString(),
-              user_agent: navigator.userAgent
-            }
-          });
-        } catch (logError) {
-          console.warn('Failed to log sign out event:', logError);
-        }
-      }
-
       const { error } = await supabase.auth.signOut();
       
       if (error) {
@@ -275,7 +262,7 @@ export function useAuth(): AuthState & AuthActions {
       });
       return { error: err };
     }
-  }, [user?.id, toast]);
+  }, [toast]);
 
   const resetPassword = useCallback(async (email: string) => {
     try {
