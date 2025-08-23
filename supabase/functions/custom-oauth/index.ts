@@ -102,13 +102,27 @@ serve(async (req) => {
         });
       }
 
-      // Validate state token against stored value
-      const { data: isValidState, error: stateError } = await supabase.rpc('validate_oauth_state', {
+      // Validate OAuth state parameter using secure server-side function
+      const { data: stateValidation, error: stateError } = await supabase.rpc('validate_oauth_state_secure', {
         token: state
       });
 
-      if (stateError || !isValidState) {
-        console.error('OAuth state validation failed:', stateError);
+      console.log('OAuth state validation result:', stateValidation);
+
+      if (stateError || !stateValidation?.valid) {
+        console.error('Invalid OAuth state parameter:', stateError || 'Token validation failed');
+        
+        // Log security event for invalid state attempt
+        await supabase.rpc('log_security_event', {
+          p_event_type: 'OAUTH_INVALID_STATE_ATTEMPT',
+          p_severity: 'high',
+          p_details: JSON.stringify({
+            provided_state: state,
+            timestamp: new Date().toISOString(),
+            user_agent: req.headers.get('user-agent')
+          })
+        });
+
         return new Response(JSON.stringify({ 
           error: "Invalid or expired state parameter" 
         }), {

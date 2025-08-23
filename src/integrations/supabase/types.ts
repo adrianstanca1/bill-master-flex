@@ -1830,6 +1830,16 @@ export type Database = {
         Args: { check_ip?: unknown; check_user_id: string }
         Returns: Json
       }
+      enhanced_rate_limit_check: {
+        Args: {
+          action_type: string
+          block_duration?: unknown
+          identifier: string
+          max_attempts?: number
+          time_window?: unknown
+        }
+        Returns: Json
+      }
       get_current_user_enhanced_role: {
         Args: Record<PropertyKey, never>
         Returns: Database["public"]["Enums"]["app_role"]
@@ -1936,6 +1946,10 @@ export type Database = {
         Args: { input_text: string }
         Returns: string
       }
+      sanitize_input_enhanced: {
+        Args: { input_text: string }
+        Returns: Json
+      }
       set_secure_search_path: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -1983,6 +1997,14 @@ export type Database = {
         Args: { token: string }
         Returns: boolean
       }
+      validate_oauth_state_secure: {
+        Args: { token: string }
+        Returns: Json
+      }
+      validate_password_strength: {
+        Args: { password: string }
+        Returns: Json
+      }
       validate_security_context: {
         Args: Record<PropertyKey, never>
         Returns: boolean
@@ -1992,6 +2014,10 @@ export type Database = {
         Returns: Json
       }
       validate_session_security: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      validate_session_security_enhanced: {
         Args: Record<PropertyKey, never>
         Returns: Json
       }

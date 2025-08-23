@@ -2,6 +2,7 @@ import React, { ReactNode, useState, useEffect } from 'react';
 import DOMPurify from 'dompurify';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useSecureLogging } from '@/hooks/useSecureLogging';
 
 interface SecurityEnhancedFormProps {
   onSubmit: (data: any) => void;
@@ -22,6 +23,7 @@ export function SecurityEnhancedForm({
   rateLimit
 }: SecurityEnhancedFormProps) {
   const { toast } = useToast();
+  const { logSecurityEvent, logSuspiciousActivity } = useSecureLogging();
   const [csrfToken, setCsrfToken] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -54,20 +56,34 @@ export function SecurityEnhancedForm({
         }
       }
 
-      // Rate limiting check
+      // Enhanced rate limiting check
       if (rateLimit) {
-        const { data: rateLimitCheck } = await supabase.rpc('check_rate_limit', {
-          user_identifier: crypto.randomUUID(), // Use session ID or user ID
-          action_type: 'FORM_SUBMISSION',
+        const identifier = `${window.location.href}_${navigator.userAgent.slice(0, 50)}`;
+        const { data: rateLimitResult } = await supabase.rpc('enhanced_rate_limit_check', {
+          identifier: identifier,
+          action_type: 'form_submission',
           max_attempts: rateLimit.maxAttempts,
-          time_window: `${rateLimit.timeWindow} minutes`
+          time_window: `${rateLimit.timeWindow} minutes`,
+          block_duration: '1 hour'
         });
 
-        if (!rateLimitCheck) {
+        const rateLimitData = rateLimitResult as any;
+        if (!rateLimitData?.allowed) {
+          const blockTime = rateLimitData?.block_expires_at 
+            ? new Date(rateLimitData.block_expires_at).toLocaleTimeString()
+            : 'temporarily';
+          
+          await logSuspiciousActivity('RATE_LIMIT_EXCEEDED', {
+            identifier,
+            attempts_made: rateLimitData?.attempts_remaining || 0,
+            block_expires_at: rateLimitData?.block_expires_at
+          });
+
           toast({
-            title: "Rate Limit Exceeded",
-            description: `Too many attempts. Please wait ${rateLimit.timeWindow} minutes.`,
+            title: "Too Many Attempts",
+            description: `Please wait until ${blockTime} before submitting again.`,
             variant: "destructive",
+            duration: 10000,
           });
           return;
         }
@@ -81,7 +97,7 @@ export function SecurityEnhancedForm({
         data._csrf = csrfToken;
       }
       
-      // Enhanced server-side sanitization using database function
+      // Enhanced server-side input sanitization with threat detection
       for (const [key, value] of formData.entries()) {
         if (typeof value === 'string') {
           // First, client-side sanitization
@@ -92,51 +108,54 @@ export function SecurityEnhancedForm({
             FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'onfocus']
           }).trim();
           
-          // Server-side sanitization via database function
+          // Enhanced server-side sanitization with threat detection
           try {
-            const { data: sanitizedValue, error } = await supabase.rpc('sanitize_input', {
+            const { data: sanitizationResult } = await supabase.rpc('sanitize_input_enhanced', {
               input_text: clientSanitized
             });
             
-            if (error) {
-              console.error('Server-side sanitization failed:', error);
-              data[key] = clientSanitized; // Fallback to client sanitization
+            if (sanitizationResult) {
+              const sanitizationData = sanitizationResult as any;
+              data[key] = sanitizationData.sanitized_text || clientSanitized;
+              
+              // Handle high-threat inputs
+              if (sanitizationData.threat_level >= 4) {
+                await logSuspiciousActivity('HIGH_THREAT_INPUT', {
+                  field: key,
+                  threat_level: sanitizationData.threat_level,
+                  threats_detected: sanitizationData.threats_detected,
+                  original_length: value.length,
+                  sanitized_length: sanitizationData.sanitized_text?.length || 0
+                });
+
+                toast({
+                  title: "Security Warning",
+                  description: "Potentially malicious content detected and blocked.",
+                  variant: "destructive",
+                  duration: 8000,
+                });
+                return;
+              }
+              
+              // Log medium-threat inputs
+              if (sanitizationData.threat_level >= 2) {
+                await logSecurityEvent({
+                  eventType: 'MEDIUM_THREAT_INPUT',
+                  severity: 'medium',
+                  details: {
+                    field: key,
+                    threat_level: sanitizationData.threat_level,
+                    threats_detected: sanitizationData.threats_detected
+                  },
+                  resourceType: 'form_security'
+                });
+              }
             } else {
-              data[key] = sanitizedValue;
+              data[key] = clientSanitized; // Fallback
             }
           } catch (error) {
             console.error('Failed to sanitize input:', error);
             data[key] = clientSanitized; // Fallback to client sanitization
-          }
-          
-          // Additional security checks
-          const suspiciousPatterns = [
-            /<script/i, /javascript:/i, /data:/i, /vbscript:/i, 
-            /onload=/i, /onerror=/i, /onclick=/i, /eval\(/i,
-            /document\./i, /window\./i, /\.innerHTML/i
-          ];
-          
-          if (suspiciousPatterns.some(pattern => pattern.test(value))) {
-            console.warn('Highly suspicious input detected:', key, value.substring(0, 100));
-            
-            // Log critical security event
-            try {
-              await supabase.from('security_audit_log').insert({
-                action: 'CRITICAL_INPUT_VIOLATION',
-                resource_type: 'form_security',
-                details: {
-                  field: key,
-                  violation_type: 'MALICIOUS_PATTERN_DETECTED',
-                  original_length: value.length,
-                  sanitized_length: data[key].length,
-                  patterns_matched: suspiciousPatterns.filter(p => p.test(value)).map(p => p.toString()),
-                  timestamp: new Date().toISOString(),
-                  user_agent: navigator.userAgent
-                }
-              });
-            } catch (error) {
-              console.error('Failed to log critical security event:', error);
-            }
           }
         }
       }
