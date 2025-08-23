@@ -7,6 +7,7 @@ import { AdvancedAnalytics } from "@/components/AdvancedAnalytics";
 import { QuickStatsGrid } from "@/components/QuickStatsGrid";
 import { RemindersWidget } from "@/components/RemindersWidget";
 import { GuestBanner } from "@/components/GuestBanner";
+import { SecurityQuickFix } from "@/components/SecurityQuickFix";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart3, Activity, Zap } from "lucide-react";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
@@ -21,6 +22,7 @@ const Dashboard: React.FC = () => {
       <ResponsiveLayout>
         <div className="space-y-8 animate-fade-in">
           <GuestBanner />
+          <SecurityQuickFix />
           
           <div className="cyber-card p-8 hover-glow">
             <h1 className="text-4xl font-bold text-gradient mb-3">Dashboard</h1>
