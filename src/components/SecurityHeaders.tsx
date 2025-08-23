@@ -3,7 +3,7 @@ import { SecurityHeadersManager } from './SecurityHeadersManager';
 
 export function SecurityHeaders() {
   useEffect(() => {
-    // Legacy meta tag support for older browsers
+    // Set basic security meta tags only - avoid CSP conflicts
     const setMetaTag = (name: string, content: string) => {
       let meta = document.querySelector(`meta[name="${name}"]`) as HTMLMetaElement;
       if (!meta) {
@@ -14,9 +14,11 @@ export function SecurityHeaders() {
       meta.content = content;
     };
 
-    // Basic security headers for fallback
+    // Basic security headers for fallback (not CSP)
     setMetaTag('referrer', 'strict-origin-when-cross-origin');
     setMetaTag('X-Download-Options', 'noopen');
+    setMetaTag('X-Content-Type-Options', 'nosniff');
+    setMetaTag('X-Frame-Options', 'DENY');
   }, []);
 
   return <SecurityHeadersManager />;

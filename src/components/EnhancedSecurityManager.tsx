@@ -8,6 +8,7 @@ import { secureStorage } from '@/lib/SecureStorage';
 import { SecurityHeaders } from './SecurityHeaders';
 import { SecurityAlert } from './SecurityAlert';
 import { SessionSecurityManager } from './SessionSecurityManager';
+import { EnhancedSessionManager } from './EnhancedSessionManager';
 import { EnhancedInputValidation, commonValidationRules } from './EnhancedInputValidation';
 
 interface EnhancedSecurityManagerProps {
@@ -134,6 +135,11 @@ export function EnhancedSecurityManager({ children }: EnhancedSecurityManagerPro
     <>
       <SecurityHeaders />
       <SecurityAlert />
+      <EnhancedSessionManager 
+        enableLocationChecks={true}
+        enableEnhancedRateLimit={true}
+        sessionTimeoutMinutes={480}
+      />
       <SessionSecurityManager 
         maxSessionAge={1440} // 24 hours
         idleTimeout={30} // 30 minutes
