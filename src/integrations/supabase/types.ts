@@ -570,6 +570,7 @@ export type Database = {
           avatar_url: string | null
           company_id: string | null
           created_at: string
+          enhanced_role: Database["public"]["Enums"]["app_role"] | null
           first_name: string | null
           id: string
           last_name: string | null
@@ -581,6 +582,7 @@ export type Database = {
           avatar_url?: string | null
           company_id?: string | null
           created_at?: string
+          enhanced_role?: Database["public"]["Enums"]["app_role"] | null
           first_name?: string | null
           id: string
           last_name?: string | null
@@ -592,6 +594,7 @@ export type Database = {
           avatar_url?: string | null
           company_id?: string | null
           created_at?: string
+          enhanced_role?: Database["public"]["Enums"]["app_role"] | null
           first_name?: string | null
           id?: string
           last_name?: string | null
@@ -1800,6 +1803,10 @@ export type Database = {
         Args: { check_ip?: unknown; check_user_id: string }
         Returns: Json
       }
+      get_current_user_enhanced_role: {
+        Args: Record<PropertyKey, never>
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
       get_user_profile: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -1813,6 +1820,17 @@ export type Database = {
           role: string
           updated_at: string
         }[]
+      }
+      has_enhanced_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_admin_or_manager: {
+        Args: { _user_id: string }
+        Returns: boolean
       }
       is_authenticated_user: {
         Args: Record<PropertyKey, never>
@@ -1937,7 +1955,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "manager" | "employee" | "readonly"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2064,6 +2082,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "manager", "employee", "readonly"],
+    },
   },
 } as const
