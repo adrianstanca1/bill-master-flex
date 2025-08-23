@@ -332,12 +332,18 @@ export function useAuth(): AuthState & AuthActions {
       console.log('✅ Provider check result:', providerCheck);
       
       // Type the provider check data
-      const providerData = providerCheck as { google_enabled?: boolean; microsoft_enabled?: boolean; custom_enabled?: boolean } | null;
-      
-      const isEnabled = provider === 'google' ? providerData?.google_enabled :
-                       provider === 'azure' ? providerData?.microsoft_enabled :
-                       provider === 'github' ? providerData?.microsoft_enabled :
-                       provider === 'custom' ? providerData?.custom_enabled : false;
+      const providerData = providerCheck as {
+        google_enabled?: boolean;
+        microsoft_enabled?: boolean;
+        github_enabled?: boolean;
+        custom_enabled?: boolean;
+      } | null;
+
+      const isEnabled =
+        provider === 'google' ? providerData?.google_enabled :
+        provider === 'azure' ? providerData?.microsoft_enabled :
+        provider === 'github' ? providerData?.github_enabled :
+        provider === 'custom' ? providerData?.custom_enabled : false;
       
       console.log(`🔍 Provider ${provider} enabled:`, isEnabled);
       
