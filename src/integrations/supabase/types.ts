@@ -1929,6 +1929,13 @@ export type Database = {
         Args: { additional_details?: Json; event_type: string; user_id: string }
         Returns: undefined
       }
+      update_user_role: {
+        Args: {
+          new_role: Database["public"]["Enums"]["app_role"]
+          target_user_id: string
+        }
+        Returns: boolean
+      }
       validate_csrf_token: {
         Args: { expected: string; token: string }
         Returns: boolean
