@@ -14,7 +14,156 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      agent_interactions: {
+        Row: {
+          agent_type: string
+          company_id: string
+          content: Json | null
+          created_at: string
+          id: string
+          interaction_type: string
+          status: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          agent_type: string
+          company_id: string
+          content?: Json | null
+          created_at?: string
+          id?: string
+          interaction_type: string
+          status?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          agent_type?: string
+          company_id?: string
+          content?: Json | null
+          created_at?: string
+          id?: string
+          interaction_type?: string
+          status?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      asset_tracking: {
+        Row: {
+          asset_name: string
+          asset_type: string
+          company_id: string
+          condition: string | null
+          created_at: string
+          current_location: string | null
+          id: string
+          purchase_cost: number | null
+          purchase_date: string | null
+          serial_number: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          asset_name: string
+          asset_type: string
+          company_id: string
+          condition?: string | null
+          created_at?: string
+          current_location?: string | null
+          id?: string
+          purchase_cost?: number | null
+          purchase_date?: string | null
+          serial_number?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          asset_name?: string
+          asset_type?: string
+          company_id?: string
+          condition?: string | null
+          created_at?: string
+          current_location?: string | null
+          id?: string
+          purchase_cost?: number | null
+          purchase_date?: string | null
+          serial_number?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          company_id: string
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          company_id?: string
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          company_id?: string
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      security_audit_log: {
+        Row: {
+          action: string
+          created_at: string
+          details: Json | null
+          id: string
+          ip_address: unknown | null
+          resource_id: string | null
+          resource_type: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          ip_address?: unknown | null
+          resource_id?: string | null
+          resource_type?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          ip_address?: unknown | null
+          resource_id?: string | null
+          resource_type?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

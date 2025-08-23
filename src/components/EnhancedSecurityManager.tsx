@@ -22,16 +22,63 @@ export function EnhancedSecurityManager({ children }: EnhancedSecurityManagerPro
   const { isBlocked, checkBruteForce } = useSecurityBruteForce();
   const { toast } = useToast();
 
-  // Enhanced security validation on component mount
+  // Migrate legacy localStorage data to secure storage
+  const migrateLegacyStorage = useCallback(async () => {
+    try {
+      const legacyKeys = [
+        'user_preferences',
+        'dashboard_settings',
+        'form_drafts',
+        'ui_state'
+      ];
+
+      for (const key of legacyKeys) {
+        const legacyData = localStorage.getItem(key);
+        if (legacyData) {
+          try {
+            const parsedData = JSON.parse(legacyData);
+            await secureStorage.setItem(key, parsedData, { 
+              encrypt: true, 
+              serverSide: true 
+            });
+            localStorage.removeItem(key);
+          } catch (parseError) {
+            console.warn(`Failed to migrate ${key}:`, parseError);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Storage migration failed:', error);
+    }
+  }, []);
+
+  // Log security events
+  const logSecurityEvent = useCallback(
+    async (eventType: string, details: any) => {
+      try {
+        await secureStorage.setItem(`security_event_${Date.now()}`, {
+          event_type: eventType,
+          user_id: user?.id,
+          timestamp: new Date().toISOString(),
+          details
+        }, { encrypt: true, serverSide: true });
+      } catch (error) {
+        console.error('Failed to log security event:', error);
+      }
+    },
+    [user]
+  );
+
+  // Enhanced security validation on component mount  
   useEffect(() => {
     const performSecurityChecks = async () => {
       if (!isAuthenticated || !user) return;
 
       try {
         // Check for brute force attempts
-        const bruteForceResult = await checkBruteForce(user.id);
+        await checkBruteForce(user.id);
         
-        if (bruteForceResult.isBlocked) {
+        if (isBlocked) {
           toast({
             title: "Security Alert",
             description: "Account temporarily blocked due to suspicious activity",
@@ -73,53 +120,6 @@ export function EnhancedSecurityManager({ children }: EnhancedSecurityManagerPro
     securityStatus.sessionValid,
     toast
   ]);
-
-  // Migrate legacy localStorage data to secure storage
-  const migrateLegacyStorage = async () => {
-    try {
-      const legacyKeys = [
-        'user_preferences',
-        'dashboard_settings',
-        'form_drafts',
-        'ui_state'
-      ];
-
-      for (const key of legacyKeys) {
-        const legacyData = localStorage.getItem(key);
-        if (legacyData) {
-          try {
-            const parsedData = JSON.parse(legacyData);
-            await secureStorage.setItem(key, parsedData, { 
-              encrypt: true, 
-              serverSide: true 
-            });
-            localStorage.removeItem(key);
-          } catch (parseError) {
-            console.warn(`Failed to migrate ${key}:`, parseError);
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Storage migration failed:', error);
-    }
-  };
-
-  // Log security events
-  const logSecurityEvent = useCallback(
-    async (eventType: string, details: any) => {
-      try {
-        await secureStorage.setItem(`security_event_${Date.now()}`, {
-          event_type: eventType,
-          user_id: user?.id,
-          timestamp: new Date().toISOString(),
-          details
-        }, { encrypt: true, serverSide: true });
-      } catch (error) {
-        console.error('Failed to log security event:', error);
-      }
-    },
-    [user]
-  );
 
   // Handle validation errors
   const handleValidationError = (field: string, error: string) => {
