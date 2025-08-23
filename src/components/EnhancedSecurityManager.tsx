@@ -5,7 +5,6 @@ import { useSecurityEnhancements } from '@/hooks/useSecurityEnhancements';
 import { useSecurityBruteForce } from '@/hooks/useSecurityBruteForce';
 import { useToast } from '@/hooks/use-toast';
 import { secureStorage } from '@/lib/SecureStorage';
-import { SecurityHeaders } from './SecurityHeaders';
 import { SecurityAlert } from './SecurityAlert';
 import { SessionSecurityManager } from './SessionSecurityManager';
 import { EnhancedSessionManager } from './EnhancedSessionManager';
@@ -133,7 +132,6 @@ export function EnhancedSecurityManager({ children }: EnhancedSecurityManagerPro
 
   return (
     <>
-      <SecurityHeaders />
       <SecurityAlert />
       <EnhancedSessionManager 
         enableLocationChecks={true}
