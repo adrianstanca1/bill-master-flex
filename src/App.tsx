@@ -54,105 +54,184 @@ function App() {
       <BrowserRouter>
         <AuthProvider>
           <EnhancedSecurityManager>
-            <SidebarProvider>
-              <AppSidebar />
-              <SidebarInset>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/auth/callback" element={<AuthCallbackHandler />} />
-                <Route path="/auth/reset-password" element={<ResetPassword />} />
-                <Route path="/setup" element={
-                  <ProtectedRoute>
-                    <Setup />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard" element={
-                  <ProtectedRoute requireSetup>
-                    <Dashboard />
-                  </ProtectedRoute>
-                } />
-                <Route path="/invoices" element={
-                  <ProtectedRoute requireSetup>
-                    <Invoices />
-                  </ProtectedRoute>
-                } />
-                <Route path="/quotes" element={
-                  <ProtectedRoute requireSetup>
-                    <Quotes />
-                  </ProtectedRoute>
-                } />
-                <Route path="/expenses" element={
-                  <ProtectedRoute requireSetup>
-                    <Expenses />
-                  </ProtectedRoute>
-                } />
-                <Route path="/tools" element={
-                  <ProtectedRoute requireSetup>
-                    <Tools />
-                  </ProtectedRoute>
-                } />
-                <Route path="/vat-settings" element={
-                  <ProtectedRoute requireSetup>
-                    <VATSettings />
-                  </ProtectedRoute>
-                } />
-                <Route path="/projects" element={
-                  <ProtectedRoute requireSetup>
-                    <Projects />
-                  </ProtectedRoute>
-                } />
-                <Route path="/business-manager" element={
-                  <ProtectedRoute requireSetup>
-                    <BusinessManager />
-                  </ProtectedRoute>
-                } />
-                <Route path="/site-manager" element={
-                  <ProtectedRoute requireSetup>
-                    <SiteManager />
-                  </ProtectedRoute>
-                } />
-                <Route path="/crm" element={
-                  <ProtectedRoute requireSetup>
-                    <CRM />
-                  </ProtectedRoute>
-                } />
-                <Route path="/agents" element={
-                  <ProtectedRoute requireSetup>
-                    <Agents />
-                  </ProtectedRoute>
-                } />
-                <Route path="/advisor" element={
-                  <ProtectedRoute requireSetup>
-                    <Advisor />
-                  </ProtectedRoute>
-                } />
-                <Route path="/hr" element={
-                  <ProtectedRoute requireSetup>
-                    <HR />
-                  </ProtectedRoute>
-                } />
-                <Route path="/security" element={
-                  <ProtectedRoute requireSetup>
-                    <Security />
-                  </ProtectedRoute>
-                } />
-                <Route path="/auth-config" element={
-                  <ProtectedRoute requireSetup>
-                    <AuthConfiguration />
-                  </ProtectedRoute>
-                } />
-                <Route path="/settings" element={
-                  <ProtectedRoute requireSetup>
-                    <Settings />
-                  </ProtectedRoute>
-                } />
-                <Route path="/policy" element={<Policy />} />
-                <Route path="/terms" element={<Terms />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-              </SidebarInset>
-            </SidebarProvider>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/auth/callback" element={<AuthCallbackHandler />} />
+              <Route path="/auth/reset-password" element={<ResetPassword />} />
+              <Route path="/setup" element={
+                <ProtectedRoute>
+                  <Setup />
+                </ProtectedRoute>
+              } />
+              
+              {/* Protected routes with sidebar layout */}
+              <Route path="/dashboard" element={
+                <ProtectedRoute requireSetup>
+                  <SidebarProvider>
+                    <AppSidebar />
+                    <SidebarInset>
+                      <Dashboard />
+                    </SidebarInset>
+                  </SidebarProvider>
+                </ProtectedRoute>
+              } />
+              <Route path="/invoices" element={
+                <ProtectedRoute requireSetup>
+                  <SidebarProvider>
+                    <AppSidebar />
+                    <SidebarInset>
+                      <Invoices />
+                    </SidebarInset>
+                  </SidebarProvider>
+                </ProtectedRoute>
+              } />
+              <Route path="/quotes" element={
+                <ProtectedRoute requireSetup>
+                  <SidebarProvider>
+                    <AppSidebar />
+                    <SidebarInset>
+                      <Quotes />
+                    </SidebarInset>
+                  </SidebarProvider>
+                </ProtectedRoute>
+              } />
+              <Route path="/expenses" element={
+                <ProtectedRoute requireSetup>
+                  <SidebarProvider>
+                    <AppSidebar />
+                    <SidebarInset>
+                      <Expenses />
+                    </SidebarInset>
+                  </SidebarProvider>
+                </ProtectedRoute>
+              } />
+              <Route path="/tools" element={
+                <ProtectedRoute requireSetup>
+                  <SidebarProvider>
+                    <AppSidebar />
+                    <SidebarInset>
+                      <Tools />
+                    </SidebarInset>
+                  </SidebarProvider>
+                </ProtectedRoute>
+              } />
+              <Route path="/vat-settings" element={
+                <ProtectedRoute requireSetup>
+                  <SidebarProvider>
+                    <AppSidebar />
+                    <SidebarInset>
+                      <VATSettings />
+                    </SidebarInset>
+                  </SidebarProvider>
+                </ProtectedRoute>
+              } />
+              <Route path="/projects" element={
+                <ProtectedRoute requireSetup>
+                  <SidebarProvider>
+                    <AppSidebar />
+                    <SidebarInset>
+                      <Projects />
+                    </SidebarInset>
+                  </SidebarProvider>
+                </ProtectedRoute>
+              } />
+              <Route path="/business-manager" element={
+                <ProtectedRoute requireSetup>
+                  <SidebarProvider>
+                    <AppSidebar />
+                    <SidebarInset>
+                      <BusinessManager />
+                    </SidebarInset>
+                  </SidebarProvider>
+                </ProtectedRoute>
+              } />
+              <Route path="/site-manager" element={
+                <ProtectedRoute requireSetup>
+                  <SidebarProvider>
+                    <AppSidebar />
+                    <SidebarInset>
+                      <SiteManager />
+                    </SidebarInset>
+                  </SidebarProvider>
+                </ProtectedRoute>
+              } />
+              <Route path="/crm" element={
+                <ProtectedRoute requireSetup>
+                  <SidebarProvider>
+                    <AppSidebar />
+                    <SidebarInset>
+                      <CRM />
+                    </SidebarInset>
+                  </SidebarProvider>
+                </ProtectedRoute>
+              } />
+              <Route path="/agents" element={
+                <ProtectedRoute requireSetup>
+                  <SidebarProvider>
+                    <AppSidebar />
+                    <SidebarInset>
+                      <Agents />
+                    </SidebarInset>
+                  </SidebarProvider>
+                </ProtectedRoute>
+              } />
+              <Route path="/advisor" element={
+                <ProtectedRoute requireSetup>
+                  <SidebarProvider>
+                    <AppSidebar />
+                    <SidebarInset>
+                      <Advisor />
+                    </SidebarInset>
+                  </SidebarProvider>
+                </ProtectedRoute>
+              } />
+              <Route path="/hr" element={
+                <ProtectedRoute requireSetup>
+                  <SidebarProvider>
+                    <AppSidebar />
+                    <SidebarInset>
+                      <HR />
+                    </SidebarInset>
+                  </SidebarProvider>
+                </ProtectedRoute>
+              } />
+              <Route path="/security" element={
+                <ProtectedRoute requireSetup>
+                  <SidebarProvider>
+                    <AppSidebar />
+                    <SidebarInset>
+                      <Security />
+                    </SidebarInset>
+                  </SidebarProvider>
+                </ProtectedRoute>
+              } />
+              <Route path="/auth-config" element={
+                <ProtectedRoute requireSetup>
+                  <SidebarProvider>
+                    <AppSidebar />
+                    <SidebarInset>
+                      <AuthConfiguration />
+                    </SidebarInset>
+                  </SidebarProvider>
+                </ProtectedRoute>
+              } />
+              <Route path="/settings" element={
+                <ProtectedRoute requireSetup>
+                  <SidebarProvider>
+                    <AppSidebar />
+                    <SidebarInset>
+                      <Settings />
+                    </SidebarInset>
+                  </SidebarProvider>
+                </ProtectedRoute>
+              } />
+              
+              {/* Routes without sidebar */}
+              <Route path="/policy" element={<Policy />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
           </EnhancedSecurityManager>
         </AuthProvider>
       </BrowserRouter>
