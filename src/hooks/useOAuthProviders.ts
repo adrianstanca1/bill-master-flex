@@ -26,8 +26,8 @@ export function useOAuthProviders() {
           const providerData = data as { google_enabled?: boolean; microsoft_enabled?: boolean };
           setEnabledProviders({
             google: providerData.google_enabled || false,
-            github: providerData.microsoft_enabled || false, // Note: github mapped to microsoft for now
-            azure: providerData.microsoft_enabled || false
+            github: false,
+            azure: false
           });
         } else {
           // Default to all disabled if validation fails
