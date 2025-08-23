@@ -568,7 +568,7 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
-          company_id: string
+          company_id: string | null
           created_at: string
           first_name: string | null
           id: string
@@ -579,7 +579,7 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
-          company_id: string
+          company_id?: string | null
           created_at?: string
           first_name?: string | null
           id: string
@@ -590,7 +590,7 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
-          company_id?: string
+          company_id?: string | null
           created_at?: string
           first_name?: string | null
           id?: string
@@ -1775,6 +1775,10 @@ export type Database = {
         Args: { project_id: string }
         Returns: number
       }
+      can_perform_sensitive_operation: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       check_rate_limit: {
         Args: {
           action_type: string
@@ -1918,6 +1922,10 @@ export type Database = {
       validate_security_context: {
         Args: Record<PropertyKey, never>
         Returns: boolean
+      }
+      validate_security_context_enhanced: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
       }
       validate_session_security: {
         Args: Record<PropertyKey, never>
