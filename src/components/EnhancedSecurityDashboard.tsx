@@ -1,237 +1,244 @@
-
-import React, { useEffect } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { useEffect, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Shield, AlertTriangle, CheckCircle, Clock, Eye, Lock } from 'lucide-react';
-import { useEnhancedSecurity } from '@/hooks/useEnhancedSecurity';
+import { Shield, AlertTriangle, CheckCircle, ExternalLink } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
+interface SecurityMetrics {
+  totalEvents: number;
+  criticalAlerts: number;
+  failedLogins: number;
+  suspiciousActivity: number;
+}
+
+interface SecurityAlert {
+  id: string;
+  event_type: string;
+  severity: string;
+  details: any;
+  created_at: string;
+}
+
 export function EnhancedSecurityDashboard() {
-  const {
-    profile,
-    securityMetrics,
-    recentAlerts,
-    testSecurityPolicies,
-    logSecurityEvent,
-    isAdmin,
-    isMonitoring
-  } = useEnhancedSecurity();
-  
+  const [metrics, setMetrics] = useState<SecurityMetrics>({
+    totalEvents: 0,
+    criticalAlerts: 0,
+    failedLogins: 0,
+    suspiciousActivity: 0
+  });
+  const [recentAlerts, setRecentAlerts] = useState<SecurityAlert[]>([]);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  // Show critical alerts as toasts
   useEffect(() => {
-    if (recentAlerts && recentAlerts.length > 0) {
-      const criticalAlerts = recentAlerts.filter(alert => alert.type === 'critical');
-      criticalAlerts.forEach(alert => {
-        toast({
-          title: "Critical Security Alert",
-          description: alert.message,
-          variant: "destructive",
+    fetchSecurityData();
+    const interval = setInterval(fetchSecurityData, 30000); // Refresh every 30 seconds
+    return () => clearInterval(interval);
+  }, []);
+
+  const fetchSecurityData = async () => {
+    try {
+      // Fetch security metrics
+      const { data: events } = await supabase
+        .from('security_audit_log')
+        .select('action, created_at')
+        .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
+
+      const { data: alerts } = await supabase
+        .from('security_events')
+        .select('*')
+        .in('severity', ['high', 'critical'])
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (events) {
+        const failedLogins = events.filter(e => 
+          e.action.includes('FAILED') || e.action.includes('UNAUTHORIZED')
+        ).length;
+        
+        const suspiciousActivity = events.filter(e => 
+          e.action.includes('VIOLATION') || e.action.includes('SUSPICIOUS')
+        ).length;
+
+        setMetrics({
+          totalEvents: events.length,
+          criticalAlerts: alerts?.filter(a => a.severity === 'critical').length || 0,
+          failedLogins,
+          suspiciousActivity
         });
+      }
+
+      if (alerts) {
+        setRecentAlerts(alerts);
+      }
+    } catch (error) {
+      console.error('Failed to fetch security data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const testSecurityPolicies = async () => {
+    try {
+      const { data, error } = await supabase.rpc('test_rls_policies');
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Security Policy Test",
+        description: "RLS policies tested successfully",
+        variant: "default",
+      });
+    } catch (error) {
+      console.error('Security policy test failed:', error);
+      toast({
+        title: "Security Policy Test Failed",
+        description: "Unable to test RLS policies",
+        variant: "destructive",
       });
     }
-  }, [recentAlerts, toast]);
+  };
 
-  if (!isAdmin) {
+  const getSeverityColor = (severity: string) => {
+    switch (severity) {
+      case 'critical': return 'destructive';
+      case 'high': return 'destructive';
+      case 'medium': return 'default';
+      default: return 'secondary';
+    }
+  };
+
+  if (loading) {
     return (
-      <Alert>
-        <Shield className="h-4 w-4" />
-        <AlertDescription>
-          Security monitoring is only available to administrators.
-        </AlertDescription>
-      </Alert>
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
     );
   }
 
-  const handleTestSecurity = () => {
-    testSecurityPolicies.mutate();
-    logSecurityEvent.mutate({
-      action: 'SECURITY_TEST_INITIATED',
-      resourceType: 'security_policies',
-      details: { initiated_by: profile?.id }
-    });
-  };
-
-  const getSecurityScore = () => {
-    if (!securityMetrics) return 0;
-    
-    let score = 100;
-    score -= securityMetrics.criticalAlerts * 20;
-    score -= securityMetrics.failedLogins * 5;
-    score -= securityMetrics.privilegeEscalationAttempts * 30;
-    score -= securityMetrics.unauthorizedAccessAttempts * 10;
-    
-    return Math.max(0, score);
-  };
-
-  const securityScore = getSecurityScore();
-
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium">Security Score</p>
-                <p className={`text-2xl font-bold ${
-                  securityScore >= 90 ? 'text-green-600' :
-                  securityScore >= 70 ? 'text-yellow-600' : 'text-red-600'
-                }`}>
-                  {securityScore}%
-                </p>
-              </div>
-              <Shield className={`h-8 w-8 ${
-                securityScore >= 90 ? 'text-green-600' :
-                securityScore >= 70 ? 'text-yellow-600' : 'text-red-600'
-              }`} />
+      {/* Critical Security Warning */}
+      <Alert className="border-red-500 bg-red-50">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <strong className="text-red-800">Critical Security Action Required:</strong>
+              <p className="text-red-700 mt-1">Leaked Password Protection is disabled in Supabase Auth settings.</p>
             </div>
+            <Button 
+              variant="destructive" 
+              size="sm"
+              onClick={() => window.open('https://supabase.com/dashboard/project/tjgbyygllssqsywxpxqe/settings/auth', '_blank')}
+            >
+              <ExternalLink className="h-3 w-3 mr-1" />
+              Fix Now
+            </Button>
+          </div>
+        </AlertDescription>
+      </Alert>
+
+      {/* Security Metrics */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Events (24h)</CardTitle>
+            <Shield className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{metrics.totalEvents}</div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium">Critical Alerts</p>
-                <p className="text-2xl font-bold text-red-600">
-                  {securityMetrics?.criticalAlerts || 0}
-                </p>
-              </div>
-              <AlertTriangle className="h-8 w-8 text-red-600" />
-            </div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Critical Alerts</CardTitle>
+            <AlertTriangle className="h-4 w-4 text-red-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-600">{metrics.criticalAlerts}</div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium">Failed Logins</p>
-                <p className="text-2xl font-bold text-yellow-600">
-                  {securityMetrics?.failedLogins || 0}
-                </p>
-              </div>
-              <Lock className="h-8 w-8 text-yellow-600" />
-            </div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Failed Logins</CardTitle>
+            <Shield className="h-4 w-4 text-yellow-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-yellow-600">{metrics.failedLogins}</div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium">Total Events</p>
-                <p className="text-2xl font-bold text-blue-600">
-                  {securityMetrics?.totalEvents || 0}
-                </p>
-              </div>
-              <Eye className="h-8 w-8 text-blue-600" />
-            </div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Suspicious Activity</CardTitle>
+            <AlertTriangle className="h-4 w-4 text-orange-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-orange-600">{metrics.suspiciousActivity}</div>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5" />
-              Recent Security Alerts
-            </CardTitle>
-            <Button 
-              size="sm" 
-              onClick={handleTestSecurity}
-              disabled={testSecurityPolicies.isPending}
-            >
-              {testSecurityPolicies.isPending ? "Testing..." : "Test Security"}
+      {/* Security Actions */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <CheckCircle className="h-5 w-5" />
+            Security Actions
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-4">
+            <Button onClick={testSecurityPolicies} variant="outline">
+              Test Security Policies
             </Button>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {recentAlerts && recentAlerts.length > 0 ? (
-                recentAlerts.map((alert) => (
-                  <div key={alert.id} className="flex items-start gap-3 p-3 border rounded-lg">
-                    <Badge variant={alert.type === 'critical' ? 'destructive' : 'secondary'}>
-                      {alert.type}
-                    </Badge>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">{alert.message}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(alert.timestamp).toLocaleString()}
+            <Button 
+              variant="outline"
+              onClick={() => window.open('https://supabase.com/dashboard/project/tjgbyygllssqsywxpxqe/settings/auth', '_blank')}
+            >
+              <ExternalLink className="h-3 w-3 mr-1" />
+              Auth Settings
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Recent Security Alerts */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Recent Security Alerts</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {recentAlerts.length === 0 ? (
+            <p className="text-muted-foreground">No recent security alerts</p>
+          ) : (
+            <div className="space-y-3">
+              {recentAlerts.map((alert) => (
+                <div key={alert.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <AlertTriangle className="h-4 w-4" />
+                    <div>
+                      <p className="font-medium">{alert.event_type}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {new Date(alert.created_at).toLocaleString()}
                       </p>
                     </div>
                   </div>
-                ))
-              ) : (
-                <div className="text-center text-muted-foreground py-4">
-                  No recent security alerts
+                  <Badge variant={getSeverityColor(alert.severity) as any}>
+                    {alert.severity}
+                  </Badge>
                 </div>
-              )}
+              ))}
             </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5" />
-              Security Status
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Authentication Required</span>
-                <Badge variant="default">
-                  <CheckCircle className="h-3 w-3 mr-1" />
-                  Active
-                </Badge>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Role-Based Access Control</span>
-                <Badge variant="default">
-                  <CheckCircle className="h-3 w-3 mr-1" />
-                  Active
-                </Badge>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Company Isolation</span>
-                <Badge variant="default">
-                  <CheckCircle className="h-3 w-3 mr-1" />
-                  Protected
-                </Badge>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Audit Logging</span>
-                <Badge variant="default">
-                  <CheckCircle className="h-3 w-3 mr-1" />
-                  Enabled
-                </Badge>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Privilege Escalation Protection</span>
-                <Badge variant="default">
-                  <CheckCircle className="h-3 w-3 mr-1" />
-                  Enforced
-                </Badge>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {securityScore < 70 && (
-        <Alert>
-          <AlertTriangle className="h-4 w-4" />
-          <AlertDescription>
-            Your security score is below recommended levels. Please review recent alerts and take appropriate action.
-          </AlertDescription>
-        </Alert>
-      )}
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

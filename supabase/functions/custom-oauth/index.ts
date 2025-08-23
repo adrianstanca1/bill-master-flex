@@ -1,9 +1,16 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.56.0';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Initialize Supabase client for state management
+const supabase = createClient(
+  Deno.env.get('SUPABASE_URL') ?? '',
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+);
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -35,7 +42,22 @@ serve(async (req) => {
       // Generate a secure state parameter
       const state = crypto.randomUUID();
       
-      // Store state in a secure way (in production, use proper state storage)
+      // Store state token securely in database
+      const { data: stateData, error: stateError } = await supabase.rpc('store_oauth_state', {
+        token: state,
+        session_id: req.headers.get('x-session-id') || null
+      });
+      
+      if (stateError) {
+        console.error('Failed to store OAuth state:', stateError);
+        return new Response(JSON.stringify({ 
+          error: "OAuth state storage failed" 
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 500,
+        });
+      }
+      
       const authUrl = new URL('https://oauth2.googleapis.com/o/oauth2/v2/auth');
       authUrl.searchParams.set('client_id', clientId);
       authUrl.searchParams.set('redirect_uri', redirectTo);
@@ -64,6 +86,31 @@ serve(async (req) => {
       if (!code) {
         return new Response(JSON.stringify({ 
           error: "Authorization code required" 
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400,
+        });
+      }
+
+      // CRITICAL: Validate state parameter to prevent CSRF attacks
+      if (!state) {
+        return new Response(JSON.stringify({ 
+          error: "State parameter required for security" 
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400,
+        });
+      }
+
+      // Validate state token against stored value
+      const { data: isValidState, error: stateError } = await supabase.rpc('validate_oauth_state', {
+        token: state
+      });
+
+      if (stateError || !isValidState) {
+        console.error('OAuth state validation failed:', stateError);
+        return new Response(JSON.stringify({ 
+          error: "Invalid or expired state parameter" 
         }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 400,

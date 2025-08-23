@@ -565,6 +565,33 @@ export type Database = {
           },
         ]
       }
+      oauth_state_store: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          state_token: string
+          used: boolean
+          user_session_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          state_token: string
+          used?: boolean
+          user_session_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          state_token?: string
+          used?: boolean
+          user_session_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -1905,6 +1932,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      sanitize_input: {
+        Args: { input_text: string }
+        Returns: string
+      }
       set_secure_search_path: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -1915,6 +1946,10 @@ export type Database = {
           company_industry?: string
           company_name: string
         }
+        Returns: string
+      }
+      store_oauth_state: {
+        Args: { session_id?: string; token: string }
         Returns: string
       }
       test_rls_policies: {
@@ -1943,6 +1978,10 @@ export type Database = {
       validate_oauth_providers: {
         Args: Record<PropertyKey, never>
         Returns: Json
+      }
+      validate_oauth_state: {
+        Args: { token: string }
+        Returns: boolean
       }
       validate_security_context: {
         Args: Record<PropertyKey, never>

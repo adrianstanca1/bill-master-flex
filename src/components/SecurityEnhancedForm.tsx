@@ -81,38 +81,64 @@ export function SecurityEnhancedForm({
         data._csrf = csrfToken;
       }
       
-      // Sanitize all form inputs with enhanced security
-    for (const [key, value] of formData.entries()) {
-      if (typeof value === 'string') {
-        // Enhanced sanitization - remove all HTML and scripts
-        data[key] = DOMPurify.sanitize(value, { 
-          ALLOWED_TAGS: [],
-          ALLOWED_ATTR: [],
-          FORBID_TAGS: ['script', 'object', 'embed', 'iframe'],
-          FORBID_ATTR: ['onerror', 'onload', 'onclick']
-        }).trim();
-        
-        // Additional validation - check for suspicious patterns
-        if (data[key].includes('<script') || data[key].includes('javascript:') || data[key].includes('data:')) {
-          console.warn('Suspicious input detected and sanitized:', key);
+      // Enhanced server-side sanitization using database function
+      for (const [key, value] of formData.entries()) {
+        if (typeof value === 'string') {
+          // First, client-side sanitization
+          const clientSanitized = DOMPurify.sanitize(value, { 
+            ALLOWED_TAGS: [],
+            ALLOWED_ATTR: [],
+            FORBID_TAGS: ['script', 'object', 'embed', 'iframe', 'style'],
+            FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'onfocus']
+          }).trim();
           
-          // Log security event
+          // Server-side sanitization via database function
           try {
-            await supabase.from('security_audit_log').insert({
-              action: 'SUSPICIOUS_INPUT_DETECTED',
-              resource_type: 'form_submission',
-              details: {
-                field: key,
-                original_length: value.length,
-                sanitized_length: data[key].length,
-                timestamp: new Date().toISOString()
-              }
+            const { data: sanitizedValue, error } = await supabase.rpc('sanitize_input', {
+              input_text: clientSanitized
             });
+            
+            if (error) {
+              console.error('Server-side sanitization failed:', error);
+              data[key] = clientSanitized; // Fallback to client sanitization
+            } else {
+              data[key] = sanitizedValue;
+            }
           } catch (error) {
-            console.error('Failed to log security event:', error);
+            console.error('Failed to sanitize input:', error);
+            data[key] = clientSanitized; // Fallback to client sanitization
+          }
+          
+          // Additional security checks
+          const suspiciousPatterns = [
+            /<script/i, /javascript:/i, /data:/i, /vbscript:/i, 
+            /onload=/i, /onerror=/i, /onclick=/i, /eval\(/i,
+            /document\./i, /window\./i, /\.innerHTML/i
+          ];
+          
+          if (suspiciousPatterns.some(pattern => pattern.test(value))) {
+            console.warn('Highly suspicious input detected:', key, value.substring(0, 100));
+            
+            // Log critical security event
+            try {
+              await supabase.from('security_audit_log').insert({
+                action: 'CRITICAL_INPUT_VIOLATION',
+                resource_type: 'form_security',
+                details: {
+                  field: key,
+                  violation_type: 'MALICIOUS_PATTERN_DETECTED',
+                  original_length: value.length,
+                  sanitized_length: data[key].length,
+                  patterns_matched: suspiciousPatterns.filter(p => p.test(value)).map(p => p.toString()),
+                  timestamp: new Date().toISOString(),
+                  user_agent: navigator.userAgent
+                }
+              });
+            } catch (error) {
+              console.error('Failed to log critical security event:', error);
+            }
           }
         }
-      }
       }
       
       onSubmit(data);
