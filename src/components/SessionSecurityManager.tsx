@@ -11,11 +11,14 @@ interface SessionSecurityManagerProps {
   enableGeolocationCheck?: boolean;
 }
 
-export function SessionSecurityManager({ 
-  maxSessionAge = 1440, // 24 hours
-  idleTimeout = 120, // 2 hours
-  enableFingerprinting = true
-}: SessionSecurityManagerProps) {
+export function SessionSecurityManager(props: SessionSecurityManagerProps = {}) {
+  const {
+    maxSessionAge = 1440, // 24 hours
+    idleTimeout = 120, // 2 hours
+    enableFingerprinting = true,
+    maxConcurrentSessions = 3,
+    enableGeolocationCheck = false
+  } = props;
   const { toast } = useToast();
   const navigate = useNavigate();
 

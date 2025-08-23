@@ -28,15 +28,16 @@ export function SecurityHeadersManager() {
           
           if (after - before > 100 && !devtools.open) {
             devtools.open = true;
-            // Log security event
-            fetch('/api/security-event', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                event: 'DEVTOOLS_OPENED',
-                timestamp: new Date().toISOString(),
-                userAgent: navigator.userAgent
-              })
+            // Log to Supabase instead of non-existent API
+            import('@/integrations/supabase/client').then(({ supabase }) => {
+              supabase.from('security_audit_log').insert({
+                action: 'DEVTOOLS_OPENED',
+                resource_type: 'security_monitoring',
+                details: {
+                  timestamp: new Date().toISOString(),
+                  userAgent: navigator.userAgent
+                }
+              });
             }).catch(() => {}); // Silent fail
           }
         }, 1000);
@@ -55,15 +56,16 @@ export function SecurityHeadersManager() {
           const hasSensitiveData = sensitivePatterns.some(pattern => pattern.test(selection));
           
           if (hasSensitiveData) {
-            // Log potential data exfiltration
-            fetch('/api/security-event', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                event: 'SENSITIVE_DATA_COPIED',
-                dataLength: selection.length,
-                timestamp: new Date().toISOString()
-              })
+            // Log to Supabase instead of non-existent API
+            import('@/integrations/supabase/client').then(({ supabase }) => {
+              supabase.from('security_audit_log').insert({
+                action: 'SENSITIVE_DATA_COPIED',
+                resource_type: 'security_monitoring',
+                details: {
+                  dataLength: selection.length,
+                  timestamp: new Date().toISOString()
+                }
+              });
             }).catch(() => {}); // Silent fail
           }
         }
