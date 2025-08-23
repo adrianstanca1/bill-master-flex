@@ -11,12 +11,12 @@ const Index = () => {
   return (
     <>
       <SEO
-        title="AS PRO Business Dashboard"
+        title="AS Agents Business Dashboard"
         description="AI-powered dashboard for invoicing, tenders, quotes, and VAT/CIS."
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "WebSite",
-          name: "AS PRO Business Dashboard",
+          name: "AS Agents Business Dashboard",
           potentialAction: {
             "@type": "SearchAction",
             target: (typeof window !== "undefined" ? window.location.origin : "") + "/dashboard#invoices?q={search_term_string}",
@@ -29,7 +29,7 @@ const Index = () => {
       <section className="relative py-16 px-4 overflow-hidden">
         <div className="container mx-auto text-center relative z-10">
           <h1 className="text-5xl md:text-7xl font-bold text-gradient mb-6">
-            AS PRO
+            AS Agents
           </h1>
           <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-8">
             Professional construction management platform for modern businesses

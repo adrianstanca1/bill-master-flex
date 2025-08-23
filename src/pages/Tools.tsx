@@ -10,7 +10,7 @@ const Tools: React.FC = () => {
   return (
     <>
       <SEO 
-        title="Tools | AS PRO" 
+        title="Tools | AS Agents" 
         description="Smart tools and AI-powered solutions for construction management"
       />
       <div className="container mx-auto p-6 space-y-6">

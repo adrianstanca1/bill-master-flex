@@ -361,7 +361,7 @@ export function AuthSecuritySettings() {
                   </Button>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Use this API key to authenticate requests to the AS PRO API
+                  Use this API key to authenticate requests to the AS Agents API
                 </p>
               </div>
 

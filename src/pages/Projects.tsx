@@ -65,7 +65,7 @@ export default function Projects() {
     <div className="min-h-screen bg-background">
       <ResponsiveLayout>
         <SEO 
-          title="Projects | AS PRO" 
+          title="Projects | AS Agents" 
           description="Comprehensive project management for your construction business - track progress, manage timelines, and monitor budgets"
         />
         

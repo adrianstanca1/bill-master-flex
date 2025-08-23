@@ -15,7 +15,7 @@ export default function AuthConfiguration() {
   return (
     <>
       <SEO 
-        title="Authentication Configuration | AS PRO" 
+        title="Authentication Configuration | AS Agents" 
         description="Configure and manage authentication, security settings, and user access controls"
         noindex 
       />

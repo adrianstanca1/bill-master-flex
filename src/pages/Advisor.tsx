@@ -12,7 +12,7 @@ const Advisor: React.FC = () => {
       
       <ResponsiveLayout>
         <SEO 
-          title="AI Business Advisor | AS PRO" 
+          title="AI Business Advisor | AS Agents" 
           description="Get intelligent business advice and insights from our AI advisor" 
         />
         <div className="space-y-6">

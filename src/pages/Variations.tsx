@@ -64,7 +64,7 @@ const Variations: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       
       <ResponsiveLayout>
-        <SEO title="Variations & Change Orders | AS PRO" description="Create and manage variations/change orders." jsonLd={jsonLd} />
+        <SEO title="Variations & Change Orders | AS Agents" description="Create and manage variations/change orders." jsonLd={jsonLd} />
         <div className="space-y-6">
           <div>
             <h1 className="text-3xl font-bold">Variations & Change Orders</h1>

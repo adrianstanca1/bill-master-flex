@@ -91,7 +91,7 @@ const BusinessManager: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-background/90">
       <ResponsiveLayout>
         <SEO 
-          title="Business Manager | AS PRO" 
+          title="Business Manager | AS Agents" 
           description="Comprehensive business management and analytics dashboard with real-time insights" 
         />
         <div className="space-y-6">

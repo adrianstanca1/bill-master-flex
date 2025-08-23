@@ -12,7 +12,7 @@ export default function HR() {
     <div className="min-h-screen bg-background">
       <ResponsiveLayout>
         <SEO 
-          title="HR Management | AS PRO" 
+          title="HR Management | AS Agents" 
           description="Human resources management for your construction business - manage employees, track time, and handle payroll"
         />
         

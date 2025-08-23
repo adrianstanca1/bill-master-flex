@@ -147,7 +147,7 @@ export function TopNavigation() {
             <Zap className="h-8 w-8 text-primary group-hover:text-primary/80 transition-colors duration-200" />
           </div>
           <span className="font-bold text-xl text-gradient">
-            AS PRO
+            AS Agents
           </span>
         </Link>
 

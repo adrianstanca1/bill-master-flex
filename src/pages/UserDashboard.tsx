@@ -11,7 +11,7 @@ const UserDashboardPage: React.FC = () => {
       
       <ResponsiveLayout>
         <SEO 
-          title="User Dashboard | AS PRO" 
+          title="User Dashboard | AS Agents" 
           description="Your user account and security dashboard" 
         />
         <UserDashboard />

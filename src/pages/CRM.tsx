@@ -8,7 +8,7 @@ export default function CRM() {
     <div className="min-h-screen bg-background">
       <ResponsiveLayout>
         <SEO 
-          title="CRM | AS PRO" 
+          title="CRM | AS Agents" 
           description="Customer relationship management for your construction business - manage clients, track communications, and build relationships"
         />
         <div className="cyber-card p-8 hover-glow">

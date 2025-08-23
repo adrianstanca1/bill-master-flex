@@ -135,7 +135,7 @@ export default function ResetPassword() {
     <>
       <SEO 
         title="Reset Password" 
-        description="Reset your AS PRO account password" 
+        description="Reset your AS Agents account password" 
         noindex 
       />
       <main className="container max-w-md mx-auto py-10">

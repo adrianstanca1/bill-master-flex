@@ -9,7 +9,7 @@ export default function Invoices() {
     <div className="min-h-screen bg-background">
       <ResponsiveLayout>
         <SEO 
-          title="Invoices | AS PRO" 
+          title="Invoices | AS Agents" 
           description="Comprehensive invoice management for your construction business - create, track, and send professional invoices"
         />
         <div className="space-y-6">
