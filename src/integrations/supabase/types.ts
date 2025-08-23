@@ -1792,6 +1792,10 @@ export type Database = {
         Args: { target_company_id: string }
         Returns: boolean
       }
+      enhanced_brute_force_check: {
+        Args: { check_ip?: unknown; check_user_id: string }
+        Returns: Json
+      }
       get_user_profile: {
         Args: Record<PropertyKey, never>
         Returns: {
