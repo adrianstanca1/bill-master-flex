@@ -302,6 +302,25 @@ export function useAuth(): AuthState & AuthActions {
 
   const signInWithOAuth = useCallback(async (provider: 'google' | 'azure' | 'github') => {
     try {
+      // First check if provider is enabled
+      const { data: providerCheck } = await supabase.rpc('validate_oauth_providers');
+      
+      // Type the provider check data
+      const providerData = providerCheck as { google_enabled?: boolean; microsoft_enabled?: boolean } | null;
+      
+      const isEnabled = provider === 'google' ? providerData?.google_enabled :
+                       provider === 'azure' ? providerData?.microsoft_enabled :
+                       provider === 'github' ? providerData?.microsoft_enabled : false;
+      
+      if (!isEnabled) {
+        toast({
+          title: "Provider Not Available",
+          description: `${provider.charAt(0).toUpperCase() + provider.slice(1)} sign-in is currently not configured. Please use email/password login or contact support.`,
+          variant: "destructive"
+        });
+        return { error: { message: 'Provider not enabled' } as AuthError };
+      }
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
@@ -322,7 +341,7 @@ export function useAuth(): AuthState & AuthActions {
       console.error(`${provider} OAuth error:`, err);
       toast({
         title: "OAuth Error",
-        description: "An unexpected error occurred during OAuth sign in.",
+        description: "OAuth sign-in is currently unavailable. Please use email/password login.",
         variant: "destructive"
       });
       return { error: err };

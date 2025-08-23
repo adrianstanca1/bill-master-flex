@@ -13,12 +13,12 @@ jwt_expiry = 3600
 refresh_token_rotation_enabled = true
 security_update_password_require_reauthentication = true
 security_captcha_enabled = false
-security_manual_linking_enabled = false
-
+# OAuth providers - disabled by default for security
+# To enable, configure the provider credentials in Supabase Dashboard
 [auth.external.google]
 enabled = false
 
-[auth.external.github]
+[auth.external.github] 
 enabled = false
 
 [auth.external.azure]
