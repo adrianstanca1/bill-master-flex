@@ -6,6 +6,7 @@ import SEO from "@/components/SEO";
 import { useAuthContext } from "@/components/auth/AuthProvider";
 import { EmailConfirmationBanner } from "@/components/EmailConfirmationBanner";
 import { PasswordSecurityBanner } from "@/components/PasswordSecurityBanner";
+import { SecurityConfigChecker } from "@/components/SecurityConfigChecker";
 import { useSecurityEnhancements } from "@/hooks/useSecurityEnhancements";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -295,6 +296,8 @@ export default function Auth() {
           description="Secure authentication for your construction dashboard" 
           noindex 
         />
+        
+        <SecurityConfigChecker />
         
         {!securityStatus.passwordProtectionEnabled && (
           <PasswordSecurityBanner />
