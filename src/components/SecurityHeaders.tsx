@@ -13,10 +13,14 @@ export function SecurityHeaders() {
       meta.content = content;
     };
 
-    // Enhanced Content Security Policy with stricter XSS protection
+    // Generate nonce for script security
+    const nonce = crypto.getRandomValues(new Uint8Array(16))
+      .reduce((acc, val) => acc + val.toString(16).padStart(2, '0'), '');
+    
+    // Enhanced Content Security Policy with nonce-based security
     setMetaTag('Content-Security-Policy', 
       "default-src 'self'; " +
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://js.stripe.com; " +
+      `script-src 'self' 'nonce-${nonce}' https://cdn.jsdelivr.net https://js.stripe.com; ` +
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
       "img-src 'self' data: https: blob:; " +
       "connect-src 'self' https://*.supabase.co https://*.supabase.com wss://*.supabase.co https://api.stripe.com; " +
@@ -24,7 +28,8 @@ export function SecurityHeaders() {
       "frame-ancestors 'none'; " +
       "form-action 'self'; " +
       "base-uri 'self'; " +
-      "object-src 'none';"
+      "object-src 'none'; " +
+      "upgrade-insecure-requests;"
     );
 
     // X-Frame-Options

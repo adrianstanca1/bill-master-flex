@@ -5,6 +5,7 @@ import { SecurityPolicyEnforcer } from '@/components/SecurityPolicyEnforcer';
 import { SecurityMonitor } from '@/components/SecurityMonitor';
 import { EnhancedSecurityDashboard } from '@/components/EnhancedSecurityDashboard';
 import { ThreatDetection } from '@/components/ThreatDetection';
+import { SecurityComplianceDashboard } from '@/components/SecurityComplianceDashboard';
 import SEO from '@/components/SEO';
 
 export default function Security() {
@@ -24,13 +25,18 @@ export default function Security() {
           </p>
         </div>
 
-        <Tabs defaultValue="dashboard" className="w-full">
+        <Tabs defaultValue="compliance" className="w-full">
           <TabsList>
+            <TabsTrigger value="compliance">Security Compliance</TabsTrigger>
             <TabsTrigger value="dashboard">Security Dashboard</TabsTrigger>
             <TabsTrigger value="monitoring">Live Monitoring</TabsTrigger>
             <TabsTrigger value="threats">Threat Detection</TabsTrigger>
             <TabsTrigger value="policies">Security Policies</TabsTrigger>
           </TabsList>
+          
+          <TabsContent value="compliance" className="space-y-6">
+            <SecurityComplianceDashboard />
+          </TabsContent>
           
           <TabsContent value="dashboard" className="space-y-6">
             <EnhancedSecurityDashboard />

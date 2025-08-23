@@ -8,12 +8,7 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import { EnhancedSecurityWrapper } from "@/components/EnhancedSecurityWrapper";
-import { SecurityAlert } from "@/components/SecurityAlert";
-import { EnhancedSecurityAlert } from "@/components/EnhancedSecurityAlert";
-import { SecurityAlertSystem } from "@/components/SecurityAlertSystem";
-import { EnhancedInputValidation } from "@/components/EnhancedInputValidation";
-import { SessionSecurityManager } from "@/components/SessionSecurityManager";
+import { EnhancedSecurityManager } from "@/components/EnhancedSecurityManager";
 import { AuthCallbackHandler } from "@/components/auth/AuthCallbackHandler";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
@@ -57,17 +52,11 @@ function App() {
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <SecurityAlert />
-        <EnhancedSecurityAlert />
-        <SecurityAlertSystem />
-        
         <AuthProvider>
-          <EnhancedSecurityWrapper>
-            <SessionSecurityManager />
-            <EnhancedInputValidation>
-              <SidebarProvider>
-                <AppSidebar />
-                <SidebarInset>
+          <EnhancedSecurityManager>
+            <SidebarProvider>
+              <AppSidebar />
+              <SidebarInset>
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
@@ -162,10 +151,9 @@ function App() {
                 <Route path="/terms" element={<Terms />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
-                </SidebarInset>
-              </SidebarProvider>
-            </EnhancedInputValidation>
-          </EnhancedSecurityWrapper>
+              </SidebarInset>
+            </SidebarProvider>
+          </EnhancedSecurityManager>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
