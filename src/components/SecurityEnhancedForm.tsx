@@ -38,8 +38,12 @@ export function SecurityEnhancedForm({
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    console.log('🔒 Security enhanced form submission started...');
     
-    if (isSubmitting) return;
+    if (isSubmitting) {
+      console.log('⏳ Form already submitting, ignoring...');
+      return;
+    }
     setIsSubmitting(true);
 
     try {
@@ -58,34 +62,47 @@ export function SecurityEnhancedForm({
 
       // Enhanced rate limiting check
       if (rateLimit) {
+        console.log('🚦 Checking rate limits...', rateLimit);
         const identifier = `${window.location.href}_${navigator.userAgent.slice(0, 50)}`;
-        const { data: rateLimitResult } = await supabase.rpc('enhanced_rate_limit_check', {
-          identifier: identifier,
-          action_type: 'form_submission',
-          max_attempts: rateLimit.maxAttempts,
-          time_window: `${rateLimit.timeWindow} minutes`,
-          block_duration: '1 hour'
-        });
-
-        const rateLimitData = rateLimitResult as any;
-        if (!rateLimitData?.allowed) {
-          const blockTime = rateLimitData?.block_expires_at 
-            ? new Date(rateLimitData.block_expires_at).toLocaleTimeString()
-            : 'temporarily';
-          
-          await logSuspiciousActivity('RATE_LIMIT_EXCEEDED', {
-            identifier,
-            attempts_made: rateLimitData?.attempts_remaining || 0,
-            block_expires_at: rateLimitData?.block_expires_at
+        
+        try {
+          const { data: rateLimitResult, error: rateLimitError } = await supabase.rpc('enhanced_rate_limit_check', {
+            identifier: identifier,
+            action_type: 'form_submission',
+            max_attempts: rateLimit.maxAttempts,
+            time_window: `${rateLimit.timeWindow} minutes`,
+            block_duration: '1 hour'
           });
 
-          toast({
-            title: "Too Many Attempts",
-            description: `Please wait until ${blockTime} before submitting again.`,
-            variant: "destructive",
-            duration: 10000,
-          });
-          return;
+          if (rateLimitError) {
+            console.error('❌ Rate limit check failed:', rateLimitError);
+            // Continue without rate limiting if the check fails
+          } else {
+            console.log('✅ Rate limit check result:', rateLimitResult);
+            const rateLimitData = rateLimitResult as any;
+            if (!rateLimitData?.allowed) {
+              const blockTime = rateLimitData?.block_expires_at 
+                ? new Date(rateLimitData.block_expires_at).toLocaleTimeString()
+                : 'temporarily';
+              
+              await logSuspiciousActivity('RATE_LIMIT_EXCEEDED', {
+                identifier,
+                attempts_made: rateLimitData?.attempts_remaining || 0,
+                block_expires_at: rateLimitData?.block_expires_at
+              });
+
+              toast({
+                title: "Too Many Attempts",
+                description: `Please wait until ${blockTime} before submitting again.`,
+                variant: "destructive",
+                duration: 10000,
+              });
+              return;
+            }
+          }
+        } catch (error) {
+          console.error('💥 Rate limit check crashed:', error);
+          // Continue without rate limiting if the check fails
         }
       }
 
@@ -110,13 +127,23 @@ export function SecurityEnhancedForm({
           
           // Enhanced server-side sanitization with threat detection
           try {
-            const { data: sanitizationResult } = await supabase.rpc('sanitize_input_enhanced', {
+            const { data: sanitizationResult, error: sanitizationError } = await supabase.rpc('sanitize_input_enhanced', {
               input_text: clientSanitized
             });
             
-            if (sanitizationResult) {
+            if (sanitizationError) {
+              console.warn('⚠️ Input sanitization failed:', sanitizationError);
+              data[key] = clientSanitized; // Fallback to client sanitization
+            } else if (sanitizationResult) {
               const sanitizationData = sanitizationResult as any;
               data[key] = sanitizationData.sanitized_text || clientSanitized;
+              
+              console.log(`🔍 Input sanitization for ${key}:`, {
+                threatLevel: sanitizationData.threat_level,
+                threatsDetected: sanitizationData.threats_detected,
+                originalLength: value.length,
+                sanitizedLength: sanitizationData.sanitized_text?.length || 0
+              });
               
               // Handle high-threat inputs
               if (sanitizationData.threat_level >= 4) {
@@ -160,6 +187,7 @@ export function SecurityEnhancedForm({
         }
       }
       
+      console.log('✅ Form validation complete, submitting data:', Object.keys(data));
       onSubmit(data);
     } catch (error) {
       console.error('Form submission error:', error);

@@ -150,6 +150,7 @@ export default function Auth() {
     }
 
     if (!password) {
+      console.log('❌ Password validation failed: empty password');
       toast({ 
         title: "Password required", 
         description: "Please enter your password.", 

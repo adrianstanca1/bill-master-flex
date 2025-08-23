@@ -16,7 +16,7 @@ interface AuthActions {
   signUp: (email: string, password: string, userData?: any) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<{ error: AuthError | null }>;
   resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
-  signInWithOAuth: (provider: 'google' | 'azure' | 'github') => Promise<{ error: AuthError | null }>;
+  signInWithOAuth: (provider: 'google' | 'azure' | 'github' | 'custom') => Promise<{ error: AuthError | null }>;
 }
 
 export function useAuth(): AuthState & AuthActions {
@@ -35,7 +35,12 @@ export function useAuth(): AuthState & AuthActions {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.email);
+        console.log('Auth state changed:', event, {
+          userId: session?.user?.id,
+          email: session?.user?.email,
+          sessionValid: !!session,
+          timestamp: new Date().toISOString()
+        });
         
         if (!mounted) return;
 
@@ -67,10 +72,17 @@ export function useAuth(): AuthState & AuthActions {
     // THEN check for existing session
     const getInitialSession = async () => {
       try {
+        console.log('🔍 Checking for initial session...');
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
-          console.error('Session check error:', error);
+          console.error('❌ Session check error:', error);
+        } else {
+          console.log('✅ Initial session check:', {
+            hasSession: !!session,
+            userId: session?.user?.id,
+            email: session?.user?.email
+          });
         }
         
         if (mounted) {
@@ -79,7 +91,7 @@ export function useAuth(): AuthState & AuthActions {
           setLoading(false);
         }
       } catch (err) {
-        console.error('Failed to get session:', err);
+        console.error('💥 Failed to get session:', err);
         if (mounted) {
           setLoading(false);
         }
@@ -302,8 +314,22 @@ export function useAuth(): AuthState & AuthActions {
 
   const signInWithOAuth = useCallback(async (provider: 'google' | 'azure' | 'github' | 'custom') => {
     try {
+      console.log(`🔐 Attempting OAuth sign-in with ${provider}...`);
+      
       // First check if provider is enabled
-      const { data: providerCheck } = await supabase.rpc('validate_oauth_providers');
+      const { data: providerCheck, error: providerError } = await supabase.rpc('validate_oauth_providers');
+      
+      if (providerError) {
+        console.error('❌ Provider validation error:', providerError);
+        toast({
+          title: "OAuth Error",
+          description: "Unable to validate OAuth providers. Please try again.",
+          variant: "destructive"
+        });
+        return { error: providerError };
+      }
+      
+      console.log('✅ Provider check result:', providerCheck);
       
       // Type the provider check data
       const providerData = providerCheck as { google_enabled?: boolean; microsoft_enabled?: boolean; custom_enabled?: boolean } | null;
@@ -312,6 +338,8 @@ export function useAuth(): AuthState & AuthActions {
                        provider === 'azure' ? providerData?.microsoft_enabled :
                        provider === 'github' ? providerData?.microsoft_enabled :
                        provider === 'custom' ? providerData?.custom_enabled : false;
+      
+      console.log(`🔍 Provider ${provider} enabled:`, isEnabled);
       
       if (!isEnabled) {
         toast({
@@ -324,19 +352,25 @@ export function useAuth(): AuthState & AuthActions {
 
       // Handle custom OAuth differently
       if (provider === 'custom') {
+        console.log('🔗 Using custom OAuth implementation...');
         // Use the custom OAuth implementation
-        const { error } = await supabase.functions.invoke('custom-oauth', {
+        const { data, error } = await supabase.functions.invoke('custom-oauth', {
           body: { action: 'authorize', redirectTo: `${window.location.origin}/auth/callback` }
         });
+        
+        console.log('🔐 Custom OAuth result:', { data, error });
         return { error };
       }
 
+      console.log(`🚀 Starting ${provider} OAuth flow...`);
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
           redirectTo: `${window.location.origin}/auth/callback`
         }
       });
+      
+      console.log(`📝 OAuth ${provider} result:`, { error });
 
       if (error) {
         toast({
