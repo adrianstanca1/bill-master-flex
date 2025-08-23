@@ -295,6 +295,7 @@ export const commonValidationRules: ValidationRules = {
   email: {
     pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
     maxLength: 254,
+    minLength: 3,
     required: true,
     sanitize: true
   },
@@ -307,6 +308,7 @@ export const commonValidationRules: ValidationRules = {
   phone: {
     pattern: /^[\+]?[1-9][\d]{0,15}$/,
     maxLength: 20,
+    minLength: 10,
     sanitize: true
   },
   name: {
@@ -317,13 +319,47 @@ export const commonValidationRules: ValidationRules = {
     sanitize: true
   },
   company: {
-    minLength: 1,
+    minLength: 2,
     maxLength: 200,
     required: true,
     sanitize: true
   },
   description: {
     maxLength: 5000,
+    minLength: 1,
+    sanitize: true
+  },
+  address: {
+    minLength: 5,
+    maxLength: 500,
+    sanitize: true
+  },
+  postcode: {
+    pattern: /^[A-Z0-9\s-]{3,10}$/i,
+    maxLength: 10,
+    minLength: 3,
+    sanitize: true
+  },
+  currency: {
+    pattern: /^[A-Z]{3}$/,
+    maxLength: 3,
+    minLength: 3,
+    sanitize: true
+  },
+  amount: {
+    pattern: /^\d*\.?\d{0,2}$/,
+    maxLength: 15,
+    sanitize: true
+  },
+  url: {
+    pattern: /^https?:\/\/[^\s]+$/,
+    maxLength: 2048,
+    sanitize: true
+  },
+  username: {
+    pattern: /^[a-zA-Z0-9_-]+$/,
+    minLength: 3,
+    maxLength: 50,
     sanitize: true
   }
 };

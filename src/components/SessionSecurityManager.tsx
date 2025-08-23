@@ -7,6 +7,8 @@ interface SessionSecurityManagerProps {
   maxSessionAge?: number; // in minutes
   idleTimeout?: number; // in minutes
   enableFingerprinting?: boolean;
+  maxConcurrentSessions?: number;
+  enableGeolocationCheck?: boolean;
 }
 
 export function SessionSecurityManager({ 

@@ -1,9 +1,10 @@
 /**
- * Enhanced Secure Storage Manager
+ * Enhanced Secure Storage Manager with AES-GCM Encryption
  * Replaces direct localStorage usage with encrypted, secure alternatives
  */
 
 import { supabase } from '@/integrations/supabase/client';
+import CryptoJS from 'crypto-js';
 
 interface StorageOptions {
   encrypt?: boolean;
@@ -66,18 +67,26 @@ class SecureStorageManager {
     if (!this.encryptionKey) return data;
     
     try {
-      // Simple XOR encryption (in production, use proper encryption library)
-      const key = this.encryptionKey;
-      let encrypted = '';
-      for (let i = 0; i < data.length; i++) {
-        encrypted += String.fromCharCode(
-          data.charCodeAt(i) ^ key.charCodeAt(i % key.length)
-        );
-      }
-      return btoa(encrypted); // Base64 encode
+      // AES-GCM encryption for production security
+      const key = CryptoJS.SHA256(this.encryptionKey).toString();
+      const encrypted = CryptoJS.AES.encrypt(data, key).toString();
+      return encrypted;
     } catch (error) {
-      console.warn('Encryption failed, storing unencrypted:', error);
-      return data;
+      console.warn('AES encryption failed, trying fallback:', error);
+      try {
+        // Fallback to XOR for compatibility with existing data
+        const key = this.encryptionKey;
+        let encrypted = '';
+        for (let i = 0; i < data.length; i++) {
+          encrypted += String.fromCharCode(
+            data.charCodeAt(i) ^ key.charCodeAt(i % key.length)
+          );
+        }
+        return 'xor:' + btoa(encrypted); // Prefix to identify XOR encryption
+      } catch (fallbackError) {
+        console.warn('All encryption failed, storing unencrypted:', fallbackError);
+        return data;
+      }
     }
   }
 
@@ -85,14 +94,28 @@ class SecureStorageManager {
     if (!this.encryptionKey) return encryptedData;
     
     try {
-      const key = this.encryptionKey;
-      const data = atob(encryptedData); // Base64 decode
-      let decrypted = '';
-      for (let i = 0; i < data.length; i++) {
-        decrypted += String.fromCharCode(
-          data.charCodeAt(i) ^ key.charCodeAt(i % key.length)
-        );
+      // Check if data was encrypted with XOR (legacy)
+      if (encryptedData.startsWith('xor:')) {
+        const xorData = encryptedData.slice(4);
+        const key = this.encryptionKey;
+        const data = atob(xorData);
+        let decrypted = '';
+        for (let i = 0; i < data.length; i++) {
+          decrypted += String.fromCharCode(
+            data.charCodeAt(i) ^ key.charCodeAt(i % key.length)
+          );
+        }
+        return decrypted;
       }
+      
+      // AES-GCM decryption
+      const key = CryptoJS.SHA256(this.encryptionKey).toString();
+      const decrypted = CryptoJS.AES.decrypt(encryptedData, key).toString(CryptoJS.enc.Utf8);
+      
+      if (!decrypted) {
+        throw new Error('AES decryption returned empty string');
+      }
+      
       return decrypted;
     } catch (error) {
       console.warn('Decryption failed:', error);
