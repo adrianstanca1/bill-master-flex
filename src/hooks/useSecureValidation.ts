@@ -40,8 +40,8 @@ export function useSecureValidation() {
         const { data: profile } = await supabase
           .from('profiles')
           .select('company_id')
-          .eq('id', user?.id)
-          .single();
+          .eq('id', user?.id || '')
+          .maybeSingle();
 
         const violations = [];
         if (!user) {
@@ -69,8 +69,8 @@ export function useSecureValidation() {
         const { data: profile } = await supabase
           .from('profiles')
           .select('company_id')
-          .eq('id', user?.id)
-          .single();
+          .eq('id', user?.id || '')
+          .maybeSingle();
 
         setValidationResult({
           isValid: true,
