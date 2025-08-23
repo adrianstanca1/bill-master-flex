@@ -53,16 +53,31 @@ export default function Auth() {
     }
   };
 
-  // Enhanced OAuth handler
+  // Enhanced OAuth handler with proper error handling
   const handleOAuthProvider = async (provider: 'google' | 'azure') => {
     setLoading(true);
     try {
+      // Check provider availability first
+      const providerCheck = await checkOAuthProviders();
+      const providerData = providerCheck as { google_enabled?: boolean; microsoft_enabled?: boolean } | null;
+      const isEnabled = provider === 'google' ? providerData?.google_enabled : providerData?.microsoft_enabled;
+      
+      if (!isEnabled) {
+        toast({
+          title: "Provider Not Available",
+          description: `${provider.charAt(0).toUpperCase() + provider.slice(1)} sign-in is currently not configured. Please use email/password login.`,
+          variant: "destructive"
+        });
+        return;
+      }
+
       const { error } = await signInWithOAuth(provider === 'azure' ? 'azure' : 'google');
       
       if (error) {
+        console.error('OAuth error:', error);
         toast({
           title: "OAuth Error",
-          description: error.message || "Failed to sign in with OAuth provider.",
+          description: error.message || "Failed to sign in with OAuth provider. Please try email/password login.",
           variant: "destructive"
         });
       }
@@ -70,7 +85,7 @@ export default function Auth() {
       console.error('OAuth error:', err);
       toast({
         title: "OAuth Error",
-        description: "An unexpected error occurred during OAuth sign in.",
+        description: "An unexpected error occurred during OAuth sign in. Please try email/password login.",
         variant: "destructive"
       });
     } finally {

@@ -35,11 +35,11 @@ export const WelcomeEmail = ({
   return (
     <Html>
       <Head />
-      <Preview>Welcome to AS PRO - Confirm your account</Preview>
+      <Preview>Welcome to AS Cladding & Roofing - Confirm your account</Preview>
       <Body style={main}>
         <Container style={container}>
           <Section style={headerSection}>
-            <Heading style={h1}>Welcome to AS PRO!</Heading>
+            <Heading style={h1}>Welcome to AS Cladding & Roofing!</Heading>
             <Text style={subtitle}>
               Your professional construction management platform
             </Text>
@@ -50,7 +50,7 @@ export const WelcomeEmail = ({
               Hi there! 👋
             </Text>
             <Text style={text}>
-              Thank you for signing up for AS PRO. We're excited to help you manage your construction business more efficiently.
+              Thank you for signing up for AS Cladding & Roofing. We're excited to help you manage your construction business more efficiently.
             </Text>
             
             <Text style={text}>
@@ -86,14 +86,14 @@ export const WelcomeEmail = ({
             <Hr style={hr} />
 
             <Text style={smallText}>
-              This confirmation link will expire in 24 hours. If you didn't create an account with AS PRO, you can safely ignore this email.
+              This confirmation link will expire in 24 hours. If you didn't create an account with AS Cladding & Roofing, you can safely ignore this email.
             </Text>
           </Section>
 
           <Section style={footerSection}>
             <Text style={footer}>
               Best regards,<br/>
-              The AS PRO Team
+              The AS Cladding & Roofing Team
             </Text>
             <Text style={footerSmall}>
               Professional Construction Management Platform
