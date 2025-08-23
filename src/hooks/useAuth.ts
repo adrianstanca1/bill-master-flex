@@ -300,17 +300,18 @@ export function useAuth(): AuthState & AuthActions {
     }
   }, [toast, logFailedAttempt]);
 
-  const signInWithOAuth = useCallback(async (provider: 'google' | 'azure' | 'github') => {
+  const signInWithOAuth = useCallback(async (provider: 'google' | 'azure' | 'github' | 'custom') => {
     try {
       // First check if provider is enabled
       const { data: providerCheck } = await supabase.rpc('validate_oauth_providers');
       
       // Type the provider check data
-      const providerData = providerCheck as { google_enabled?: boolean; microsoft_enabled?: boolean } | null;
+      const providerData = providerCheck as { google_enabled?: boolean; microsoft_enabled?: boolean; custom_enabled?: boolean } | null;
       
       const isEnabled = provider === 'google' ? providerData?.google_enabled :
                        provider === 'azure' ? providerData?.microsoft_enabled :
-                       provider === 'github' ? providerData?.microsoft_enabled : false;
+                       provider === 'github' ? providerData?.microsoft_enabled :
+                       provider === 'custom' ? providerData?.custom_enabled : false;
       
       if (!isEnabled) {
         toast({
@@ -319,6 +320,15 @@ export function useAuth(): AuthState & AuthActions {
           variant: "destructive"
         });
         return { error: { message: 'Provider not enabled' } as AuthError };
+      }
+
+      // Handle custom OAuth differently
+      if (provider === 'custom') {
+        // Use the custom OAuth implementation
+        const { error } = await supabase.functions.invoke('custom-oauth', {
+          body: { action: 'authorize', redirectTo: `${window.location.origin}/auth/callback` }
+        });
+        return { error };
       }
 
       const { error } = await supabase.auth.signInWithOAuth({
