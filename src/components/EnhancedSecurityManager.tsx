@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { useEnhancedRoleAccess } from '@/hooks/useEnhancedRoleAccess';
 import { useSecureAuth } from '@/hooks/useSecureAuth';
 import { useSecurityEnhancements } from '@/hooks/useSecurityEnhancements';
@@ -8,7 +8,8 @@ import { secureStorage } from '@/lib/SecureStorage';
 import { SecurityAlert } from './SecurityAlert';
 import { SessionSecurityManager } from './SessionSecurityManager';
 import { EnhancedSessionManager } from './EnhancedSessionManager';
-import { EnhancedInputValidation, commonValidationRules } from './EnhancedInputValidation';
+import { EnhancedInputValidation } from './EnhancedInputValidation';
+import { commonValidationRules } from '@/lib/validation';
 
 interface EnhancedSecurityManagerProps {
   children: React.ReactNode;
@@ -61,7 +62,17 @@ export function EnhancedSecurityManager({ children }: EnhancedSecurityManagerPro
     };
 
     performSecurityChecks();
-  }, [isAuthenticated, user, canAccessFinancials, userRole, roleLoading]);
+  }, [
+    isAuthenticated,
+    user,
+    canAccessFinancials,
+    userRole,
+    roleLoading,
+    checkBruteForce,
+    logSecurityEvent,
+    securityStatus.sessionValid,
+    toast
+  ]);
 
   // Migrate legacy localStorage data to secure storage
   const migrateLegacyStorage = async () => {
@@ -94,18 +105,21 @@ export function EnhancedSecurityManager({ children }: EnhancedSecurityManagerPro
   };
 
   // Log security events
-  const logSecurityEvent = async (eventType: string, details: any) => {
-    try {
-      await secureStorage.setItem(`security_event_${Date.now()}`, {
-        event_type: eventType,
-        user_id: user?.id,
-        timestamp: new Date().toISOString(),
-        details
-      }, { encrypt: true, serverSide: true });
-    } catch (error) {
-      console.error('Failed to log security event:', error);
-    }
-  };
+  const logSecurityEvent = useCallback(
+    async (eventType: string, details: any) => {
+      try {
+        await secureStorage.setItem(`security_event_${Date.now()}`, {
+          event_type: eventType,
+          user_id: user?.id,
+          timestamp: new Date().toISOString(),
+          details
+        }, { encrypt: true, serverSide: true });
+      } catch (error) {
+        console.error('Failed to log security event:', error);
+      }
+    },
+    [user]
+  );
 
   // Handle validation errors
   const handleValidationError = (field: string, error: string) => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -20,7 +20,7 @@ export function SecurityStatusChecker() {
   const [lastCheck, setLastCheck] = useState<Date | null>(null);
   const { toast } = useToast();
 
-  const runSecurityChecks = async () => {
+  const runSecurityChecks = useCallback(async () => {
     setLoading(true);
     const results: SecurityCheck[] = [];
 
@@ -116,11 +116,11 @@ export function SecurityStatusChecker() {
         variant: "destructive",
       });
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
     runSecurityChecks();
-  }, []);
+  }, [runSecurityChecks]);
 
   const getStatusIcon = (status: SecurityCheck['status']) => {
     switch (status) {
