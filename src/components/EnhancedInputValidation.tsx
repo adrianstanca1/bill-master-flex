@@ -300,8 +300,9 @@ export const commonValidationRules: ValidationRules = {
     sanitize: true
   },
   password: {
-    minLength: 8,
+    minLength: 12, // Increased from 8 for stronger security
     maxLength: 128,
+    pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/,
     required: true,
     sanitize: false // Don't sanitize passwords
   },
@@ -312,32 +313,33 @@ export const commonValidationRules: ValidationRules = {
     sanitize: true
   },
   name: {
-    pattern: /^[a-zA-Z\s\-']+$/,
-    minLength: 1,
-    maxLength: 100,
+    pattern: /^[a-zA-Z\s\-'\.]+$/,
+    minLength: 2, // Increased from 1
+    maxLength: 50, // Reduced from 100 for security
     required: true,
     sanitize: true
   },
   company: {
+    pattern: /^[a-zA-Z0-9\s\-&'\.]+$/,
     minLength: 2,
-    maxLength: 200,
+    maxLength: 100, // Reduced from 200 for security
     required: true,
     sanitize: true
   },
   description: {
-    maxLength: 5000,
+    maxLength: 500, // Reduced from 5000 for security
     minLength: 1,
     sanitize: true
   },
   address: {
     minLength: 5,
-    maxLength: 500,
+    maxLength: 200, // Reduced from 500 for security
     sanitize: true
   },
   postcode: {
-    pattern: /^[A-Z0-9\s-]{3,10}$/i,
-    maxLength: 10,
-    minLength: 3,
+    pattern: /^[A-Z]{1,2}\d[A-Z\d]?\s?\d[A-Z]{2}$/i, // UK postcode format
+    maxLength: 8,
+    minLength: 5,
     sanitize: true
   },
   currency: {
