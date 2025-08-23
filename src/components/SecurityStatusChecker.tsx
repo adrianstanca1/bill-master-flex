@@ -8,7 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 
 interface SecurityCheck {
   name: string;
-  status: 'passed' | 'failed' | 'warning' | 'checking';
+  status: 'pass' | 'fail' | 'warn';
   message: string;
   recommendation?: string;
   severity: 'low' | 'medium' | 'high' | 'critical';
@@ -29,16 +29,25 @@ export function SecurityStatusChecker() {
       const { data: { session } } = await supabase.auth.getSession();
       results.push({
         name: 'Authentication Status',
-        status: session ? 'passed' : 'failed',
+        status: session ? 'pass' : 'fail',
         message: session ? 'User is properly authenticated' : 'No active session',
         severity: session ? 'low' : 'high'
+      });
+
+      // Critical: Leaked Password Protection
+      results.push({
+        name: 'Leaked Password Protection',
+        status: 'fail',
+        message: 'Leaked password protection is disabled',
+        recommendation: 'Enable in Supabase Dashboard → Auth → Settings → Password Security',
+        severity: 'critical'
       });
 
       // Check RLS policies
       const { data: rlsData, error: rlsError } = await supabase.rpc('test_rls_policies');
       results.push({
         name: 'Row Level Security',
-        status: rlsError ? 'failed' : 'passed',
+        status: rlsError ? 'fail' : 'pass',
         message: rlsError ? 'RLS policy test failed' : 'RLS policies are working correctly',
         severity: rlsError ? 'critical' : 'low'
       });
@@ -48,7 +57,7 @@ export function SecurityStatusChecker() {
       const sessionValid = sessionData && typeof sessionData === 'object' && 'valid' in sessionData ? (sessionData as any).valid : false;
       results.push({
         name: 'Session Security',
-        status: sessionValid ? 'passed' : 'warning',
+        status: sessionValid ? 'pass' : 'warn',
         message: sessionValid ? 'Session is secure' : 'Session validation issues detected',
         recommendation: !sessionValid ? 'Review session configuration' : undefined,
         severity: sessionValid ? 'low' : 'medium'
@@ -63,7 +72,7 @@ export function SecurityStatusChecker() {
 
       results.push({
         name: 'Security Events (24h)',
-        status: securityEvents && securityEvents.length > 10 ? 'warning' : 'passed',
+        status: securityEvents && securityEvents.length > 10 ? 'warn' : 'pass',
         message: `${securityEvents?.length || 0} security events in last 24 hours`,
         recommendation: securityEvents && securityEvents.length > 10 ? 'Review security logs' : undefined,
         severity: securityEvents && securityEvents.length > 10 ? 'medium' : 'low'
@@ -78,7 +87,7 @@ export function SecurityStatusChecker() {
 
       results.push({
         name: 'Company Association',
-        status: profile?.company_id ? 'passed' : 'failed',
+        status: profile?.company_id ? 'pass' : 'fail',
         message: profile?.company_id ? 'User has proper company association' : 'No company association found',
         recommendation: !profile?.company_id ? 'Complete setup process' : undefined,
         severity: profile?.company_id ? 'low' : 'high'
@@ -88,7 +97,7 @@ export function SecurityStatusChecker() {
       console.error('Security check failed:', error);
       results.push({
         name: 'Security Check System',
-        status: 'failed',
+        status: 'fail',
         message: 'Failed to complete security checks',
         severity: 'medium'
       });
@@ -99,7 +108,7 @@ export function SecurityStatusChecker() {
     setLastCheck(new Date());
 
     // Show toast for critical issues
-    const criticalIssues = results.filter(r => r.severity === 'critical' && r.status === 'failed');
+    const criticalIssues = results.filter(r => r.severity === 'critical' && r.status === 'fail');
     if (criticalIssues.length > 0) {
       toast({
         title: "Critical Security Issues Detected",
@@ -115,20 +124,19 @@ export function SecurityStatusChecker() {
 
   const getStatusIcon = (status: SecurityCheck['status']) => {
     switch (status) {
-      case 'passed': return <CheckCircle className="h-4 w-4 text-green-600" />;
-      case 'failed': return <AlertTriangle className="h-4 w-4 text-red-600" />;
-      case 'warning': return <AlertTriangle className="h-4 w-4 text-yellow-600" />;
-      case 'checking': return <Clock className="h-4 w-4 text-blue-600" />;
+      case 'pass': return <CheckCircle className="h-4 w-4 text-green-600" />;
+      case 'fail': return <AlertTriangle className="h-4 w-4 text-red-600" />;
+      case 'warn': return <AlertTriangle className="h-4 w-4 text-yellow-600" />;
     }
   };
 
   const getStatusBadge = (check: SecurityCheck) => {
-    const variant = check.status === 'passed' ? 'default' : 
-                   check.status === 'failed' ? 'destructive' : 'secondary';
+    const variant = check.status === 'pass' ? 'default' : 
+                   check.status === 'fail' ? 'destructive' : 'secondary';
     
     return (
       <Badge variant={variant} className="ml-2">
-        {check.status.charAt(0).toUpperCase() + check.status.slice(1)}
+        {check.status === 'pass' ? 'Pass' : check.status === 'fail' ? 'Fail' : 'Warning'}
       </Badge>
     );
   };
@@ -201,7 +209,7 @@ export function SecurityStatusChecker() {
           ))}
         </div>
 
-        {checks.some(c => c.severity === 'critical' && c.status === 'failed') && (
+        {checks.some(c => c.severity === 'critical' && c.status === 'fail') && (
           <div className="mt-4 p-3 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg">
             <div className="flex items-center gap-2 text-red-800 dark:text-red-200">
               <AlertTriangle className="h-4 w-4" />

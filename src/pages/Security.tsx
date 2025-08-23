@@ -7,8 +7,7 @@ import { EnhancedSecurityDashboard } from '@/components/EnhancedSecurityDashboar
 import { ThreatDetection } from '@/components/ThreatDetection';
 import { SecurityComplianceDashboard } from '@/components/SecurityComplianceDashboard';
 import { SecurityConfigurationManager } from '@/components/SecurityConfigurationManager';
-import { SecurityStatusChecker } from '@/components/SecurityStatusChecker';
-import { SecurityEnhancementPanel } from '@/components/SecurityEnhancementPanel';
+import { SecurityDashboard } from '@/components/SecurityDashboard';
 import SEO from '@/components/SEO';
 
 export default function Security() {
@@ -39,9 +38,7 @@ export default function Security() {
           </TabsList>
           
           <TabsContent value="configuration" className="space-y-6">
-            <SecurityConfigurationManager />
-            <SecurityStatusChecker />
-            <SecurityEnhancementPanel />
+            <SecurityDashboard />
           </TabsContent>
           
           <TabsContent value="compliance" className="space-y-6">
