@@ -3,15 +3,18 @@ import { usePasswordSecurity } from '@/hooks/usePasswordSecurity';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Shield, AlertTriangle, CheckCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface PasswordStrengthIndicatorProps {
   password: string;
   onStrengthChange?: (isStrong: boolean) => void;
+  className?: string;
 }
 
 export function PasswordStrengthIndicator({ 
   password, 
-  onStrengthChange 
+  onStrengthChange,
+  className 
 }: PasswordStrengthIndicatorProps) {
   const { validatePasswordStrength, getPasswordStrengthColor, isValidating } = usePasswordSecurity();
   const [strength, setStrength] = useState<any>(null);
@@ -64,7 +67,7 @@ export function PasswordStrengthIndicator({
   };
 
   return (
-    <Card className="mt-2">
+    <Card className={cn("mt-2", className)}>
       <CardContent className="p-3 space-y-2">
         <div className="flex items-center gap-2">
           {getStrengthIcon()}

@@ -7,11 +7,14 @@ import SEO from "@/components/SEO";
 import { useAuthContext } from "@/components/auth/AuthProvider";
 import { useOAuthProviders } from "@/hooks/useOAuthProviders";
 import { EmailConfirmationBanner } from "@/components/EmailConfirmationBanner";
+import { SecurityEnhancedForm } from "@/components/SecurityEnhancedForm";
+import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicator";
+import { usePasswordSecurity } from "@/hooks/usePasswordSecurity";
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
-import { Eye, EyeOff, Mail, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Mail, Loader2, Shield } from "lucide-react";
 
 export default function Auth() {
   const { toast } = useToast();
@@ -33,6 +36,9 @@ export default function Auth() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
+  
+  // Enhanced security features
+  const { validatePasswordStrength } = usePasswordSecurity();
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -301,15 +307,20 @@ export default function Auth() {
         
         
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-2">
-            {mode === "signin" && "Welcome back"}
-            {mode === "signup" && "Create your account"}
-            {mode === "forgot" && "Reset your password"}
+          <div className="flex items-center justify-center mb-4">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-primary flex items-center justify-center">
+              <Shield className="w-8 h-8 text-primary-foreground" />
+            </div>
+          </div>
+          <h1 className="text-4xl font-bold mb-3 text-gradient">
+            {mode === "signin" && "Welcome Back"}
+            {mode === "signup" && "Join Our Platform"}
+            {mode === "forgot" && "Reset Password"}
           </h1>
-          <p className="text-muted-foreground">
-            {mode === "signin" && "Sign in to access your construction dashboard"}
-            {mode === "signup" && "Join to manage your construction business"}
-            {mode === "forgot" && "Enter your email to receive reset instructions"}
+          <p className="text-muted-foreground text-lg">
+            {mode === "signin" && "Secure access to your business dashboard"}
+            {mode === "signup" && "Create your secure account in seconds"}
+            {mode === "forgot" && "We'll send you reset instructions"}
           </p>
         </div>
 
@@ -405,7 +416,7 @@ export default function Auth() {
             </>
           )}
 
-          <form className="space-y-6 mt-6" onSubmit={handleSubmit}>
+          <SecurityEnhancedForm onSubmit={handleSubmit} className="space-y-6 mt-6">
             {mode === "signup" && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -484,8 +495,14 @@ export default function Auth() {
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
+                     </button>
                   </div>
+                  {mode === "signup" && password && (
+                    <PasswordStrengthIndicator 
+                      password={password}
+                      className="mt-2"
+                    />
+                  )}
                 </div>
 
                 {mode === "signup" && (
@@ -559,7 +576,7 @@ export default function Auth() {
                 </>
               )}
             </Button>
-          </form>
+          </SecurityEnhancedForm>
           
           <div className="mt-6 text-center space-y-2">
             {mode === "signin" && (
