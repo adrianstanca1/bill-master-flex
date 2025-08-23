@@ -54,7 +54,6 @@ export default function Setup() {
       { key: "emerald", name: "Emerald" },
       { key: "blue", name: "Blue" },
       { key: "violet", name: "Violet" },
-      { key: "orange", name: "Orange" },
     ],
     []
   );

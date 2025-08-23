@@ -134,6 +134,12 @@ const Index = () => {
             </Link>
           </div>
         </section>
+
+        <footer className="text-center text-sm">
+          <Link to="/policy" className="text-muted-foreground hover:underline">
+            Privacy Policy
+          </Link>
+        </footer>
       </div>
     </>
   );

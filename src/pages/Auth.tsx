@@ -59,7 +59,7 @@ export default function Auth() {
       return data;
     } catch (error) {
       console.error('OAuth validation error:', error);
-      return { google_enabled: false, microsoft_enabled: false };
+      return { google_enabled: false, microsoft_enabled: false, github_enabled: false, custom_enabled: false };
     }
   };
 
