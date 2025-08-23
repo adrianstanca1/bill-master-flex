@@ -12,21 +12,28 @@ export function EnhancedSecurityWrapper({ children }: EnhancedSecurityWrapperPro
   const { toast } = useToast();
 
   useEffect(() => {
-    // Enhanced Content Security Policy
+    // Enhanced Content Security Policy with nonce support
     const metaCSP = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
     if (!metaCSP) {
       const meta = document.createElement('meta');
       meta.httpEquiv = 'Content-Security-Policy';
+      
+      // Generate nonce for inline scripts
+      const nonce = crypto.randomUUID();
+      document.documentElement.setAttribute('data-csp-nonce', nonce);
+      
       meta.content = [
         "default-src 'self'",
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://*.supabase.co",
+        `script-src 'self' 'nonce-${nonce}' https://cdn.jsdelivr.net https://*.supabase.co`,
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         "img-src 'self' data: https: blob:",
         "connect-src 'self' https://*.supabase.co https://*.supabase.com wss://*.supabase.co https://api.ipify.org",
         "font-src 'self' data: https://fonts.gstatic.com",
         "frame-ancestors 'none'",
         "base-uri 'self'",
-        "form-action 'self'"
+        "form-action 'self'",
+        "object-src 'none'",
+        "upgrade-insecure-requests"
       ].join('; ');
       document.head.appendChild(meta);
     }
