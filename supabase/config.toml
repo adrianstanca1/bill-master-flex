@@ -13,6 +13,23 @@ jwt_expiry = 3600
 refresh_token_rotation_enabled = true
 security_update_password_require_reauthentication = true
 security_captcha_enabled = false
+security_manual_linking_enabled = false
+
+[auth.external.google]
+enabled = false
+
+[auth.external.github]
+enabled = false
+
+[auth.external.azure]
+enabled = false
+
+# Password security settings
+[auth.password]
+min_length = 8
+enable_signup = true
+enable_strength_check = true
+enable_hibp_check = true
 
 [auth.email]
 enable_signup = true

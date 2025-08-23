@@ -11,6 +11,7 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { EnhancedSecurityWrapper } from "@/components/EnhancedSecurityWrapper";
 import { SecurityAlert } from "@/components/SecurityAlert";
 import { EnhancedSecurityAlert } from "@/components/EnhancedSecurityAlert";
+import { SecurityAlertSystem } from "@/components/SecurityAlertSystem";
 import { AuthCallbackHandler } from "@/components/auth/AuthCallbackHandler";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
@@ -54,6 +55,7 @@ function App() {
       <BrowserRouter>
         <SecurityAlert />
         <EnhancedSecurityAlert />
+        <SecurityAlertSystem />
         
         <AuthProvider>
           <EnhancedSecurityWrapper>
