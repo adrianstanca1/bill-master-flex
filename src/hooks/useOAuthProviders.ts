@@ -5,13 +5,15 @@ interface OAuthProviderConfig {
   google: boolean;
   github: boolean;
   azure: boolean;
+  custom: boolean;
 }
 
 export function useOAuthProviders() {
   const [enabledProviders, setEnabledProviders] = useState<OAuthProviderConfig>({
     google: false,
     github: false,
-    azure: false
+    azure: false,
+    custom: false
   });
   const [loading, setLoading] = useState(true);
 
@@ -23,18 +25,20 @@ export function useOAuthProviders() {
         
         if (data) {
           // Type the response data properly
-          const providerData = data as { google_enabled?: boolean; microsoft_enabled?: boolean };
+          const providerData = data as { google_enabled?: boolean; microsoft_enabled?: boolean; custom_enabled?: boolean };
           setEnabledProviders({
             google: providerData.google_enabled || false,
             github: false,
-            azure: false
+            azure: providerData.microsoft_enabled || false,
+            custom: providerData.custom_enabled || false
           });
         } else {
           // Default to all disabled if validation fails
           setEnabledProviders({
             google: false,
             github: false,
-            azure: false
+            azure: false,
+            custom: false
           });
         }
       } catch (error) {
@@ -43,7 +47,8 @@ export function useOAuthProviders() {
         setEnabledProviders({
           google: false,
           github: false,
-          azure: false
+          azure: false,
+          custom: false
         });
       } finally {
         setLoading(false);
