@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -18,7 +18,7 @@ export function useSecureValidation() {
   });
   const { toast } = useToast();
 
-  const validateSecurityContext = async () => {
+  const validateSecurityContext = useCallback(async () => {
     try {
       // Call server-side validation function
       const { data, error } = await supabase.rpc('validate_security_context');
@@ -88,12 +88,14 @@ export function useSecureValidation() {
         userId: null
       });
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
     // Only validate security context for authenticated users
     const checkAndValidate = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user }
+      } = await supabase.auth.getUser();
       if (user) {
         validateSecurityContext();
       } else {
@@ -108,12 +110,12 @@ export function useSecureValidation() {
     };
 
     checkAndValidate();
-    
+
     // Re-validate every 5 minutes only if user is authenticated
     const interval = setInterval(checkAndValidate, 5 * 60 * 1000);
-    
+
     return () => clearInterval(interval);
-  }, []);
+  }, [validateSecurityContext]);
 
   return validationResult;
 }

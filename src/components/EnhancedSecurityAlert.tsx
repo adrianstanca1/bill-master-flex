@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, Shield, X } from 'lucide-react';
@@ -19,15 +19,7 @@ export function EnhancedSecurityAlert() {
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
   const { toast } = useToast();
 
-  useEffect(() => {
-    checkSecurityViolations();
-    
-    // Real-time monitoring
-    const interval = setInterval(checkSecurityViolations, 30000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const checkSecurityViolations = async () => {
+  const checkSecurityViolations = useCallback(async () => {
     try {
       const { data: auditLogs } = await supabase
         .from('security_audit_log')
@@ -70,7 +62,15 @@ export function EnhancedSecurityAlert() {
     } catch (error) {
       console.error('Error checking security violations:', error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    checkSecurityViolations();
+
+    // Real-time monitoring
+    const interval = setInterval(checkSecurityViolations, 30000);
+    return () => clearInterval(interval);
+  }, [checkSecurityViolations]);
 
   const getViolationMessage = (violationType: string): string => {
     const messages: Record<string, string> = {

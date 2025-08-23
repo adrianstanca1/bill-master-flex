@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -50,7 +50,7 @@ export function SecurityDashboard() {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  const fetchSecurityData = async () => {
+  const fetchSecurityData = useCallback(async () => {
     try {
       // Fetch user metrics
       const { data: profiles, error: profilesError } = await supabase
@@ -104,7 +104,7 @@ export function SecurityDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
   const getSeverityFromAction = (action: string): 'low' | 'medium' | 'high' | 'critical' => {
     if (['SECURITY_VIOLATION', 'UNAUTHORIZED_ACCESS', 'BRUTE_FORCE_DETECTED'].includes(action)) {
@@ -149,7 +149,7 @@ export function SecurityDashboard() {
     fetchSecurityData();
     const interval = setInterval(fetchSecurityData, 30000); // Refresh every 30 seconds
     return () => clearInterval(interval);
-  }, []);
+  }, [fetchSecurityData]);
 
   if (loading) {
     return (
