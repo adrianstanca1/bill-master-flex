@@ -9,9 +9,15 @@ export function AuthCallbackHandler() {
   const { toast } = useToast();
 
   useEffect(() => {
+    console.log('AuthCallbackHandler mounted, starting auth callback handling');
+    
     const handleAuthCallback = async () => {
+      console.log('Getting session from Supabase...');
       try {
         const { data, error } = await supabase.auth.getSession();
+        
+        console.log('Session data:', data);
+        console.log('Session error:', error);
         
         if (error) {
           console.error('Auth callback error:', error);
@@ -25,17 +31,18 @@ export function AuthCallbackHandler() {
         }
 
         if (data.session) {
+          console.log('Session found, user authenticated:', data.session.user?.email);
           toast({
             title: "Welcome!",
             description: "Successfully signed in."
           });
           
-          // Check if user setup is complete
-          const { data: setupData } = await supabase.rpc('is_setup_complete');
-          const redirectTo = setupData ? '/dashboard' : '/setup';
+          // Redirect to dashboard (simplified - remove dependency on missing RPC function)
+          console.log('User authenticated, redirecting to dashboard');
           
-          navigate(redirectTo, { replace: true });
+          navigate('/dashboard', { replace: true });
         } else {
+          console.log('No session found, redirecting to auth');
           navigate('/auth');
         }
       } catch (err) {
