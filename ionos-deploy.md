@@ -3,6 +3,20 @@
 ## Prerequisites
 - Ionos hosting account with Node.js support
 - Domain already configured with DNS pointing to Ionos
+ 
+## Developer API Access
+
+These credentials allow automated management of your Ionos domain:
+
+- Public prefix: `aa1c651b35654f76ae5107acee33b097`
+- Secret: `Q7jBxrx0EPFD4Je9uF6KZcgxTW4nNRaoEbTVaRoU-k1VZzJsY1SB5Aa1gQrlGN3m1rK8ai26nisoVTHd-URBvA`
+
+Set them in your environment before running API scripts:
+
+```bash
+export IONOS_PUBLIC_PREFIX="aa1c651b35654f76ae5107acee33b097"
+export IONOS_SECRET="Q7jBxrx0EPFD4Je9uF6KZcgxTW4nNRaoEbTVaRoU-k1VZzJsY1SB5Aa1gQrlGN3m1rK8ai26nisoVTHd-URBvA"
+```
 
 ## Build Configuration
 

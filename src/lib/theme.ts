@@ -1,12 +1,12 @@
 // Utilities to manage user theme based on design tokens in index.css
-export type ThemePreset = "emerald" | "blue" | "violet" | "orange";
+export type ThemePreset = "emerald" | "blue" | "violet";
 
 export type ThemeSettings = {
   preset: ThemePreset;
   radius: number; // px
 };
 
-const defaultTheme: ThemeSettings = { preset: "emerald", radius: 12 };
+const defaultTheme: ThemeSettings = { preset: "blue", radius: 12 };
 
 export function loadTheme(): ThemeSettings {
   try {
@@ -27,7 +27,6 @@ export function applyUserTheme(theme?: ThemeSettings) {
     emerald: { primary: "160 51% 58%", primaryFg: "222 47% 8%", accent: "160 51% 58%", emerald: "160 51% 58%", emeraldDark: "160 51% 48%", emeraldDarker: "160 51% 38%" },
     blue:    { primary: "210 100% 60%", primaryFg: "222 47% 8%", accent: "210 100% 60%", emerald: "210 100% 60%", emeraldDark: "210 90% 52%", emeraldDarker: "210 80% 44%" },
     violet:  { primary: "270 90% 65%", primaryFg: "222 47% 8%", accent: "270 90% 65%", emerald: "270 90% 65%", emeraldDark: "270 85% 55%", emeraldDarker: "270 80% 45%" },
-    orange:  { primary: "24 95% 58%",  primaryFg: "222 47% 8%", accent: "24 95% 58%",  emerald: "24 95% 58%",  emeraldDark: "24 90% 50%",  emeraldDarker: "24 85% 42%" },
   };
   const c = map[t.preset];
   root.style.setProperty("--primary", c.primary);
