@@ -13,10 +13,12 @@ jwt_expiry = 3600
 refresh_token_rotation_enabled = true
 security_update_password_require_reauthentication = true
 security_captcha_enabled = false
-# OAuth providers - disabled by default for security
-# To enable, configure the provider credentials in Supabase Dashboard
+# OAuth providers
 [auth.external.google]
-enabled = false
+enabled = true
+client_id = "env(GOOGLE_CLIENT_ID)"
+secret = "env(GOOGLE_CLIENT_SECRET)"
+redirect_uri = "https://tjgbyygllssqsywxpxqe.supabase.co/auth/v1/callback"
 
 [auth.external.github] 
 enabled = false
