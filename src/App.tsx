@@ -34,6 +34,7 @@ import Setup from "./pages/Setup";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
+import Policy from "./pages/Policy";
 
 // Create QueryClient instance outside component to prevent recreation
 const queryClient = new QueryClient({
@@ -152,6 +153,7 @@ function App() {
                     <Settings />
                   </ProtectedRoute>
                 } />
+                <Route path="/policy" element={<Policy />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </SidebarInset>
