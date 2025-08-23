@@ -5,12 +5,15 @@ import { useToast } from "@/hooks/use-toast";
 import SEO from "@/components/SEO";
 import { useAuthContext } from "@/components/auth/AuthProvider";
 import { EmailConfirmationBanner } from "@/components/EmailConfirmationBanner";
+import { PasswordSecurityBanner } from "@/components/PasswordSecurityBanner";
+import { useSecurityEnhancements } from "@/hooks/useSecurityEnhancements";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { Eye, EyeOff, Mail, Loader2 } from "lucide-react";
 
 export default function Auth() {
+  const { securityStatus } = useSecurityEnhancements();
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation() as any;
@@ -292,6 +295,10 @@ export default function Auth() {
           description="Secure authentication for your construction dashboard" 
           noindex 
         />
+        
+        {!securityStatus.passwordProtectionEnabled && (
+          <PasswordSecurityBanner />
+        )}
         
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold mb-2">
