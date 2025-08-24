@@ -1,4 +1,5 @@
 // Utilities to manage user theme based on design tokens in index.css
+import { secureStorage } from '@/lib/SecureStorage';
 export type ThemePreset = "emerald" | "blue" | "violet";
 
 export type ThemeSettings = {
@@ -10,14 +11,27 @@ const defaultTheme: ThemeSettings = { preset: "blue", radius: 12 };
 
 export function loadTheme(): ThemeSettings {
   try {
-    return { ...defaultTheme, ...(JSON.parse(localStorage.getItem("as-theme") || "{}") as ThemeSettings) };
+    // For immediate access, try localStorage first as fallback
+    const stored = localStorage.getItem("as-theme");
+    return { ...defaultTheme, ...(stored ? JSON.parse(stored) : {}) as ThemeSettings };
+  } catch {
+    return defaultTheme;
+  }
+}
+
+export async function loadThemeAsync(): Promise<ThemeSettings> {
+  try {
+    const stored = await secureStorage.getItem("as-theme", { encrypt: true });
+    return { ...defaultTheme, ...(stored || {}) as ThemeSettings };
   } catch {
     return defaultTheme;
   }
 }
 
 export function saveTheme(theme: ThemeSettings) {
+  // Save to both for immediate access and secure storage
   localStorage.setItem("as-theme", JSON.stringify(theme));
+  secureStorage.setItem("as-theme", theme, { encrypt: true });
 }
 
 export function applyUserTheme(theme?: ThemeSettings) {

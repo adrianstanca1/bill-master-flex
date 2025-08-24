@@ -1,20 +1,27 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Upload, User, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { secureStorage } from '@/lib/SecureStorage';
 
 export function ProfileUpload() {
   const { toast } = useToast();
-  const [profileImage, setProfileImage] = useState<string | null>(
-    localStorage.getItem('profile-image')
-  );
-  const [companyLogo, setCompanyLogo] = useState<string | null>(
-    localStorage.getItem('company-logo')
-  );
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [companyLogo, setCompanyLogo] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadImages = async () => {
+      const profile = await secureStorage.getItem('profile-image', { encrypt: true });
+      const logo = await secureStorage.getItem('company-logo', { encrypt: true });
+      setProfileImage(profile);
+      setCompanyLogo(logo);
+    };
+    loadImages();
+  }, []);
 
   const handleImageUpload = (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -36,17 +43,17 @@ export function ProfileUpload() {
         const imageUrl = e.target?.result as string;
         if (type === 'profile') {
           setProfileImage(imageUrl);
-          localStorage.setItem('profile-image', imageUrl);
+          secureStorage.setItem('profile-image', imageUrl, { encrypt: true });
           toast({
             title: "Profile image uploaded",
-            description: "Your profile image has been saved",
+            description: "Your profile image has been saved securely",
           });
         } else {
           setCompanyLogo(imageUrl);
-          localStorage.setItem('company-logo', imageUrl);
+          secureStorage.setItem('company-logo', imageUrl, { encrypt: true });
           toast({
             title: "Company logo uploaded",
-            description: "Your company logo has been saved",
+            description: "Your company logo has been saved securely",
           });
         }
       };
@@ -57,11 +64,11 @@ export function ProfileUpload() {
   const removeImage = (type: 'profile' | 'logo') => {
     if (type === 'profile') {
       setProfileImage(null);
-      localStorage.removeItem('profile-image');
+      secureStorage.removeItem('profile-image', { encrypt: true });
       toast({ title: "Profile image removed" });
     } else {
       setCompanyLogo(null);
-      localStorage.removeItem('company-logo');
+      secureStorage.removeItem('company-logo', { encrypt: true });
       toast({ title: "Company logo removed" });
     }
   };
