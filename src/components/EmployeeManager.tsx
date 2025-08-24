@@ -24,16 +24,13 @@ import {
 
 interface Employee {
   id: string;
-  user_id: string;
   company_id: string;
-  role: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  position?: string;
+  department?: string;
   created_at: string;
-  profiles?: {
-    first_name?: string;
-    last_name?: string;
-    phone?: string;
-    avatar_url?: string;
-  };
 }
 
 export function EmployeeManager() {
@@ -47,25 +44,16 @@ export function EmployeeManager() {
   const queryClient = useQueryClient();
 
   // Fetch company members
-  const { data: employees, isLoading } = useQuery({
-    queryKey: ['company-members', companyId],
+  const { data: employees = [], isLoading } = useQuery({
+    queryKey: ['employees', companyId],
     queryFn: async () => {
       if (!companyId) return [];
       const { data, error } = await supabase
-        .from('company_members')
-        .select(`
-          *,
-          profiles:user_id (
-            first_name,
-            last_name,
-            phone,
-            avatar_url
-          )
-        `)
-        .eq('company_id', companyId)
-        .order('created_at', { ascending: false });
+        .from('employees')
+        .select('*')
+        .eq('company_id', companyId);
       if (error) throw error;
-      return data as Employee[];
+      return data || [];
     },
     enabled: !!companyId,
   });
@@ -81,11 +69,11 @@ export function EmployeeManager() {
         {
           event: '*',
           schema: 'public',
-          table: 'company_members',
+          table: 'employees',
           filter: `company_id=eq.${companyId}`,
         },
         () => {
-          queryClient.invalidateQueries({ queryKey: ['company-members', companyId] });
+          queryClient.invalidateQueries({ queryKey: ['employees', companyId] });
         }
       )
       .subscribe();
@@ -100,13 +88,13 @@ export function EmployeeManager() {
     mutationFn: async (data: { email: string; role: string }) => {
       // For now, we'll just show a success message
       // In a real implementation, this would send an invitation email
+      return data;
+    },
+    onSuccess: (data) => {
       toast({
         title: "Invitation sent",
         description: `Invitation sent to ${data.email} as ${data.role}`,
       });
-      return data;
-    },
-    onSuccess: () => {
       setInviteEmail('');
       setInviteRole('member');
       setViewMode('list');
@@ -124,9 +112,9 @@ export function EmployeeManager() {
   const updateRoleMutation = useMutation({
     mutationFn: async ({ userId, role }: { userId: string; role: string }) => {
       const { data, error } = await supabase
-        .from('company_members')
-        .update({ role })
-        .eq('user_id', userId)
+        .from('employees')
+        .update({ position: role })
+        .eq('id', userId)
         .eq('company_id', companyId)
         .select()
         .single();
@@ -159,7 +147,7 @@ export function EmployeeManager() {
   };
 
   const filteredEmployees = employees?.filter(employee => {
-    const fullName = `${employee.profiles?.first_name || ''} ${employee.profiles?.last_name || ''}`.toLowerCase();
+    const fullName = `${employee.name || ''}`.toLowerCase();
     return fullName.includes(searchTerm.toLowerCase());
   }) || [];
 
@@ -172,10 +160,10 @@ export function EmployeeManager() {
     }
   };
 
-  const getInitials = (employee: Employee) => {
-    const firstName = employee.profiles?.first_name || '';
-    const lastName = employee.profiles?.last_name || '';
-    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || 'U';
+  const getInitials = (employee: any) => {
+    const name = employee.name || '';
+    const parts = name.split(' ');
+    return parts.length > 1 ? `${parts[0].charAt(0)}${parts[1].charAt(0)}`.toUpperCase() : name.charAt(0).toUpperCase() || 'U';
   };
 
   if (!companyId) {
@@ -285,13 +273,13 @@ export function EmployeeManager() {
                     </Avatar>
                     <div>
                       <h3 className="font-semibold">
-                        {employee.profiles?.first_name || 'Unknown'} {employee.profiles?.last_name || 'User'}
+                        {employee.name || 'Unknown User'}
                       </h3>
                       <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        {employee.profiles?.phone && (
+                        {employee.phone && (
                           <div className="flex items-center gap-1">
                             <Phone className="h-3 w-3" />
-                            {employee.profiles.phone}
+                            {employee.phone}
                           </div>
                         )}
                         <div className="flex items-center gap-1">
@@ -303,12 +291,12 @@ export function EmployeeManager() {
                   </div>
                   
                   <div className="flex items-center gap-2">
-                    <Badge variant={getRoleColor(employee.role)}>
-                      {employee.role}
+                    <Badge variant={getRoleColor(employee.position || 'member')}>
+                      {employee.position || 'member'}
                     </Badge>
                     <Select 
-                      value={employee.role} 
-                      onValueChange={(role) => updateRoleMutation.mutate({ userId: employee.user_id, role })}
+                      value={employee.position || 'member'} 
+                      onValueChange={(role) => updateRoleMutation.mutate({ userId: employee.id, role })}
                     >
                       <SelectTrigger className="w-32">
                         <SelectValue />

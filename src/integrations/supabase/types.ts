@@ -131,6 +131,98 @@ export type Database = {
         }
         Relationships: []
       }
+      dayworks: {
+        Row: {
+          company_id: string
+          created_at: string
+          date: string
+          hourly_rate: number | null
+          hours_worked: number | null
+          id: string
+          project_id: string | null
+          total_cost: number | null
+          updated_at: string
+          work_description: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          date: string
+          hourly_rate?: number | null
+          hours_worked?: number | null
+          id?: string
+          project_id?: string | null
+          total_cost?: number | null
+          updated_at?: string
+          work_description: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          date?: string
+          hourly_rate?: number | null
+          hours_worked?: number | null
+          id?: string
+          project_id?: string | null
+          total_cost?: number | null
+          updated_at?: string
+          work_description?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dayworks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employees: {
+        Row: {
+          company_id: string
+          created_at: string
+          department: string | null
+          email: string | null
+          hire_date: string | null
+          id: string
+          name: string
+          phone: string | null
+          position: string | null
+          salary: number | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          department?: string | null
+          email?: string | null
+          hire_date?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+          position?: string | null
+          salary?: number | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          department?: string | null
+          email?: string | null
+          hire_date?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+          position?: string | null
+          salary?: number | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -160,6 +252,45 @@ export type Database = {
           full_name?: string | null
           id?: string
           phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      projects: {
+        Row: {
+          budget: number | null
+          company_id: string
+          created_at: string
+          description: string | null
+          end_date: string | null
+          id: string
+          name: string
+          start_date: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          budget?: number | null
+          company_id: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          name: string
+          start_date?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          budget?: number | null
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          name?: string
+          start_date?: string | null
+          status?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -205,7 +336,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      enhanced_brute_force_check: {
+        Args: { check_ip?: unknown; check_user_id?: string }
+        Returns: Json
+      }
+      secure_retrieve_data: {
+        Args: { store_key: string }
+        Returns: Json
+      }
+      secure_store_data: {
+        Args: { store_key: string; store_value: Json }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
