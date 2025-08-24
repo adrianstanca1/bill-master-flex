@@ -33,6 +33,9 @@ const Dashboard: React.FC = () => {
 
           <div className="cyber-card p-6 hover-glow">
             <h2 className="text-lg font-semibold mb-3">Theme</h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              Choose a color scheme for your dashboard.
+            </p>
             <ThemeSwitcher />
           </div>
 
