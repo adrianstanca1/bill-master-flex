@@ -2,16 +2,39 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = "https://zwxyoeqsbntsogvgwily.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp3eHlvZXFzYm50c29ndmd3aWx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU5ODQ4NzksImV4cCI6MjA3MTU2MDg3OX0.hGZQHoXS_3RaoKpZcz6W8BNNYBt6QnyJMpTJ9HCvpW8";
+// Use environment variables so the client works across different deployments
+let SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+const SUPABASE_DB_URL = import.meta.env
+  .VITE_SUPABASE_DB_URL as string | undefined;
+const SUPABASE_ANON_KEY = import.meta.env
+  .VITE_SUPABASE_ANON_KEY as string | undefined;
+
+// Allow deriving the project URL from a provided database connection string
+if (!SUPABASE_URL && SUPABASE_DB_URL) {
+  try {
+    const { username } = new URL(SUPABASE_DB_URL);
+    const projectRef = username.split('.')[1];
+    SUPABASE_URL = `https://${projectRef}.supabase.co`;
+  } catch {
+    // ignore parsing errors
+  }
+}
+
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  throw new Error('Missing Supabase environment variables');
+}
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-  auth: {
-    storage: localStorage,
-    persistSession: true,
-    autoRefreshToken: true,
-  }
-});
+export const supabase = createClient<Database>(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY,
+  {
+    auth: {
+      storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+      persistSession: true,
+      autoRefreshToken: true,
+    },
+  },
+);
