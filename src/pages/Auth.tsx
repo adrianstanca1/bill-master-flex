@@ -40,10 +40,10 @@ export default function Auth() {
   }, [isAuthenticated, authLoading, navigate, redirectTo]);
 
   // Enhanced OAuth handler with proper error handling
-  const handleOAuthProvider = async (provider: 'google' | 'azure' | 'custom') => {
+  const handleOAuthProvider = async (provider: 'google' | 'azure') => {
     setLoading(true);
     try {
-      const { error } = await signInWithOAuth(provider === 'azure' ? 'azure' : provider === 'custom' ? 'custom' : 'google');
+      const { error } = await signInWithOAuth(provider);
       
       if (error) {
         console.error('OAuth error:', error);
@@ -324,7 +324,7 @@ export default function Auth() {
                   </Button>
                 )}
 
-                {!enabledProviders.google && !enabledProviders.custom && !enabledProviders.azure && (
+                {!enabledProviders.google && !enabledProviders.azure && (
                   <div className="text-center py-4">
                     <p className="text-sm text-muted-foreground">OAuth providers not configured</p>
                   </div>

@@ -59,7 +59,10 @@ export function useAuth() {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: userData ? { data: userData } : undefined,
+      options: {
+        emailRedirectTo: `${window.location.origin}/`,
+        ...(userData ? { data: userData } : {})
+      },
     });
     if (!error && data.session) {
       setSession(data.session);
@@ -83,9 +86,9 @@ export function useAuth() {
   };
 
   const signInWithOAuth = async (
-    provider: 'google' | 'azure' | 'github' | 'custom',
+    provider: 'google' | 'azure' | 'github',
     redirectTo: string = window.location.origin
-  ): Promise<AuthResult<OAuthResponse>> => {
+  ): Promise<AuthResult<any>> => {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider,
       options: { redirectTo },

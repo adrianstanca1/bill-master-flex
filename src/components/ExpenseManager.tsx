@@ -11,6 +11,7 @@ import { useCompanyId } from '@/hooks/useCompanyId';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Edit, Trash2, Receipt } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { validateAndSanitizeField } from '@/lib/sanitization';
 
 interface Expense {
   id: string;
@@ -133,10 +134,39 @@ export const ExpenseManager: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate and sanitize inputs
+    const supplierValidation = validateAndSanitizeField(formData.supplier, 'company');
+    const amountValidation = validateAndSanitizeField(formData.amount, 'amount');
+    
+    if (!supplierValidation.isValid) {
+      toast({
+        title: "Invalid supplier name",
+        description: supplierValidation.errors.join(', '),
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (!amountValidation.isValid) {
+      toast({
+        title: "Invalid amount",
+        description: amountValidation.errors.join(', '),
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    const sanitizedData = {
+      ...formData,
+      supplier: supplierValidation.sanitized,
+      amount: amountValidation.sanitized
+    };
+    
     if (editingExpense) {
-      updateExpenseMutation.mutate({ id: editingExpense.id, ...formData });
+      updateExpenseMutation.mutate({ id: editingExpense.id, ...sanitizedData });
     } else {
-      createExpenseMutation.mutate(formData);
+      createExpenseMutation.mutate(sanitizedData);
     }
   };
 

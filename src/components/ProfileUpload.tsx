@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Upload, User, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { secureStorage } from '@/lib/SecureStorage';
+import { sanitizeFileUpload } from '@/lib/sanitization';
 
 export function ProfileUpload() {
   const { toast } = useToast();
@@ -29,11 +30,13 @@ export function ProfileUpload() {
   ) => {
     const file = event.target.files?.[0];
     if (file) {
-      if (file.size > 2 * 1024 * 1024) {
+      // Validate file using security sanitization
+      const validation = sanitizeFileUpload(file);
+      if (!validation.isValid) {
         toast({
-          title: "File too large",
-          description: "Please select an image under 2MB",
-          variant: "destructive"
+          title: "Invalid file",
+          description: validation.errors.join(', '),
+          variant: "destructive",
         });
         return;
       }
