@@ -152,11 +152,9 @@ export function EnhancedSecurityManager({ children }: EnhancedSecurityManagerPro
         enableEnhancedRateLimit={true}
         sessionTimeoutMinutes={480}
       />
-      <SessionSecurityManager 
-        maxSessionAge={1440} // 24 hours
-        idleTimeout={30} // 30 minutes
-        enableFingerprinting={true}
-      />
+      <SessionSecurityManager>
+        <div />
+      </SessionSecurityManager>
       <EnhancedInputValidation 
         rules={commonValidationRules}
         onValidationError={handleValidationError}

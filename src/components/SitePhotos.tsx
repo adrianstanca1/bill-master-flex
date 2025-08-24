@@ -22,13 +22,12 @@ interface SitePhoto {
   id: string;
   url: string;
   caption?: string;
-  location?: any;
-  taken_by?: string;
-  photo_date: string;
-  tags?: string[];
-  ai_analysis?: any;
   project_id?: string;
+  company_id: string;
   created_at: string;
+  updated_at: string;
+  tags?: string[];
+  photo_date?: string;
 }
 
 export function SitePhotos() {
@@ -74,7 +73,7 @@ export function SitePhotos() {
         .from('site_photos')
         .select('*')
         .eq('company_id', companyId)
-        .order('photo_date', { ascending: false });
+        .order('created_at', { ascending: false });
 
       if (selectedProject !== 'all') {
         query = query.eq('project_id', selectedProject);
@@ -82,7 +81,10 @@ export function SitePhotos() {
 
       const { data, error } = await query;
       if (error) throw error;
-      return data as SitePhoto[];
+      return (data || []).map(photo => ({
+        ...photo,
+        photo_date: photo.created_at // Use created_at as photo_date
+      })) as SitePhoto[];
     },
     enabled: !!companyId,
   });
@@ -107,9 +109,6 @@ export function SitePhotos() {
           url: imageUrl,
           caption: uploadData.caption,
           project_id: uploadData.project_id || null,
-          tags,
-          taken_by: user.id,
-          photo_date: new Date().toISOString(),
         })
         .select()
         .single();
@@ -322,10 +321,10 @@ export function SitePhotos() {
                       {photo.caption && (
                         <p className="text-sm line-clamp-2">{photo.caption}</p>
                       )}
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Calendar className="h-3 w-3" />
-                        {new Date(photo.photo_date).toLocaleDateString()}
-                      </div>
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <Calendar className="h-3 w-3" />
+                          {new Date(photo.created_at).toLocaleDateString()}
+                        </div>
                       {photo.tags && photo.tags.length > 0 && (
                         <div className="flex flex-wrap gap-1">
                           {photo.tags.slice(0, 3).map((tag, index) => (
@@ -375,7 +374,7 @@ export function SitePhotos() {
                         <div className="flex items-center gap-4 text-xs text-muted-foreground mb-2">
                           <div className="flex items-center gap-1">
                             <Calendar className="h-3 w-3" />
-                            {new Date(photo.photo_date).toLocaleDateString()}
+                            {new Date(photo.created_at).toLocaleDateString()}
                           </div>
                         </div>
                         {photo.tags && photo.tags.length > 0 && (
