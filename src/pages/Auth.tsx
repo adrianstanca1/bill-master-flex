@@ -9,6 +9,7 @@ import { useOAuthProviders } from "@/hooks/useOAuthProviders";
 import { EmailConfirmationBanner } from "@/components/EmailConfirmationBanner";
 import { SecurityEnhancedForm } from "@/components/SecurityEnhancedForm";
 import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicator";
+import { useAuth0 } from '@auth0/auth0-react';
 import { usePasswordSecurity } from "@/hooks/usePasswordSecurity";
 import { PasswordSecurityBannerFixed } from "@/components/PasswordSecurityBannerFixed";
 
@@ -24,6 +25,7 @@ export default function Auth() {
   const redirectTo = (location.state?.from?.pathname as string) || "/dashboard";
   const { isAuthenticated, signIn, signUp, signInWithOAuth, loading: authLoading } = useAuthContext();
   const { enabledProviders, loading: providersLoading } = useOAuthProviders();
+  const { loginWithRedirect } = useAuth0();
 
   const [mode, setMode] = useState<"signin"|"signup"|"forgot">("signin");
   const [email, setEmail] = useState("");
@@ -398,6 +400,20 @@ export default function Auth() {
                     Continue with Microsoft
                   </Button>
                 )}
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full h-12 text-sm font-medium hover:bg-muted/50 transition-colors"
+                  onClick={() => loginWithRedirect()}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    'Continue with Auth0'
+                  )}
+                </Button>
 
                 {!enabledProviders.google && !enabledProviders.custom && !enabledProviders.azure && (
                   <div className="text-center py-4">
