@@ -1,6 +1,11 @@
 import React from 'react';
 import { SecurityStub } from './SecurityStub';
 
-export function ProjectsOverview() {
+interface ProjectsOverviewProps {
+  onViewProject?: (id: string) => void;
+  onCreateProject?: () => void;
+}
+
+export function ProjectsOverview({ onViewProject, onCreateProject }: ProjectsOverviewProps) {
   return <SecurityStub title="Projects Overview" />;
 }

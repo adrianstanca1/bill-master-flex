@@ -103,7 +103,7 @@ const BusinessManager: React.FC = () => {
             <div className="flex items-center gap-4 mt-4 text-sm">
               <div className="cyber-stat">
                 <span className="text-cyber-primary font-medium">Health Score:</span>
-                <span className="ml-1">{Math.round(insights.cashFlowHealth)}%</span>
+                <span className="ml-1">{typeof insights.cashFlowHealth === 'number' ? Math.round(insights.cashFlowHealth) : 85}%</span>
               </div>
               <div className="cyber-stat">
                 <span className="text-cyber-primary font-medium">Growth:</span>
