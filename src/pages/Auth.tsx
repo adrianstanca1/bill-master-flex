@@ -77,6 +77,46 @@ export default function Auth() {
       return;
     }
 
+    // Enhanced password validation for signup
+    if (mode === 'signup') {
+      if (!password) {
+        toast({
+          title: "Password required",
+          description: "Please enter a password.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/;
+      if (password.length < 12 || !passwordPattern.test(password)) {
+        toast({
+          title: "Password Requirements",
+          description: "Password must be at least 12 characters with uppercase, lowercase, number, and special character (@$!%*?&)",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      if (!firstName?.trim() || !lastName?.trim()) {
+        toast({
+          title: "Name required",
+          description: "Please enter your first and last name.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      if (!acceptTerms) {
+        toast({
+          title: "Terms required",
+          description: "Please accept the terms and conditions.",
+          variant: "destructive"
+        });
+        return;
+      }
+    }
+
     if (mode === "forgot") {
       setLoading(true);
       try {
