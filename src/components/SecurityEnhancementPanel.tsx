@@ -1,170 +1,130 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ExternalLink, Shield, Users, Database, Lock, Eye, AlertTriangle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Shield, CheckCircle, AlertTriangle, ExternalLink } from 'lucide-react';
+import { useEnhancedSecurityLogging } from '@/hooks/useEnhancedSecurityLogging';
+import { useRateLimiting } from '@/hooks/useRateLimiting';
 
 export function SecurityEnhancementPanel() {
-  const enhancements = [
-    {
-      category: "Authentication",
-      icon: <Lock className="h-4 w-4" />,
-      items: [
-        {
-          title: "Multi-Factor Authentication",
-          description: "Add an extra layer of security with SMS or authenticator apps",
-          status: "recommended",
-          action: "Configure MFA",
-          link: "https://supabase.com/dashboard/project/tjgbyygllssqsywxpxqe/auth/settings"
-        },
-        {
-          title: "Social Login Providers",
-          description: "Enable Google, GitHub, or Microsoft authentication",
-          status: "optional",
-          action: "Add Providers",
-          link: "https://supabase.com/dashboard/project/tjgbyygllssqsywxpxqe/auth/providers"
-        }
-      ]
-    },
-    {
-      category: "Access Control",
-      icon: <Users className="h-4 w-4" />,
-      items: [
-        {
-          title: "Role-Based Permissions",
-          description: "Fine-tune user roles and permissions",
-          status: "implemented",
-          action: "Review Roles"
-        },
-        {
-          title: "API Rate Limiting",
-          description: "Prevent abuse with request rate limiting",
-          status: "implemented",
-          action: "Monitor Usage"
-        }
-      ]
-    },
-    {
-      category: "Data Protection",
-      icon: <Database className="h-4 w-4" />,
-      items: [
-        {
-          title: "Database Backup Strategy",
-          description: "Automated backups and point-in-time recovery",
-          status: "recommended",
-          action: "Configure Backups",
-          link: "https://supabase.com/dashboard/project/tjgbyygllssqsywxpxqe/database/backups"
-        },
-        {
-          title: "Audit Trail Enhancement",
-          description: "Extended audit logging with retention policies",
-          status: "implemented",
-          action: "Review Policies"
-        }
-      ]
-    },
-    {
-      category: "Monitoring",
-      icon: <Eye className="h-4 w-4" />,
-      items: [
-        {
-          title: "Security Alerts",
-          description: "Real-time notifications for security events",
-          status: "implemented",
-          action: "Configure Alerts"
-        },
-        {
-          title: "Performance Monitoring",
-          description: "Track application performance and anomalies",
-          status: "recommended",
-          action: "Set up Monitoring",
-          link: "https://supabase.com/dashboard/project/tjgbyygllssqsywxpxqe/logs/explorer"
-        }
-      ]
-    }
-  ];
+  const { logSecurityEvent } = useEnhancedSecurityLogging();
+  const { isBlocked } = useRateLimiting('security_check', {
+    maxAttempts: 5,
+    windowMs: 60000,
+    blockDurationMs: 300000
+  });
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'implemented':
-        return <Badge variant="default" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">Implemented</Badge>;
-      case 'recommended':
-        return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100">Recommended</Badge>;
-      case 'optional':
-        return <Badge variant="outline">Optional</Badge>;
-      default:
-        return <Badge variant="outline">{status}</Badge>;
+  const securityStatus = {
+    completed: [
+      'Input validation on forms',
+      'File upload security',
+      'CORS security hardening',
+      'Secure storage implementation',
+      'Rate limiting protection',
+      'Enhanced security logging'
+    ],
+    pending: [
+      'Reduce OTP expiry to 5-10 minutes',
+      'Enable leaked password protection',
+      'Database function search path updates'
+    ]
+  };
+
+  const handleConfigurationFix = (type: string) => {
+    logSecurityEvent({
+      eventType: 'SECURITY_CONFIG_ACCESS',
+      severity: 'low',
+      details: { configuration_type: type },
+      resourceType: 'security_config',
+      resourceId: type
+    });
+
+    if (type === 'otp') {
+      window.open('https://supabase.com/dashboard/project/zwxyoeqsbntsogvgwily/auth/settings', '_blank');
+    } else if (type === 'password') {
+      window.open('https://supabase.com/dashboard/project/zwxyoeqsbntsogvgwily/auth/settings', '_blank');
     }
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Shield className="h-5 w-5" />
-          Security Enhancement Opportunities
-        </CardTitle>
-        <CardDescription>
-          Additional security measures to further strengthen your application
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-6">
-          {enhancements.map((category, categoryIndex) => (
-            <div key={categoryIndex}>
-              <h3 className="flex items-center gap-2 font-semibold text-lg mb-3">
-                {category.icon}
-                {category.category}
-              </h3>
-              <div className="space-y-3 ml-6">
-                {category.items.map((item, itemIndex) => (
-                  <div key={itemIndex} className="flex items-center justify-between p-3 rounded-lg border bg-card">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-medium">{item.title}</span>
-                        {getStatusBadge(item.status)}
-                      </div>
-                      <p className="text-sm text-muted-foreground">{item.description}</p>
-                    </div>
-                    <div className="flex items-center gap-2 ml-4">
-                      {item.link ? (
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => window.open(item.link, '_blank')}
-                        >
-                          {item.action}
-                          <ExternalLink className="h-3 w-3 ml-1" />
-                        </Button>
-                      ) : (
-                        <Button variant="outline" size="sm">
-                          {item.action}
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg">
-          <div className="flex items-start gap-2">
-            <AlertTriangle className="h-4 w-4 text-blue-600 dark:text-blue-400 mt-0.5" />
-            <div>
-              <h4 className="font-medium text-blue-800 dark:text-blue-200">Security Best Practices</h4>
-              <ul className="text-sm text-blue-700 dark:text-blue-300 mt-1 space-y-1">
-                <li>• Regular security audits and penetration testing</li>
-                <li>• Keep dependencies updated and monitor for vulnerabilities</li>
-                <li>• Implement proper error handling to avoid information disclosure</li>
-                <li>• Use HTTPS everywhere and implement proper CORS policies</li>
-                <li>• Regular backup testing and disaster recovery planning</li>
-              </ul>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Shield className="h-5 w-5 text-green-600" />
+            Security Enhancement Status
+          </CardTitle>
+          <CardDescription>
+            Comprehensive security improvements have been implemented
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <h4 className="font-medium text-green-700 mb-2 flex items-center gap-2">
+              <CheckCircle className="h-4 w-4" />
+              Completed Security Fixes
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              {securityStatus.completed.map((item, index) => (
+                <Badge key={index} variant="secondary" className="bg-green-50 text-green-700 border-green-200">
+                  {item}
+                </Badge>
+              ))}
             </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+
+          <div>
+            <h4 className="font-medium text-orange-700 mb-2 flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4" />
+              Configuration Updates Needed
+            </h4>
+            <div className="space-y-2">
+              {securityStatus.pending.map((item, index) => (
+                <Alert key={index} className="border-orange-200 bg-orange-50">
+                  <AlertDescription className="flex items-center justify-between">
+                    <span className="text-orange-800">{item}</span>
+                    {item.includes('OTP') && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleConfigurationFix('otp')}
+                        className="border-orange-300 text-orange-700 hover:bg-orange-100"
+                        disabled={isBlocked}
+                      >
+                        Fix in Supabase <ExternalLink className="h-3 w-3 ml-1" />
+                      </Button>
+                    )}
+                    {item.includes('password') && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleConfigurationFix('password')}
+                        className="border-orange-300 text-orange-700 hover:bg-orange-100"
+                        disabled={isBlocked}
+                      >
+                        Fix in Supabase <ExternalLink className="h-3 w-3 ml-1" />
+                      </Button>
+                    )}
+                  </AlertDescription>
+                </Alert>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+            <h4 className="font-medium text-blue-800 mb-2">Security Improvements Implemented</h4>
+            <ul className="text-sm text-blue-700 space-y-1">
+              <li>• All form inputs now use comprehensive validation and sanitization</li>
+              <li>• File uploads have enhanced security with MIME type verification</li>
+              <li>• Edge functions use secure CORS with specific domain restrictions</li>
+              <li>• Secure storage now uses encryption and Supabase backend</li>
+              <li>• Rate limiting prevents brute force attacks on forms</li>
+              <li>• Enhanced security logging tracks all security events</li>
+            </ul>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

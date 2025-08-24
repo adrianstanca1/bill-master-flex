@@ -7,8 +7,10 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1"
 
 const hookSecret = Deno.env.get('SEND_EMAIL_HOOK_SECRET') || Deno.env.get('WEBHOOK_SECRET') || Deno.env.get('CRON_SECRET')
 
+import { corsHeaders as baseCorsHeaders } from '../_shared/cors.ts';
+
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+  ...baseCorsHeaders,
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-webhook-signature',
 }
 
