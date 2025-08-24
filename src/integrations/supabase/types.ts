@@ -376,6 +376,48 @@ export type Database = {
         }
         Relationships: []
       }
+      quotes: {
+        Row: {
+          client_email: string | null
+          client_name: string | null
+          company_id: string
+          created_at: string
+          id: string
+          items: Json | null
+          status: string | null
+          title: string
+          total: number
+          updated_at: string
+          valid_until: string | null
+        }
+        Insert: {
+          client_email?: string | null
+          client_name?: string | null
+          company_id: string
+          created_at?: string
+          id?: string
+          items?: Json | null
+          status?: string | null
+          title: string
+          total: number
+          updated_at?: string
+          valid_until?: string | null
+        }
+        Update: {
+          client_email?: string | null
+          client_name?: string | null
+          company_id?: string
+          created_at?: string
+          id?: string
+          items?: Json | null
+          status?: string | null
+          title?: string
+          total?: number
+          updated_at?: string
+          valid_until?: string | null
+        }
+        Relationships: []
+      }
       security_audit_log: {
         Row: {
           action: string
@@ -408,6 +450,48 @@ export type Database = {
           resource_id?: string | null
           resource_type?: string | null
           user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      timesheets: {
+        Row: {
+          company_id: string
+          created_at: string
+          description: string | null
+          end_time: string | null
+          hours_worked: number | null
+          id: string
+          project_id: string | null
+          start_time: string | null
+          status: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          description?: string | null
+          end_time?: string | null
+          hours_worked?: number | null
+          id?: string
+          project_id?: string | null
+          start_time?: string | null
+          status?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          end_time?: string | null
+          hours_worked?: number | null
+          id?: string
+          project_id?: string | null
+          start_time?: string | null
+          status?: string | null
+          updated_at?: string
           user_id?: string | null
         }
         Relationships: []
