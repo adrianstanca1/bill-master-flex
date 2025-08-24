@@ -12,7 +12,7 @@ export const HMRCConnections: React.FC = () => {
   const call = async (fn: string, payload: any = {}) => {
     try {
       setBusy(fn);
-      const settings = await secureStorage.getItem('as-settings', { encrypt: true }) || {};
+      const settings = await secureStorage.getItem('as-settings') || {};
       const details = {
         hmrcClientId: settings?.hmrcClientId,
         hmrcRedirectUri: settings?.hmrcRedirectUri,

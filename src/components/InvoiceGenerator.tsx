@@ -54,7 +54,7 @@ export type FormValues = z.infer<typeof formSchema>;
 async function loadDefaults(): Promise<Partial<FormValues>> {
   if (typeof window === 'undefined') return getInitialDefaults();
   
-  const saved = await secureStorage.getItem('as-invoice-defaults', { encrypt: true });
+  const saved = await secureStorage.getItem('as-invoice-defaults');
   if (saved) {
     try { 
       return saved; 

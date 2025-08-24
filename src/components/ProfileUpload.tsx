@@ -15,8 +15,8 @@ export function ProfileUpload() {
 
   useEffect(() => {
     const loadImages = async () => {
-      const profile = await secureStorage.getItem('profile-image', { encrypt: true });
-      const logo = await secureStorage.getItem('company-logo', { encrypt: true });
+      const profile = await secureStorage.getItem('profile-image');
+      const logo = await secureStorage.getItem('company-logo');
       setProfileImage(profile);
       setCompanyLogo(logo);
     };
@@ -43,14 +43,14 @@ export function ProfileUpload() {
         const imageUrl = e.target?.result as string;
         if (type === 'profile') {
           setProfileImage(imageUrl);
-          secureStorage.setItem('profile-image', imageUrl, { encrypt: true });
+          secureStorage.setItem('profile-image', imageUrl);
           toast({
             title: "Profile image uploaded",
             description: "Your profile image has been saved securely",
           });
         } else {
           setCompanyLogo(imageUrl);
-          secureStorage.setItem('company-logo', imageUrl, { encrypt: true });
+          secureStorage.setItem('company-logo', imageUrl);
           toast({
             title: "Company logo uploaded",
             description: "Your company logo has been saved securely",
@@ -64,11 +64,11 @@ export function ProfileUpload() {
   const removeImage = (type: 'profile' | 'logo') => {
     if (type === 'profile') {
       setProfileImage(null);
-      secureStorage.removeItem('profile-image', { encrypt: true });
+      secureStorage.removeItem('profile-image');
       toast({ title: "Profile image removed" });
     } else {
       setCompanyLogo(null);
-      secureStorage.removeItem('company-logo', { encrypt: true });
+      secureStorage.removeItem('company-logo');
       toast({ title: "Company logo removed" });
     }
   };

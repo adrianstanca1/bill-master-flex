@@ -4,7 +4,14 @@ export function useSystemHealth() {
     metrics: {},
     loading: false,
     checkHealth: () => {},
-    systemHealth: { status: 'healthy' },
+    systemHealth: { 
+      status: 'healthy',
+      database: { status: 'healthy' },
+      auth: { status: 'healthy' },
+      functions: { status: 'healthy' },
+      apis: { status: 'healthy' },
+      lastCheck: new Date().toISOString()
+    },
     runHealthCheck: () => {}
   };
 }

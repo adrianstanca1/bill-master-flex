@@ -21,7 +21,7 @@ export function loadTheme(): ThemeSettings {
 
 export async function loadThemeAsync(): Promise<ThemeSettings> {
   try {
-    const stored = await secureStorage.getItem("as-theme", { encrypt: true });
+    const stored = await secureStorage.getItem("as-theme");
     return { ...defaultTheme, ...(stored || {}) as ThemeSettings };
   } catch {
     return defaultTheme;

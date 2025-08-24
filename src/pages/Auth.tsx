@@ -1,5 +1,3 @@
-
-// Authentication page
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -7,11 +5,7 @@ import SEO from "@/components/SEO";
 import { useAuthContext } from "@/components/auth/AuthProvider";
 import { useOAuthProviders } from "@/hooks/useOAuthProviders";
 import { EmailConfirmationBanner } from "@/components/EmailConfirmationBanner";
-import { SecurityEnhancedForm } from "@/components/SecurityEnhancedForm";
-import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicator";
-import { usePasswordSecurity } from "@/hooks/usePasswordSecurity";
 import { PasswordSecurityBannerFixed } from "@/components/PasswordSecurityBannerFixed";
-
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
@@ -37,53 +31,18 @@ export default function Auth() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
-  
-  // Enhanced security features
-  const { validatePasswordStrength } = usePasswordSecurity();
 
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated && !authLoading) {
-      // Use server-side validation for setup completion
-      import('@/components/auth/SecureDataStore').then(({ SecureDataStore }) => {
-        SecureDataStore.isSetupComplete().then((isSetupComplete) => {
-          navigate(isSetupComplete ? redirectTo : '/setup', { replace: true });
-        });
-      });
+      navigate(redirectTo, { replace: true });
     }
   }, [isAuthenticated, authLoading, navigate, redirectTo]);
-
-  // Check OAuth provider status and handle OAuth sign in
-  const checkOAuthProviders = async () => {
-    try {
-      const { data } = await supabase.rpc('validate_oauth_providers');
-      return data;
-    } catch (error) {
-      console.error('OAuth validation error:', error);
-      return { google_enabled: false, microsoft_enabled: false, github_enabled: false, custom_enabled: false };
-    }
-  };
 
   // Enhanced OAuth handler with proper error handling
   const handleOAuthProvider = async (provider: 'google' | 'azure' | 'custom') => {
     setLoading(true);
     try {
-      // Check provider availability first
-      const providerCheck = await checkOAuthProviders();
-      const providerData = providerCheck as { google_enabled?: boolean; microsoft_enabled?: boolean; custom_enabled?: boolean } | null;
-      const isEnabled = provider === 'google' ? providerData?.google_enabled : 
-                       provider === 'azure' ? providerData?.microsoft_enabled :
-                       provider === 'custom' ? providerData?.custom_enabled : false;
-      
-      if (!isEnabled) {
-        toast({
-          title: "Provider Not Available",
-          description: `${provider.charAt(0).toUpperCase() + provider.slice(1)} sign-in is currently not configured. Please use email/password login.`,
-          variant: "destructive"
-        });
-        return;
-      }
-
       const { error } = await signInWithOAuth(provider === 'azure' ? 'azure' : provider === 'custom' ? 'custom' : 'google');
       
       if (error) {
@@ -151,7 +110,6 @@ export default function Auth() {
     }
 
     if (!password) {
-      console.log('❌ Password validation failed: empty password');
       toast({ 
         title: "Password required", 
         description: "Please enter your password.", 
@@ -210,46 +168,11 @@ export default function Auth() {
         
         if (!result.error) {
           setShowEmailConfirmation(true);
-          // Log successful signup
-          await supabase.from('security_audit_log').insert({
-            action: 'USER_SIGNUP_SUCCESS',
-            resource_type: 'authentication',
-            details: { email, timestamp: new Date().toISOString() }
-          });
         } else if (result.error.message.includes("User already registered")) {
           setMode("signin");
-          // Log signup attempt with existing email
-          await supabase.from('security_audit_log').insert({
-            action: 'USER_SIGNUP_EXISTING_EMAIL',
-            resource_type: 'authentication',
-            details: { email, timestamp: new Date().toISOString() }
-          });
-        } else {
-          // Log failed signup
-          await supabase.from('security_audit_log').insert({
-            action: 'USER_SIGNUP_FAILED',
-            resource_type: 'authentication',
-            details: { email, error: result.error.message, timestamp: new Date().toISOString() }
-          });
         }
       } else {
         result = await signIn(email, password);
-        
-        if (!result.error) {
-          // Log successful signin
-          await supabase.from('security_audit_log').insert({
-            action: 'USER_SIGNIN_SUCCESS',
-            resource_type: 'authentication',
-            details: { email, timestamp: new Date().toISOString() }
-          });
-        } else {
-          // Log failed signin
-          await supabase.from('security_audit_log').insert({
-            action: 'USER_SIGNIN_FAILED',
-            resource_type: 'authentication',
-            details: { email, error: result.error.message, timestamp: new Date().toISOString() }
-          });
-        }
       }
       
     } catch (err: any) {
@@ -361,44 +284,6 @@ export default function Auth() {
                   </Button>
                 )}
 
-                {enabledProviders.custom && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full h-12 text-sm font-medium hover:bg-muted/50 transition-colors border-primary/20 bg-primary/5"
-                    onClick={() => handleOAuthProvider('custom')}
-                    disabled={loading}
-                  >
-                    {loading ? (
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    ) : (
-                      <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/>
-                        <path d="M9 12l2 2 4-4"/>
-                      </svg>
-                    )}
-                    Continue with Secure Auth
-                  </Button>
-                )}
-
-                {enabledProviders.azure && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full h-12 text-sm font-medium hover:bg-muted/50 transition-colors"
-                    onClick={() => handleOAuthProvider('azure')}
-                    disabled={loading}
-                  >
-                    <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
-                      <path fill="#F25022" d="M1 1h10v10H1z"/>
-                      <path fill="#00A4EF" d="M13 1h10v10H13z"/>
-                      <path fill="#7FBA00" d="M1 13h10v10H1z"/>
-                      <path fill="#FFB900" d="M13 13h10v10H13z"/>
-                    </svg>
-                    Continue with Microsoft
-                  </Button>
-                )}
-
                 {!enabledProviders.google && !enabledProviders.custom && !enabledProviders.azure && (
                   <div className="text-center py-4">
                     <p className="text-sm text-muted-foreground">OAuth providers not configured</p>
@@ -419,7 +304,7 @@ export default function Auth() {
             </>
           )}
 
-          <SecurityEnhancedForm onSubmit={handleSubmit} className="space-y-6 mt-6">
+          <form onSubmit={handleSubmit} className="space-y-6 mt-6">
             {mode === "signup" && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -457,10 +342,10 @@ export default function Auth() {
             
             <div className="space-y-2">
               <label htmlFor="email" className="block text-sm font-medium text-foreground">
-                Email address *
+                Email Address *
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <input 
                   id="email"
                   className="w-full pl-10 pr-4 py-3 rounded-lg bg-muted border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" 
@@ -468,161 +353,147 @@ export default function Auth() {
                   placeholder="Enter your email"
                   value={email} 
                   onChange={(e)=>setEmail(e.target.value)} 
-                  required 
                   autoComplete="email"
+                  required
                 />
               </div>
             </div>
             
             {mode !== "forgot" && (
-              <>
-                <div className="space-y-2">
-                  <label htmlFor="password" className="block text-sm font-medium text-foreground">
-                    Password *
-                  </label>
-                  <div className="relative">
-                    <input 
-                      id="password"
-                      className="w-full px-4 py-3 pr-12 rounded-lg bg-muted border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" 
-                      type={showPassword ? "text" : "password"}
-                      placeholder={mode === "signup" ? "Create a password (min. 6 characters)" : "Enter your password"}
-                      value={password} 
-                      onChange={(e)=>setPassword(e.target.value)} 
-                      required 
-                      autoComplete={mode === "signin" ? "current-password" : "new-password"}
-                      minLength={6}
-                    />
-                    <button
-                      type="button"
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                     </button>
-                  </div>
-                  {mode === "signup" && password && (
-                    <PasswordStrengthIndicator 
-                      password={password}
-                      className="mt-2"
-                    />
-                  )}
+              <div className="space-y-2">
+                <label htmlFor="password" className="block text-sm font-medium text-foreground">
+                  Password *
+                </label>
+                <div className="relative">
+                  <input 
+                    id="password"
+                    className="w-full px-4 py-3 pr-10 rounded-lg bg-muted border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" 
+                    type={showPassword ? "text" : "password"}
+                    placeholder={mode === "signup" ? "Create a strong password" : "Enter your password"}
+                    value={password} 
+                    onChange={(e)=>setPassword(e.target.value)}
+                    autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
                 </div>
+              </div>
+            )}
 
-                {mode === "signup" && (
-                  <>
-                    <div className="space-y-2">
-                      <label htmlFor="confirmPassword" className="block text-sm font-medium text-foreground">
-                        Confirm Password *
-                      </label>
-                      <div className="relative">
-                        <input 
-                          id="confirmPassword"
-                          className="w-full px-4 py-3 pr-12 rounded-lg bg-muted border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" 
-                          type={showConfirmPassword ? "text" : "password"}
-                          placeholder="Confirm your password"
-                          value={confirmPassword} 
-                          onChange={(e)=>setConfirmPassword(e.target.value)} 
-                          required 
-                          autoComplete="new-password"
-                          minLength={6}
-                        />
-                        <button
-                          type="button"
-                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        >
-                          {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                        </button>
-                      </div>
-                    </div>
+            {mode === "signup" && (
+              <div className="space-y-2">
+                <label htmlFor="confirmPassword" className="block text-sm font-medium text-foreground">
+                  Confirm Password *
+                </label>
+                <div className="relative">
+                  <input 
+                    id="confirmPassword"
+                    className="w-full px-4 py-3 pr-10 rounded-lg bg-muted border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" 
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="Confirm your password"
+                    value={confirmPassword} 
+                    onChange={(e)=>setConfirmPassword(e.target.value)}
+                    autoComplete="new-password"
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
+              </div>
+            )}
 
-                    <div className="flex items-start space-x-2">
-                      <input
-                        id="terms"
-                        type="checkbox"
-                        checked={acceptTerms}
-                        onChange={(e) => setAcceptTerms(e.target.checked)}
-                        className="mt-1 h-4 w-4 text-primary border-border rounded focus:ring-primary"
-                        required
-                      />
-                      <label htmlFor="terms" className="text-sm text-muted-foreground">
-                        I accept the{" "}
-                        <a href="/terms" className="text-primary hover:underline" target="_blank">
-                          Terms of Service
-                        </a>{" "}
-                        and{" "}
-                        <a href="/privacy" className="text-primary hover:underline" target="_blank">
-                          Privacy Policy
-                        </a>
-                      </label>
-                    </div>
-                  </>
-                )}
-              </>
+            {mode === "signup" && (
+              <div className="flex items-start space-x-2">
+                <input
+                  type="checkbox"
+                  id="terms"
+                  checked={acceptTerms}
+                  onChange={(e) => setAcceptTerms(e.target.checked)}
+                  className="mt-1"
+                  required
+                />
+                <label htmlFor="terms" className="text-sm text-muted-foreground">
+                  I agree to the{" "}
+                  <a href="/terms" className="text-primary hover:underline">
+                    Terms of Service
+                  </a>{" "}
+                  and{" "}
+                  <a href="/policy" className="text-primary hover:underline">
+                    Privacy Policy
+                  </a>
+                </label>
+              </div>
             )}
             
-            <Button 
-              className="w-full h-12 font-semibold" 
-              type="submit" 
-              disabled={loading || authLoading || !email.trim() || (mode !== "forgot" && !password)}
+            <Button
+              type="submit"
+              className="w-full h-12"
+              disabled={loading}
             >
-              {(loading || authLoading) ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Please wait...
-                </>
-              ) : (
-                <>
-                  {mode === "signin" && "Sign in to your account"}
-                  {mode === "signup" && "Create your account"}
-                  {mode === "forgot" && "Send reset email"}
-                </>
-              )}
+              {loading ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : null}
+              {mode === "signin" && "Sign In"}
+              {mode === "signup" && "Create Account"}
+              {mode === "forgot" && "Send Reset Email"}
             </Button>
-          </SecurityEnhancedForm>
-          
+          </form>
+
           <div className="mt-6 text-center space-y-2">
             {mode === "signin" && (
               <>
                 <p className="text-sm text-muted-foreground">
                   Don't have an account?{" "}
                   <button 
-                    className="text-primary hover:text-primary/80 font-medium underline-offset-4 hover:underline transition-colors" 
-                    onClick={()=>setMode("signup")}
+                    onClick={() => setMode("signup")}
+                    className="text-primary hover:underline font-medium"
                   >
-                    Create one here
+                    Sign up
                   </button>
                 </p>
                 <p className="text-sm text-muted-foreground">
                   Forgot your password?{" "}
                   <button 
-                    className="text-primary hover:text-primary/80 font-medium underline-offset-4 hover:underline transition-colors" 
-                    onClick={()=>setMode("forgot")}
+                    onClick={() => setMode("forgot")}
+                    className="text-primary hover:underline font-medium"
                   >
-                    Reset it here
+                    Reset it
                   </button>
                 </p>
               </>
             )}
+            
             {mode === "signup" && (
               <p className="text-sm text-muted-foreground">
                 Already have an account?{" "}
                 <button 
-                  className="text-primary hover:text-primary/80 font-medium underline-offset-4 hover:underline transition-colors" 
-                  onClick={()=>setMode("signin")}
+                  onClick={() => setMode("signin")}
+                  className="text-primary hover:underline font-medium"
                 >
-                  Sign in instead
+                  Sign in
                 </button>
               </p>
             )}
+            
             {mode === "forgot" && (
               <p className="text-sm text-muted-foreground">
                 Remember your password?{" "}
                 <button 
-                  className="text-primary hover:text-primary/80 font-medium underline-offset-4 hover:underline transition-colors" 
-                  onClick={()=>setMode("signin")}
+                  onClick={() => setMode("signin")}
+                  className="text-primary hover:underline font-medium"
                 >
-                  Sign in here
+                  Sign in
                 </button>
               </p>
             )}

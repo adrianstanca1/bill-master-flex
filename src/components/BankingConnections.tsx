@@ -12,7 +12,7 @@ export const BankingConnections: React.FC = () => {
   const connect = async () => {
     try {
       setBusy(true);
-      const settings = await secureStorage.getItem('as-settings', { encrypt: true }) || {};
+      const settings = await secureStorage.getItem('as-settings') || {};
       const details = {
         truelayerClientId: settings?.truelayerClientId,
         truelayerRedirectUri: settings?.truelayerRedirectUri,
