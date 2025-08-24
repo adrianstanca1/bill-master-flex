@@ -273,6 +273,7 @@ export type Database = {
           due_date: string
           id: string
           items: Json | null
+          meta: Json | null
           number: string
           status: string | null
           total: number
@@ -285,6 +286,7 @@ export type Database = {
           due_date: string
           id?: string
           items?: Json | null
+          meta?: Json | null
           number: string
           status?: string | null
           total: number
@@ -297,6 +299,7 @@ export type Database = {
           due_date?: string
           id?: string
           items?: Json | null
+          meta?: Json | null
           number?: string
           status?: string | null
           total?: number
@@ -345,6 +348,7 @@ export type Database = {
           description: string | null
           end_date: string | null
           id: string
+          meta: Json | null
           name: string
           start_date: string | null
           status: string | null
@@ -357,6 +361,7 @@ export type Database = {
           description?: string | null
           end_date?: string | null
           id?: string
+          meta?: Json | null
           name: string
           start_date?: string | null
           status?: string | null
@@ -369,6 +374,7 @@ export type Database = {
           description?: string | null
           end_date?: string | null
           id?: string
+          meta?: Json | null
           name?: string
           start_date?: string | null
           status?: string | null
@@ -418,6 +424,42 @@ export type Database = {
         }
         Relationships: []
       }
+      reminders: {
+        Row: {
+          company_id: string
+          completed: boolean
+          created_at: string
+          description: string | null
+          due_date: string
+          id: string
+          title: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          company_id: string
+          completed?: boolean
+          created_at?: string
+          description?: string | null
+          due_date: string
+          id?: string
+          title: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          company_id?: string
+          completed?: boolean
+          created_at?: string
+          description?: string | null
+          due_date?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       security_audit_log: {
         Row: {
           action: string
@@ -451,6 +493,36 @@ export type Database = {
           resource_type?: string | null
           user_agent?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      site_photos: {
+        Row: {
+          caption: string | null
+          company_id: string
+          created_at: string
+          id: string
+          project_id: string
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          caption?: string | null
+          company_id: string
+          created_at?: string
+          id?: string
+          project_id: string
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          caption?: string | null
+          company_id?: string
+          created_at?: string
+          id?: string
+          project_id?: string
+          updated_at?: string
+          url?: string
         }
         Relationships: []
       }
