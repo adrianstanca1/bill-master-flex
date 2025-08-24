@@ -107,6 +107,15 @@ export default function Auth() {
         return;
       }
 
+      if (password !== confirmPassword) {
+        toast({
+          title: "Passwords don't match",
+          description: "Please make sure your passwords match.",
+          variant: "destructive"
+        });
+        return;
+      }
+
       if (!acceptTerms) {
         toast({
           title: "Terms required",
@@ -209,10 +218,27 @@ export default function Auth() {
         if (!result.error) {
           setShowEmailConfirmation(true);
         } else if (result.error.message.includes("User already registered")) {
+          toast({
+            title: "Account already exists",
+            description: "Please sign in to continue.",
+          });
           setMode("signin");
+        } else {
+          toast({
+            title: "Sign up failed",
+            description: result.error.message,
+            variant: "destructive",
+          });
         }
       } else {
         result = await signIn(email, password);
+        if (result.error) {
+          toast({
+            title: "Sign in failed",
+            description: result.error.message,
+            variant: "destructive",
+          });
+        }
       }
       
     } catch (err: any) {
