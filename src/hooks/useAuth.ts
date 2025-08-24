@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { User, Session, AuthError } from '@supabase/supabase-js';
+import type { User, Session, AuthError, OAuthResponse } from '@supabase/supabase-js';
+
+export interface AuthResult<T> {
+  data: T | null;
+  error: AuthError | null;
+}
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
@@ -8,64 +13,91 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    let active = true;
+
+    const getInitialSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (!active) return;
+        if (!error) {
+          setSession(session);
+          setUser(session?.user ?? null);
+        }
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+
+    getInitialSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!active) return;
       setSession(session);
       setUser(session?.user ?? null);
-      setLoading(false);
     });
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-      }
-    );
-
-    return () => subscription.unsubscribe();
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
-  const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    return { error };
+  const signIn = async (email: string, password: string): Promise<AuthResult<User>> => {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (!error) {
+      setSession(data.session);
+      setUser(data.user);
+    }
+    return { data: data?.user ?? null, error };
   };
 
-  const signUp = async (email: string, password: string, userData?: any) => {
-    const { error } = await supabase.auth.signUp({
+  const signUp = async (
+    email: string,
+    password: string,
+    userData?: Record<string, any>
+  ): Promise<AuthResult<User>> => {
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: userData ? { data: userData } : undefined,
     });
-    return { error };
+    if (!error && data.session) {
+      setSession(data.session);
+      setUser(data.user);
+    }
+    return { data: data?.user ?? null, error };
   };
 
-  const signOut = async () => {
+  const signOut = async (): Promise<AuthResult<null>> => {
     const { error } = await supabase.auth.signOut();
-    return { error };
+    if (!error) {
+      setSession(null);
+      setUser(null);
+    }
+    return { data: null, error };
   };
 
-  const resetPassword = async (email: string) => {
+  const resetPassword = async (email: string): Promise<AuthResult<null>> => {
     const { error } = await supabase.auth.resetPasswordForEmail(email);
-    return { error };
+    return { data: null, error };
   };
 
-  const signInWithOAuth = async (provider: 'google' | 'azure' | 'github' | 'custom') => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: provider === 'custom' ? 'google' : provider,
+  const signInWithOAuth = async (
+    provider: 'google' | 'azure' | 'github' | 'custom',
+    redirectTo: string = window.location.origin
+  ): Promise<AuthResult<OAuthResponse>> => {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: { redirectTo },
     });
-    return { error };
+    return { data, error };
   };
 
   return {
     user,
     session,
     loading,
-    isAuthenticated: !!user,
+    isAuthenticated: !!session,
     signIn,
     signUp,
     signOut,
@@ -73,3 +105,4 @@ export function useAuth() {
     signInWithOAuth,
   };
 }
+
