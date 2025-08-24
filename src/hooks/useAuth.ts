@@ -28,37 +28,62 @@ export function useAuth() {
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    return { error };
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      return { error };
+    } catch (err) {
+      console.error('signIn error:', err);
+      return { error: err as AuthError };
+    }
   };
 
   const signUp = async (email: string, password: string, userData?: any) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: userData ? { data: userData } : undefined,
-    });
-    return { error };
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: userData ? { data: userData } : undefined,
+      });
+      return { error };
+    } catch (err) {
+      console.error('signUp error:', err);
+      return { error: err as AuthError };
+    }
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    return { error };
+    try {
+      const { error } = await supabase.auth.signOut();
+      return { error };
+    } catch (err) {
+      console.error('signOut error:', err);
+      return { error: err as AuthError };
+    }
   };
 
   const resetPassword = async (email: string) => {
-    const { error } = await supabase.auth.resetPasswordForEmail(email);
-    return { error };
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      return { error };
+    } catch (err) {
+      console.error('resetPassword error:', err);
+      return { error: err as AuthError };
+    }
   };
 
   const signInWithOAuth = async (provider: 'google' | 'azure' | 'github' | 'custom') => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: provider === 'custom' ? 'google' : provider,
-    });
-    return { error };
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: provider === 'custom' ? 'google' : provider,
+      });
+      return { error };
+    } catch (err) {
+      console.error('signInWithOAuth error:', err);
+      return { error: err as AuthError };
+    }
   };
 
   return {
