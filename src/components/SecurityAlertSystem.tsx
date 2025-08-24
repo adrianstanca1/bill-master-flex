@@ -21,10 +21,10 @@ export function SecurityAlertSystem() {
   useEffect(() => {
     const checkSecurityAlerts = async () => {
       try {
-        const { data, error } = await supabase
-          .from('security_events')
-          .select('*')
-          .in('severity', ['high', 'critical'])
+      const { data, error } = await supabase
+        .from('security_audit_log')
+        .select('*')
+          .eq('action', 'SECURITY_VIOLATION')
           .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
           .order('created_at', { ascending: false })
           .limit(5);
@@ -35,7 +35,16 @@ export function SecurityAlertSystem() {
         }
 
         if (data) {
-          const newAlerts = data.filter(alert => !dismissedAlerts.has(alert.id));
+          // Transform security_audit_log entries to SecurityAlert format
+          const securityAlerts: SecurityAlert[] = data.map(log => ({
+            id: log.id,
+            event_type: log.action,
+            severity: (log.details as any)?.severity || 'medium',
+            details: log.details,
+            created_at: log.created_at
+          }));
+          
+          const newAlerts = securityAlerts.filter(alert => !dismissedAlerts.has(alert.id));
           setAlerts(newAlerts);
 
           // Show toast for critical alerts

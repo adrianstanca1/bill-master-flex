@@ -40,7 +40,7 @@ export function InvoiceDashboard() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data as Invoice[];
+      return data?.map(invoice => ({ ...invoice, meta: invoice.meta || {} })) as Invoice[];
     },
     enabled: !!companyId,
   });
