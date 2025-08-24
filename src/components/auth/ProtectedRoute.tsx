@@ -1,6 +1,7 @@
 import { ReactNode, useState, useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuthContext } from './AuthProvider';
+import { useAuth0 } from '@auth0/auth0-react';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 
 interface ProtectedRouteProps {
@@ -9,7 +10,9 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children, requireSetup = false }: ProtectedRouteProps) {
-  const { user, loading, isAuthenticated } = useAuthContext();
+  const { loading, isAuthenticated: supabaseAuthenticated } = useAuthContext();
+  const { isAuthenticated: auth0Authenticated, isLoading: auth0Loading } = useAuth0();
+  const isAuthenticated = supabaseAuthenticated || auth0Authenticated;
   const location = useLocation();
 
   const [isSetupComplete, setIsSetupComplete] = useState<boolean | null>(null);
@@ -22,7 +25,7 @@ export function ProtectedRoute({ children, requireSetup = false }: ProtectedRout
     }
   }, [requireSetup]);
 
-  if (loading) {
+  if (loading || auth0Loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">

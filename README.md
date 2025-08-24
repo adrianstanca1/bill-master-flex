@@ -44,6 +44,29 @@ This project uses [Resend](https://resend.com) for transactional emails. To enab
 export VITE_RESEND_API_KEY="your_resend_api_key"
 ```
 
+Supabase is used for authentication and data storage. Configure these variables to connect to your Supabase project:
+
+```sh
+export VITE_SUPABASE_URL="https://YOUR_PROJECT_REF.supabase.co"
+export VITE_SUPABASE_ANON_KEY="your_supabase_anon_key"
+
+# Optional: supply a database connection string instead of VITE_SUPABASE_URL
+export VITE_SUPABASE_DB_URL="postgresql://user:password@host:5432/postgres"
+
+# For server-side code or edge functions
+export SUPABASE_URL="$VITE_SUPABASE_URL" # optional when SUPABASE_DB_URL is set
+export SUPABASE_DB_URL="$VITE_SUPABASE_DB_URL"
+export SUPABASE_ANON_KEY="$VITE_SUPABASE_ANON_KEY"
+export SUPABASE_SERVICE_ROLE_KEY="your_supabase_service_role_key"
+```
+
+Auth0 can also be used for authentication. Set these variables to configure the Auth0 client:
+
+```sh
+export VITE_AUTH0_DOMAIN="your_auth0_domain"
+export VITE_AUTH0_CLIENT_ID="your_auth0_client_id"
+```
+
 **Edit a file directly in GitHub**
 
 - Navigate to the desired file(s).
