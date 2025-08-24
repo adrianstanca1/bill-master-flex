@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import { applyUserTheme, loadTheme, saveTheme, ThemePreset, ThemeSettings } from "@/lib/theme";
 import { useCompanySetup } from "@/hooks/useCompanySetup";
 import SEO from "@/components/SEO";
+import { secureStorage } from "@/lib/SecureStorage";
+import { sanitizeFileUpload } from "@/lib/sanitization";
 
 const LS = "as-settings";
 
@@ -40,13 +42,27 @@ export default function Setup() {
   const { setupCompany, loading } = useCompanySetup();
 
   useEffect(() => {
-    // Load existing settings only
-    try {
-      const raw = localStorage.getItem(LS);
-      if (raw) setData({ ...defaults, ...(JSON.parse(raw) as SettingsData) });
-    } catch (err) {
-      console.error('Failed to load setup settings', err);
-    }
+    const loadSettings = async () => {
+      try {
+        // Load from secure storage first, fallback to localStorage
+        const secureData = await secureStorage.getItem('setup-settings');
+        if (secureData) {
+          setData({ ...defaults, ...secureData });
+        } else {
+          const raw = localStorage.getItem(LS);
+          if (raw) {
+            const legacyData = JSON.parse(raw) as SettingsData;
+            setData({ ...defaults, ...legacyData });
+            // Migrate to secure storage
+            await secureStorage.setItem('setup-settings', legacyData);
+            localStorage.removeItem(LS);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load setup settings', err);
+      }
+    };
+    loadSettings();
   }, []);
 
   const presets: { key: ThemePreset; name: string }[] = useMemo(
@@ -60,6 +76,21 @@ export default function Setup() {
 
   function onLogoChange(file?: File | null) {
     if (!file) return;
+    
+    // Enhanced file validation with MIME type verification
+    const { isValid, errors } = sanitizeFileUpload(file);
+    if (!isValid) {
+      console.error('Invalid file:', errors.join(', '));
+      return;
+    }
+
+    // Additional MIME type verification
+    const allowedMimeTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+    if (!allowedMimeTypes.includes(file.type)) {
+      console.error('Invalid file type. Only PNG, JPEG, JPG, and WebP images are allowed');
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = () => {
       const url = String(reader.result || "");
@@ -82,9 +113,11 @@ export default function Setup() {
         industry: data.industry
       });
 
-      // Save theme and other settings
+      // Save theme and other settings securely
       const toSave = { ...data, onboarded: true };
-      localStorage.setItem(LS, JSON.stringify(toSave));
+      await secureStorage.setItem('setup-settings', toSave);
+      // Remove legacy localStorage data if it exists
+      localStorage.removeItem(LS);
       saveTheme(theme);
       applyUserTheme(theme);
     } catch (error) {

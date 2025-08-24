@@ -6,6 +6,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Shield, CheckCircle, AlertTriangle, ExternalLink } from 'lucide-react';
 import { useEnhancedSecurityLogging } from '@/hooks/useEnhancedSecurityLogging';
 import { useRateLimiting } from '@/hooks/useRateLimiting';
+import { SecurityMonitoringDashboard } from './SecurityMonitoringDashboard';
+import { EnhancedSecurityScanResults } from './EnhancedSecurityScanResults';
 
 export function SecurityEnhancementPanel() {
   const { logSecurityEvent } = useEnhancedSecurityLogging();
@@ -125,6 +127,12 @@ export function SecurityEnhancementPanel() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Enhanced Security Scan Results */}
+      <EnhancedSecurityScanResults />
+
+      {/* Security Monitoring Dashboard */}
+      <SecurityMonitoringDashboard />
     </div>
   );
 }

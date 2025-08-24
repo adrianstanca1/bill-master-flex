@@ -10,6 +10,7 @@ import { Trash2, Plus, Upload } from 'lucide-react';
 import { FormValues } from './InvoiceGenerator';
 import { useToast } from '@/hooks/use-toast';
 import { validateAndSanitizeField, sanitizeFileUpload } from '@/lib/sanitization';
+import { secureStorage } from '@/lib/SecureStorage';
 
 interface InvoiceFormProps {
   register: UseFormRegister<FormValues>;
@@ -33,10 +34,10 @@ export function InvoiceForm({
 }: InvoiceFormProps) {
   const { toast } = useToast();
 
-  const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // Validate file using security function
+      // Enhanced file validation with MIME type verification
       const { isValid, errors } = sanitizeFileUpload(file);
       if (!isValid) {
         toast({
@@ -46,14 +47,25 @@ export function InvoiceForm({
         });
         return;
       }
+
+      // Additional MIME type verification
+      const allowedMimeTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+      if (!allowedMimeTypes.includes(file.type)) {
+        toast({
+          title: "Invalid file type",
+          description: "Only PNG, JPEG, JPG, and WebP images are allowed",
+          variant: "destructive"
+        });
+        return;
+      }
       
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = async (e) => {
         const logoUrl = e.target?.result as string;
-        localStorage.setItem('company-logo', logoUrl);
+        await secureStorage.setItem('company-logo', logoUrl);
         toast({
           title: "Logo uploaded",
-          description: "Your company logo has been saved",
+          description: "Your company logo has been saved securely",
         });
       };
       reader.readAsDataURL(file);
