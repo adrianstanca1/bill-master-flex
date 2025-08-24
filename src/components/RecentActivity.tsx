@@ -68,7 +68,7 @@ export function RecentActivity() {
       // Fetch recent reminders
       const { data: reminders } = await supabase
         .from('reminders')
-        .select('id, title, created_at, status')
+        .select('id, title, created_at, completed')
         .eq('company_id', companyId)
         .order('created_at', { ascending: false })
         .limit(5);
@@ -80,7 +80,7 @@ export function RecentActivity() {
           title: 'Reminder Created',
           description: reminder.title,
           timestamp: reminder.created_at,
-          status: reminder.status,
+          status: reminder.completed ? 'completed' : 'pending',
         });
       });
 

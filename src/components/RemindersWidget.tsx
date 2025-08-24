@@ -34,12 +34,18 @@ export const RemindersWidget: React.FC = () => {
       if (!companyId) return [];
       const { data, error } = await supabase
         .from('reminders')
-        .select('id, title, description, due_date, status, priority, created_at')
+        .select('id, title, description, due_date, completed, created_at')
         .eq('company_id', companyId)
         .order('due_date', { ascending: true })
         .limit(10);
       if (error) throw error;
-      return data as Reminder[];
+      return data?.map(reminder => ({
+        ...reminder,
+        priority: 'medium',
+        category: 'general',
+        status: reminder.completed ? 'completed' : 'pending',
+        recurring: false
+      })) as Reminder[];
     },
     enabled: !!companyId,
   });
@@ -106,7 +112,7 @@ export const RemindersWidget: React.FC = () => {
     mutationFn: async (id: string) => {
       const { error } = await supabase
         .from('reminders')
-        .update({ status: 'completed' })
+        .update({ completed: true })
         .eq('id', id);
       if (error) throw error;
     },

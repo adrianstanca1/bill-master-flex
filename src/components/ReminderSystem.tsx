@@ -42,7 +42,13 @@ export function ReminderSystem() {
         .eq('company_id', companyId)
         .order('due_date', { ascending: true });
       if (error) throw error;
-      return data as Reminder[];
+      return data?.map(reminder => ({
+        ...reminder,
+        priority: 'medium',
+        category: 'general', 
+        status: reminder.completed ? 'completed' : 'pending',
+        recurring: false
+      })) as Reminder[];
     },
     enabled: !!companyId,
   });
@@ -116,7 +122,7 @@ export function ReminderSystem() {
     mutationFn: async (reminderId: string) => {
       const { error } = await supabase
         .from('reminders')
-        .update({ status: 'completed' })
+        .update({ completed: true })
         .eq('id', reminderId);
       if (error) throw error;
     },
