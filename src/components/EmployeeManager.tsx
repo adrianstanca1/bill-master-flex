@@ -21,6 +21,7 @@ import {
   Search,
   Plus
 } from 'lucide-react';
+import { validateAndSanitizeField } from '@/lib/sanitization';
 
 interface Employee {
   id: string;
@@ -135,15 +136,22 @@ export function EmployeeManager() {
 
   const handleInvite = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inviteEmail.trim()) {
+    
+    // Validate and sanitize email
+    const emailValidation = validateAndSanitizeField(inviteEmail, 'email');
+    if (!emailValidation.isValid) {
       toast({
-        title: "Email required",
-        description: "Please enter an email address",
+        title: "Invalid email",
+        description: emailValidation.errors[0],
         variant: "destructive"
       });
       return;
     }
-    inviteEmployeeMutation.mutate({ email: inviteEmail, role: inviteRole });
+    
+    inviteEmployeeMutation.mutate({ 
+      email: emailValidation.sanitized, 
+      role: inviteRole 
+    });
   };
 
   const filteredEmployees = employees?.filter(employee => {

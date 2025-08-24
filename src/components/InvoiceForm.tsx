@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Trash2, Plus, Upload } from 'lucide-react';
 import { FormValues } from './InvoiceGenerator';
 import { useToast } from '@/hooks/use-toast';
+import { validateAndSanitizeField, sanitizeFileUpload } from '@/lib/sanitization';
 
 interface InvoiceFormProps {
   register: UseFormRegister<FormValues>;
@@ -35,10 +36,12 @@ export function InvoiceForm({
   const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      if (file.size > 2 * 1024 * 1024) { // 2MB limit
+      // Validate file using security function
+      const { isValid, errors } = sanitizeFileUpload(file);
+      if (!isValid) {
         toast({
-          title: "File too large",
-          description: "Please select a logo under 2MB",
+          title: "Invalid file",
+          description: errors.join(', '),
           variant: "destructive"
         });
         return;
@@ -89,11 +92,16 @@ export function InvoiceForm({
               <div>
                 <Label className="text-text-secondary font-medium">Your Company</Label>
                 <div className="mt-2 space-y-3">
-                  <Input 
-                    placeholder="Company name" 
-                    className="bg-input border-border text-text-primary"
-                    {...register('company.name')} 
-                  />
+                   <Input 
+                     placeholder="Company name" 
+                     className="bg-input border-border text-text-primary"
+                     {...register('company.name', {
+                       validate: (value) => {
+                         const { isValid, errors } = validateAndSanitizeField(value || '', 'company');
+                         return isValid || errors[0];
+                       }
+                     })} 
+                   />
                   <Textarea 
                     placeholder="Company address (multi-line)" 
                     rows={4}
@@ -101,17 +109,29 @@ export function InvoiceForm({
                     {...register('company.address')}
                   />
                   <div className="grid grid-cols-2 gap-3">
-                    <Input 
-                      placeholder="Email" 
-                      type="email"
-                      className="bg-input border-border text-text-primary"
-                      {...register('company.email')} 
-                    />
-                    <Input 
-                      placeholder="Phone" 
-                      className="bg-input border-border text-text-primary"
-                      {...register('company.phone')} 
-                    />
+                   <Input 
+                     placeholder="Email" 
+                     type="email"
+                     className="bg-input border-border text-text-primary"
+                     {...register('company.email', {
+                       validate: (value) => {
+                         if (!value) return true;
+                         const { isValid, errors } = validateAndSanitizeField(value, 'email');
+                         return isValid || errors[0];
+                       }
+                     })} 
+                   />
+                   <Input 
+                     placeholder="Phone" 
+                     className="bg-input border-border text-text-primary"
+                     {...register('company.phone', {
+                       validate: (value) => {
+                         if (!value) return true;
+                         const { isValid, errors } = validateAndSanitizeField(value, 'phone');
+                         return isValid || errors[0];
+                       }
+                     })} 
+                   />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <Input 

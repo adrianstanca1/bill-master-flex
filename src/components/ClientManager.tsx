@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Search, Plus, Building, Phone, Mail, MapPin, Edit, Trash2, Users } from 'lucide-react';
+import { validateAndSanitizeField } from '@/lib/sanitization';
 
 interface Client {
   id: string;
@@ -156,22 +157,59 @@ export function ClientManager() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name.trim()) {
+    // Validate and sanitize name
+    const nameValidation = validateAndSanitizeField(formData.name, 'name');
+    if (!nameValidation.isValid) {
       toast({
-        title: "Name required",
-        description: "Please enter a client name",
+        title: "Invalid name",
+        description: nameValidation.errors[0],
         variant: "destructive"
       });
       return;
     }
 
+    // Validate email if provided
+    if (formData.email) {
+      const emailValidation = validateAndSanitizeField(formData.email, 'email');
+      if (!emailValidation.isValid) {
+        toast({
+          title: "Invalid email",
+          description: emailValidation.errors[0],
+          variant: "destructive"
+        });
+        return;
+      }
+    }
+
+    // Validate phone if provided
+    if (formData.phone) {
+      const phoneValidation = validateAndSanitizeField(formData.phone, 'phone');
+      if (!phoneValidation.isValid) {
+        toast({
+          title: "Invalid phone",
+          description: phoneValidation.errors[0],
+          variant: "destructive"
+        });
+        return;
+      }
+    }
+
+    // Sanitize form data
+    const sanitizedData = {
+      name: nameValidation.sanitized,
+      email: formData.email ? validateAndSanitizeField(formData.email, 'email').sanitized : '',
+      phone: formData.phone ? validateAndSanitizeField(formData.phone, 'phone').sanitized : '',
+      address: formData.address ? validateAndSanitizeField(formData.address, 'address').sanitized : '',
+      notes: formData.notes ? validateAndSanitizeField(formData.notes, 'description').sanitized : ''
+    };
+
     if (editingClient) {
       updateClientMutation.mutate({
         id: editingClient.id,
-        updates: formData
+        updates: sanitizedData
       });
     } else {
-      createClientMutation.mutate(formData);
+      createClientMutation.mutate(sanitizedData);
     }
   };
 
