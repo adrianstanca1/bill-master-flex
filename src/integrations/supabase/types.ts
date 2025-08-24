@@ -223,6 +223,87 @@ export type Database = {
         }
         Relationships: []
       }
+      expenses: {
+        Row: {
+          amount: number
+          category: string
+          company_id: string
+          created_at: string
+          description: string | null
+          id: string
+          receipt_url: string | null
+          status: string | null
+          supplier: string | null
+          txn_date: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          category: string
+          company_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          receipt_url?: string | null
+          status?: string | null
+          supplier?: string | null
+          txn_date: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          category?: string
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          receipt_url?: string | null
+          status?: string | null
+          supplier?: string | null
+          txn_date?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      invoices: {
+        Row: {
+          client: string
+          company_id: string
+          created_at: string
+          due_date: string
+          id: string
+          items: Json | null
+          number: string
+          status: string | null
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          client: string
+          company_id: string
+          created_at?: string
+          due_date: string
+          id?: string
+          items?: Json | null
+          number: string
+          status?: string | null
+          total: number
+          updated_at?: string
+        }
+        Update: {
+          client?: string
+          company_id?: string
+          created_at?: string
+          due_date?: string
+          id?: string
+          items?: Json | null
+          number?: string
+          status?: string | null
+          total?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
