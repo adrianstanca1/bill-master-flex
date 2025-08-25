@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -43,13 +43,7 @@ export function SecurityMonitoringDashboard() {
   const { toast } = useToast();
   const { logSecurityEvent } = useEnhancedSecurityLogging();
 
-  useEffect(() => {
-    loadSecurityData();
-    const interval = setInterval(loadSecurityData, 30000); // Refresh every 30 seconds
-    return () => clearInterval(interval);
-  }, []);
-
-  const loadSecurityData = async () => {
+  const loadSecurityData = useCallback(async () => {
     try {
       // Load recent security events
       const { data: eventData, error: eventError } = await supabase
@@ -100,7 +94,13 @@ export function SecurityMonitoringDashboard() {
       });
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    loadSecurityData();
+    const interval = setInterval(loadSecurityData, 30000); // Refresh every 30 seconds
+    return () => clearInterval(interval);
+  }, [loadSecurityData]);
 
   const determineSeverity = (action: string, details: any): 'low' | 'medium' | 'high' | 'critical' => {
     if (action.includes('FAILED') || action.includes('SUSPICIOUS')) return 'high';
