@@ -12,6 +12,30 @@ export function useAuth() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const ensureUserProfile = async (user: User, meta?: Record<string, any>) => {
+    try {
+      const { data: existing } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', user.id)
+        .maybeSingle();
+      if (!existing) {
+        const metadata = { ...user.user_metadata, ...meta };
+        const fullName =
+          metadata.full_name ||
+          [metadata.first_name, metadata.last_name].filter(Boolean).join(' ') ||
+          null;
+        await supabase.from('profiles').insert({
+          id: user.id,
+          email: user.email,
+          full_name: fullName,
+        });
+      }
+    } catch (err) {
+      console.warn('Failed to ensure user profile', err);
+    }
+  };
+
   useEffect(() => {
     let active = true;
 
@@ -47,6 +71,9 @@ export function useAuth() {
     if (!error) {
       setSession(data.session);
       setUser(data.user);
+      if (data.user) {
+        await ensureUserProfile(data.user);
+      }
     }
     return { data: data?.user ?? null, error };
   };
@@ -67,6 +94,9 @@ export function useAuth() {
     if (!error && data.session) {
       setSession(data.session);
       setUser(data.user);
+      if (data.user) {
+        await ensureUserProfile(data.user, userData);
+      }
     }
     return { data: data?.user ?? null, error };
   };
