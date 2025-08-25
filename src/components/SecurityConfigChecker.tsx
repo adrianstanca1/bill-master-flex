@@ -28,7 +28,7 @@ export function SecurityConfigChecker() {
           status: 'fail',
           description: 'Currently disabled in Supabase. This is a CRITICAL security risk.',
           action: 'Enable in Supabase Dashboard',
-          actionUrl: 'https://supabase.com/dashboard/project/tjgbyygllssqsywxpxqe/settings/auth'
+          actionUrl: 'https://supabase.com/dashboard/project/zwxyoeqsbntsogvgwily/settings/auth'
         },
         {
           id: 'rls-enabled',

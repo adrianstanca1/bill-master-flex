@@ -17,15 +17,15 @@ import {
 
 export function SecurityConfigurationManager() {
   const handleOpenSupabaseAuth = () => {
-    window.open('https://supabase.com/dashboard/project/tjgbyygllssqsywxpxqe/auth/settings', '_blank');
+    window.open('https://supabase.com/dashboard/project/zwxyoeqsbntsogvgwily/auth/settings', '_blank');
   };
 
   const handleOpenSupabaseUsers = () => {
-    window.open('https://supabase.com/dashboard/project/tjgbyygllssqsywxpxqe/auth/users', '_blank');
+    window.open('https://supabase.com/dashboard/project/zwxyoeqsbntsogvgwily/auth/users', '_blank');
   };
 
   const handleOpenSupabaseFunctions = () => {
-    window.open('https://supabase.com/dashboard/project/tjgbyygllssqsywxpxqe/functions', '_blank');
+    window.open('https://supabase.com/dashboard/project/zwxyoeqsbntsogvgwily/functions', '_blank');
   };
 
   const securityChecks = [
@@ -140,7 +140,7 @@ export function SecurityConfigurationManager() {
                 onClick={() => {
                   if (check.link === 'auth/settings') handleOpenSupabaseAuth();
                   else if (check.link === 'functions') handleOpenSupabaseFunctions();
-                  else if (check.link === 'sql') window.open('https://supabase.com/dashboard/project/tjgbyygllssqsywxpxqe/sql/new', '_blank');
+                  else if (check.link === 'sql') window.open('https://supabase.com/dashboard/project/zwxyoeqsbntsogvgwily/sql/new', '_blank');
                 }}
                 className="w-full"
               >
