@@ -19,7 +19,7 @@ export default function Auth({ defaultMode = "signin" }: { defaultMode?: "signin
   const { isAuthenticated, signIn, signUp, signInWithOAuth, loading: authLoading } = useAuthContext();
   const { enabledProviders, loading: providersLoading } = useOAuthProviders();
 
-  const [mode, setMode] = useState<"signin"|"signup"|"forgot">(defaultMode);
+  const [mode, setMode] = useState<"signin" | "signup" | "forgot">(defaultMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -29,11 +29,8 @@ export default function Auth({ defaultMode = "signin" }: { defaultMode?: "signin
   const [showEmailConfirmation, setShowEmailConfirmation] = useState(false);
   const [isResendingEmail, setIsResendingEmail] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-const [showConfirmPassword, s
-
-     etShowConfirmPassword] = useState(false);
-  const [acceptTerms, setAcceptTerms] = us
-    eState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [acceptTerms, setAcceptTerms] = useState(false);
   
 
   // Redirect if already authenticated
@@ -108,8 +105,7 @@ const [showConfirmPassword, s
       if (!firstName?.trim() || !lastName?.trim()) {
         toast({
           title: "Name required",
-          description: "Please enter your fi
-            rst and last name.",
+          description: "Please enter your first and last name.",
           variant: "destructive"
         });
         return;
