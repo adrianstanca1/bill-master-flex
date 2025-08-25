@@ -6,16 +6,17 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  Shield, 
-  CheckCircle, 
-  AlertTriangle, 
-  Clock, 
-  Lock, 
-  Key, 
+import {
+  Shield,
+  CheckCircle,
+  AlertTriangle,
+  Clock,
+  Lock,
+  Key,
   Monitor,
   ExternalLink
 } from 'lucide-react';
+import { supabaseDashboardUrl } from '@/integrations/supabase/env';
 import { EnhancedSecureStorage } from './EnhancedSecureStorage';
 
 interface SecurityEnhancement {
@@ -122,7 +123,7 @@ export function SecurityEnhancementsPanel() {
   };
 
   const openSupabaseAuth = () => {
-    window.open('https://supabase.com/dashboard/project/zwxyoeqsbntsogvgwily/auth/settings', '_blank');
+    window.open(`${supabaseDashboardUrl}/auth/settings`, '_blank');
   };
 
   return (

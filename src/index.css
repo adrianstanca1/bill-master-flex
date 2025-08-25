@@ -161,6 +161,15 @@
     transform: translateY(-2px);
   }
 
+  /* Futuristic Glass Cards */
+  .futuristic-card {
+    @apply relative rounded-xl border bg-background/60 backdrop-blur-sm shadow-card transition-all;
+  }
+
+  .futuristic-card:hover {
+    @apply shadow-neon;
+  }
+
   /* Professional Buttons */
   .btn-primary {
     @apply relative px-6 py-2.5 rounded-md font-medium text-sm;

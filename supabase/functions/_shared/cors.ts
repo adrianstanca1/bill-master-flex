@@ -1,12 +1,23 @@
 // Get environment-specific CORS origin for enhanced security
 const getAllowedOrigin = () => {
-  const projectRef = 'zwxyoeqsbntsogvgwily';
+  const envRef = Deno.env.get('SUPABASE_PROJECT_REF');
+  let derivedRef = '';
+  const url = Deno.env.get('SUPABASE_URL');
+  if (!envRef && url) {
+    try {
+      derivedRef = new URL(url).hostname.split('.')[0];
+    } catch {
+      derivedRef = '';
+    }
+  }
+  const projectRef = envRef || derivedRef;
+
   const allowedOrigins = [
     'https://lovable.dev',
-    `https://${projectRef}.supabase.co`,
-    'https://project.lovable.app'
-  ];
-  
+    projectRef ? `https://${projectRef}.supabase.co` : '',
+    'https://project.lovable.app',
+  ].filter(Boolean);
+
   // In production, restrict to specific domains only
   return allowedOrigins.join(', ');
 };
