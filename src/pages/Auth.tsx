@@ -16,8 +16,8 @@ export default function Auth({ defaultMode = "signin" }: { defaultMode?: "signin
   const navigate = useNavigate();
   const location = useLocation() as any;
   const redirectTo = (location.state?.from?.pathname as string) || "/dashboard";
-  const { isAuthenticated, signIn, signUp, signInWithOAuth, loading: authLoading } = useAuthContext();
-  const { enabledProviders, loading: providersLoading } = useOAuthProviders();
+  const { isAuthenticated, signIn, signUp, signInWithOAuth, resetPassword, loading: authLoading } = useAuthContext();
+  const { enabledProviders } = useOAuthProviders();
 
   const [mode, setMode] = useState<"signin"|"signup"|"forgot">(defaultMode);
   const [email, setEmail] = useState("");
@@ -129,9 +129,7 @@ export default function Auth({ defaultMode = "signin" }: { defaultMode?: "signin
     if (mode === "forgot") {
       setLoading(true);
       try {
-        const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-          redirectTo: `${window.location.origin}/auth/reset-password`
-        });
+        const { error } = await resetPassword(email.trim().toLowerCase());
 
         if (error) {
           toast({
@@ -159,50 +157,21 @@ export default function Auth({ defaultMode = "signin" }: { defaultMode?: "signin
     }
 
     if (!password) {
-      toast({ 
-        title: "Password required", 
-        description: "Please enter your password.", 
-        variant: "destructive" 
+      toast({
+        title: "Password required",
+        description: "Please enter your password.",
+        variant: "destructive",
       });
       return;
     }
 
-    if (password.length < 6) {
-      toast({ 
-        title: "Password too short", 
-        description: "Password must be at least 6 characters long.", 
-        variant: "destructive" 
+    if (mode === "signin" && password.length < 6) {
+      toast({
+        title: "Password too short",
+        description: "Password must be at least 6 characters long.",
+        variant: "destructive",
       });
       return;
-    }
-
-    if (mode === "signup") {
-      if (!firstName.trim() || !lastName.trim()) {
-        toast({
-          title: "Name required",
-          description: "Please enter your first and last name.",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      if (password !== confirmPassword) {
-        toast({
-          title: "Passwords don't match",
-          description: "Please make sure your passwords match.",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      if (!acceptTerms) {
-        toast({
-          title: "Terms required",
-          description: "Please accept the terms and conditions.",
-          variant: "destructive"
-        });
-        return;
-      }
     }
 
     setLoading(true);
@@ -210,9 +179,10 @@ export default function Auth({ defaultMode = "signin" }: { defaultMode?: "signin
       let result;
       
       if (mode === "signup") {
-        result = await signUp(email, password, { 
-          firstName: firstName.trim(), 
-          lastName: lastName.trim() 
+        result = await signUp(email.trim().toLowerCase(), password, {
+          first_name: firstName.trim(),
+          last_name: lastName.trim(),
+          full_name: `${firstName.trim()} ${lastName.trim()}`
         });
         
         if (!result.error) {
@@ -231,7 +201,7 @@ export default function Auth({ defaultMode = "signin" }: { defaultMode?: "signin
           });
         }
       } else {
-        result = await signIn(email, password);
+        result = await signIn(email.trim().toLowerCase(), password);
         if (result.error) {
           toast({
             title: "Sign in failed",
@@ -253,39 +223,47 @@ export default function Auth({ defaultMode = "signin" }: { defaultMode?: "signin
     }
   }
 
-  const handleResendEmail = async () => {
-    if (!email) {
-      toast({
-        title: "Email required",
-        description: "Please enter your email address to resend confirmation.",
-        variant: "destructive"
-      });
-      return;
-    }
 
-    setIsResendingEmail(true);
-    try {
-      const result = await signUp(email, password, { 
-        firstName: firstName.trim(), 
-        lastName: lastName.trim() 
-      });
-      
-      if (!result.error) {
+    const handleResendEmail = async () => {
+      if (!email.trim()) {
         toast({
-          title: "Email sent",
-          description: "Check your inbox for the confirmation link.",
+          title: "Email required",
+          description: "Please enter your email address to resend confirmation.",
+          variant: "destructive",
         });
+        return;
       }
-    } catch (error) {
-      toast({
-        title: "Failed to resend",
-        description: "Please try again later.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsResendingEmail(false);
-    }
-  }
+
+      setIsResendingEmail(true);
+      try {
+        const { error } = await supabase.auth.resend({
+          type: 'signup',
+          email: email.trim().toLowerCase(),
+          options: { emailRedirectTo: `${window.location.origin}/` },
+        });
+
+        if (!error) {
+          toast({
+            title: "Email sent",
+            description: "Check your inbox for the confirmation link.",
+          });
+        } else {
+          toast({
+            title: "Failed to resend",
+            description: error.message,
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        toast({
+          title: "Failed to resend",
+          description: "Please try again later.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsResendingEmail(false);
+      }
+    };
 
   return (
     <>
