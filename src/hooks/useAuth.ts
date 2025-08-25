@@ -25,17 +25,28 @@ export function useAuth() {
       }
       if (!existing) {
         const metadata = { ...user.user_metadata, ...meta };
+        const firstName = metadata.first_name || null;
+        const lastName = metadata.last_name || null;
         const fullName =
           metadata.full_name ||
-          [metadata.first_name, metadata.last_name].filter(Boolean).join(' ') ||
+          [firstName, lastName].filter(Boolean).join(' ') ||
           null;
-        const { error: insertError } = await supabase.from('profiles').insert({
+        const profile: Record<string, any> = {
           id: user.id,
           email: user.email,
           full_name: fullName,
-        });
+        };
+        if (firstName) profile.first_name = firstName;
+        if (lastName) profile.last_name = lastName;
+        const { error: insertError } = await supabase.from('profiles').insert(profile);
         if (insertError) {
           console.warn('Failed to create profile', insertError);
+          // Retry with minimal fields in case first/last name columns don't exist
+          const minimalProfile = { id: user.id, email: user.email, full_name: fullName };
+          const { error: minimalError } = await supabase.from('profiles').insert(minimalProfile);
+          if (minimalError) {
+            console.warn('Failed to create minimal profile', minimalError);
+          }
         }
       }
     } catch (err) {
