@@ -11,7 +11,7 @@ select cron.schedule(
   '0 6 * * *',
   $$
   select net.http_post(
-    url := 'https://tjgbyygllssqsywxpxqe.supabase.co/functions/v1/task-scheduler',
+    url := 'https://zpbuvuxpfemldsknerew.supabase.co/functions/v1/task-scheduler',
     headers := '{"Content-Type":"application/json"}'::jsonb,
     body := '{"trigger":"cron"}'::jsonb
   );

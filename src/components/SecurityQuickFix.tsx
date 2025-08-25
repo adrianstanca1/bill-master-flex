@@ -24,7 +24,7 @@ export function SecurityQuickFix({ className }: SecurityQuickFixProps) {
           <Button 
             variant="outline" 
             size="sm"
-            onClick={() => window.open('https://supabase.com/dashboard/project/tjgbyygllssqsywxpxqe/auth/settings', '_blank')}
+            onClick={() => window.open('https://supabase.com/dashboard/project/zpbuvuxpfemldsknerew/auth/settings', '_blank')}
             className="border-red-300 text-red-700 hover:bg-red-100 dark:border-red-600 dark:text-red-300 dark:hover:bg-red-900 whitespace-nowrap"
           >
             Fix in Supabase

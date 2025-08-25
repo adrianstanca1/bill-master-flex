@@ -43,9 +43,9 @@ export function SecurityEnhancementPanel() {
     });
 
     if (type === 'otp') {
-      window.open('https://supabase.com/dashboard/project/zwxyoeqsbntsogvgwily/auth/settings', '_blank');
+      window.open('https://supabase.com/dashboard/project/zpbuvuxpfemldsknerew/auth/settings', '_blank');
     } else if (type === 'password') {
-      window.open('https://supabase.com/dashboard/project/zwxyoeqsbntsogvgwily/auth/settings', '_blank');
+      window.open('https://supabase.com/dashboard/project/zpbuvuxpfemldsknerew/auth/settings', '_blank');
     }
   };
 

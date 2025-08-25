@@ -10,7 +10,7 @@ import { GuestBanner } from "@/components/GuestBanner";
 import { SecurityQuickFix } from "@/components/SecurityQuickFix";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart3, Activity, Zap } from "lucide-react";
-import ThemeSwitcher from "@/components/ThemeSwitcher";
+import PaletteToggle from "@/components/PaletteToggle";
 
 const Dashboard: React.FC = () => {
   return (
@@ -24,19 +24,19 @@ const Dashboard: React.FC = () => {
           <GuestBanner />
           <SecurityQuickFix />
           
-          <div className="cyber-card p-8 hover-glow">
+          <div className="futuristic-card p-8">
             <h1 className="text-4xl font-bold text-gradient mb-3">Dashboard</h1>
             <p className="text-muted-foreground text-lg">
               Command center for your construction business operations
             </p>
           </div>
 
-          <div className="cyber-card p-6 hover-glow">
+          <div className="futuristic-card p-6">
             <h2 className="text-lg font-semibold mb-3">Theme</h2>
             <p className="text-sm text-muted-foreground mb-4">
               Choose a color scheme for your dashboard.
             </p>
-            <ThemeSwitcher />
+            <PaletteToggle />
           </div>
 
           {/* Enhanced Dashboard with Tabs */}
@@ -59,7 +59,7 @@ const Dashboard: React.FC = () => {
             <TabsContent value="overview" className="space-y-6 mt-6">
               <EnhancedDashboardGrid />
               
-              <div className="cyber-card p-6 hover-glow">
+              <div className="futuristic-card p-6">
                 <RemindersWidget />
               </div>
             </TabsContent>
@@ -69,7 +69,7 @@ const Dashboard: React.FC = () => {
             </TabsContent>
 
             <TabsContent value="insights" className="space-y-6 mt-6">
-              <div className="cyber-card p-8 text-center hover-glow">
+              <div className="futuristic-card p-8 text-center">
                 <Zap className="h-16 w-16 mx-auto mb-4 text-purple-600" />
                 <h3 className="text-2xl font-bold mb-2">AI-Powered Insights</h3>
                 <p className="text-muted-foreground mb-6">

@@ -8,8 +8,8 @@ select cron.schedule(
   '0 6 * * *',
   $$
   select net.http_post(
-    url := 'https://tjgbyygllssqsywxpxqe.supabase.co/functions/v1/task-scheduler',
-    headers := '{"Content-Type":"application/json","Authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqZ2J5eWdsbHNzcXN5d3hweHFlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM2NjU0OTQsImV4cCI6MjA2OTI0MTQ5NH0.FA1X97r-Y7nMcDqBQiGHYYE4yo46ZHOKHiw2AAM8pRA"}'::jsonb,
+    url := 'https://zpbuvuxpfemldsknerew.supabase.co/functions/v1/task-scheduler',
+    headers := '{"Content-Type":"application/json","Authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpwYnV2dXhwZmVtbGRza25lcmV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYxMTQzMTcsImV4cCI6MjA3MTY5MDMxN30.4wb8_qMaJ0hpkLEv51EWh0pRtVXD3GWWOsuCmZsOx6A"}'::jsonb,
     body := '{"trigger":"cron"}'::jsonb
   );
   $$

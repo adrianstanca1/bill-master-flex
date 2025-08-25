@@ -41,7 +41,7 @@ export function SecurityFixesCompleted() {
             <Button 
               variant="outline" 
               size="sm" 
-              onClick={() => window.open('https://supabase.com/dashboard/project/zwxyoeqsbntsogvgwily/settings/auth', '_blank')}
+              onClick={() => window.open('https://supabase.com/dashboard/project/zpbuvuxpfemldsknerew/settings/auth', '_blank')}
               className="border-green-300 text-green-700 hover:bg-green-100 dark:border-green-600 dark:text-green-300 dark:hover:bg-green-900"
             >
               <ExternalLink className="h-4 w-4 mr-2" />

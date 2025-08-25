@@ -1,6 +1,6 @@
 // Get environment-specific CORS origin for enhanced security
 const getAllowedOrigin = () => {
-  const projectRef = 'zwxyoeqsbntsogvgwily';
+  const projectRef = 'zpbuvuxpfemldsknerew';
   const allowedOrigins = [
     'https://lovable.dev',
     `https://${projectRef}.supabase.co`,
