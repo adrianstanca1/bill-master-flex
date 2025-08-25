@@ -1,10 +1,10 @@
 export function useOAuthProviders() {
   return {
-    providers: [],
+    providers: ['google', 'github', 'apple'],
     enabledProviders: {
-      google: false,
-      custom: false,
-      azure: false
+      google: true,
+      github: true,
+      apple: true,
     },
     loading: false,
     validateProvider: () => true

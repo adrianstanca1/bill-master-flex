@@ -17,7 +17,7 @@ interface AuthContextType {
   signOut: () => Promise<AuthResult<null>>;
   resetPassword: (email: string) => Promise<AuthResult<null>>;
   signInWithOAuth: (
-    provider: 'google' | 'azure' | 'github',
+    provider: 'google' | 'github' | 'apple',
     redirectTo?: string,
   ) => Promise<AuthResult<any>>;
 }
