@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Shield, AlertTriangle, CheckCircle, ExternalLink } from 'lucide-react';
+import { supabaseDashboardUrl } from '@/integrations/supabase/env';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 
@@ -28,7 +29,7 @@ export function SecurityConfigChecker() {
           status: 'fail',
           description: 'Currently disabled in Supabase. This is a CRITICAL security risk.',
           action: 'Enable in Supabase Dashboard',
-          actionUrl: 'https://supabase.com/dashboard/project/zpbuvuxpfemldsknerew/settings/auth'
+          actionUrl: `${supabaseDashboardUrl}/settings/auth`
         },
         {
           id: 'rls-enabled',

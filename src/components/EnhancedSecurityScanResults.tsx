@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Shield, CheckCircle, AlertTriangle, XCircle, Info, ExternalLink, RefreshCw } from 'lucide-react';
+import { supabaseDashboardUrl } from '@/integrations/supabase/env';
 import { useToast } from '@/hooks/use-toast';
 import { useEnhancedSecurityLogging } from '@/hooks/useEnhancedSecurityLogging';
 
@@ -106,7 +107,7 @@ export function EnhancedSecurityScanResults() {
           status: 'warning',
           description: 'Most database functions use secure search paths',
           recommendation: 'Verify all functions have SET search_path = \'public\' for security',
-          actionUrl: 'https://supabase.com/dashboard/project/zpbuvuxpfemldsknerew/sql/new',
+          actionUrl: `${supabaseDashboardUrl}/sql/new`,
           severity: 'low'
         },
         {
@@ -115,7 +116,7 @@ export function EnhancedSecurityScanResults() {
           status: 'info',
           description: 'OTP expiry settings should be reviewed in Supabase Dashboard',
           recommendation: 'Consider reducing OTP expiry to 5-10 minutes for enhanced security',
-          actionUrl: 'https://supabase.com/dashboard/project/zpbuvuxpfemldsknerew/auth/providers',
+          actionUrl: `${supabaseDashboardUrl}/auth/providers`,
           severity: 'low'
         }
       ];

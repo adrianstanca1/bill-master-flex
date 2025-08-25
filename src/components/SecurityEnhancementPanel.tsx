@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Shield, CheckCircle, AlertTriangle, ExternalLink } from 'lucide-react';
+import { supabaseDashboardUrl } from '@/integrations/supabase/env';
 import { useEnhancedSecurityLogging } from '@/hooks/useEnhancedSecurityLogging';
 import { useRateLimiting } from '@/hooks/useRateLimiting';
 import { SecurityMonitoringDashboard } from './SecurityMonitoringDashboard';
@@ -43,9 +44,9 @@ export function SecurityEnhancementPanel() {
     });
 
     if (type === 'otp') {
-      window.open('https://supabase.com/dashboard/project/zpbuvuxpfemldsknerew/auth/settings', '_blank');
+      window.open(`${supabaseDashboardUrl}/auth/settings`, '_blank');
     } else if (type === 'password') {
-      window.open('https://supabase.com/dashboard/project/zpbuvuxpfemldsknerew/auth/settings', '_blank');
+      window.open(`${supabaseDashboardUrl}/auth/settings`, '_blank');
     }
   };
 

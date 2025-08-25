@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
 // Use environment variables so the client works across different deployments
-const SUPABASE_URL =
+export const SUPABASE_URL =
   (import.meta.env['VITE_SUPABASE_URL'] as string | undefined) ??
   (import.meta.env['NEXT_PUBLIC_SUPABASE_URL'] as string | undefined) ??
   process.env.VITE_SUPABASE_URL ??
@@ -11,7 +11,7 @@ const SUPABASE_URL =
   process.env.SUPABASE_URL ??
   process.env['asagents_SUPABASE_URL'] ??
   process.env['asagents_NEXT_PUBLIC_SUPABASE_URL'];
-const SUPABASE_ANON_KEY =
+export const SUPABASE_ANON_KEY =
   (import.meta.env['VITE_SUPABASE_ANON_KEY'] as string | undefined) ??
   (import.meta.env['NEXT_PUBLIC_SUPABASE_ANON_KEY'] as string | undefined) ??
   process.env.VITE_SUPABASE_ANON_KEY ??
