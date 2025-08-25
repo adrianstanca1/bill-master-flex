@@ -3,11 +3,14 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
 // Use environment variables so the client works across different deployments
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env
-  .VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined;
+const SUPABASE_URL =
+  (import.meta.env['VITE_SUPABASE_URL'] as string | undefined) ||
+  process.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY =
+  (import.meta.env['VITE_SUPABASE_ANON_KEY'] as string | undefined) ||
+  process.env.VITE_SUPABASE_ANON_KEY;
 
-if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
   throw new Error('Missing Supabase environment variables');
 }
 
@@ -16,7 +19,7 @@ if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
 
 export const supabase = createClient<Database>(
   SUPABASE_URL,
-  SUPABASE_PUBLISHABLE_KEY,
+  SUPABASE_ANON_KEY,
   {
     auth: {
       storage: typeof window !== 'undefined' ? window.localStorage : undefined,

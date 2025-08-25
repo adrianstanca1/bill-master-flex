@@ -29,7 +29,7 @@ export function PasswordSecurityBanner() {
             <Button 
               variant="destructive" 
               size="sm" 
-              onClick={() => window.open('https://supabase.com/dashboard/project/tjgbyygllssqsywxpxqe/settings/auth', '_blank')}
+              onClick={() => window.open('https://supabase.com/dashboard/project/zpbuvuxpfemldsknerew/settings/auth', '_blank')}
               className="bg-red-600 hover:bg-red-700"
             >
               <ExternalLink className="h-4 w-4 mr-2" />

@@ -122,7 +122,7 @@ export function SecurityEnhancementsPanel() {
   };
 
   const openSupabaseAuth = () => {
-    window.open('https://supabase.com/dashboard/project/zwxyoeqsbntsogvgwily/auth/settings', '_blank');
+    window.open('https://supabase.com/dashboard/project/zpbuvuxpfemldsknerew/auth/settings', '_blank');
   };
 
   return (

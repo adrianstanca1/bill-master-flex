@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -24,11 +24,7 @@ export function EnhancedSecurityScanResults() {
   const { toast } = useToast();
   const { logSecurityEvent } = useEnhancedSecurityLogging();
 
-  useEffect(() => {
-    performSecurityScan();
-  }, []);
-
-  const performSecurityScan = async () => {
+  const performSecurityScan = useCallback(async () => {
     setScanning(true);
     
     try {
@@ -110,7 +106,7 @@ export function EnhancedSecurityScanResults() {
           status: 'warning',
           description: 'Most database functions use secure search paths',
           recommendation: 'Verify all functions have SET search_path = \'public\' for security',
-          actionUrl: 'https://supabase.com/dashboard/project/zwxyoeqsbntsogvgwily/sql/new',
+          actionUrl: 'https://supabase.com/dashboard/project/zpbuvuxpfemldsknerew/sql/new',
           severity: 'low'
         },
         {
@@ -119,7 +115,7 @@ export function EnhancedSecurityScanResults() {
           status: 'info',
           description: 'OTP expiry settings should be reviewed in Supabase Dashboard',
           recommendation: 'Consider reducing OTP expiry to 5-10 minutes for enhanced security',
-          actionUrl: 'https://supabase.com/dashboard/project/zwxyoeqsbntsogvgwily/auth/providers',
+          actionUrl: 'https://supabase.com/dashboard/project/zpbuvuxpfemldsknerew/auth/providers',
           severity: 'low'
         }
       ];
@@ -171,7 +167,11 @@ export function EnhancedSecurityScanResults() {
     } finally {
       setScanning(false);
     }
-  };
+  }, [logSecurityEvent, toast]);
+
+  useEffect(() => {
+    performSecurityScan();
+  }, [performSecurityScan]);
 
   const getStatusIcon = (status: SecurityCheck['status']) => {
     switch (status) {

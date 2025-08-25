@@ -116,6 +116,8 @@ export function EnhancedSecurityManager({ children }: EnhancedSecurityManagerPro
     userRole,
     roleLoading,
     checkBruteForce,
+    isBlocked,
+    migrateLegacyStorage,
     logSecurityEvent,
     securityStatus.sessionValid,
     toast
