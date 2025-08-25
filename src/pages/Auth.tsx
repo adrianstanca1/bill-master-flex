@@ -29,12 +29,17 @@ export default function Auth({ defaultMode = "signin" }: { defaultMode?: "signin
   const [showEmailConfirmation, setShowEmailConfirmation] = useState(false);
   const [isResendingEmail, setIsResendingEmail] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [acceptTerms, setAcceptTerms] = useState(false);
+const [showConfirmPassword, s
+
+     etShowConfirmPassword] = useState(false);
+  const [acceptTerms, setAcceptTerms] = us
+    eState(false);
+  
 
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated && !authLoading) {
+      
       navigate(redirectTo, { replace: true });
     }
   }, [isAuthenticated, authLoading, navigate, redirectTo]);
@@ -92,16 +97,19 @@ export default function Auth({ defaultMode = "signin" }: { defaultMode?: "signin
       if (password.length < 12 || !passwordPattern.test(password)) {
         toast({
           title: "Password Requirements",
+          
           description: "Password must be at least 12 characters with uppercase, lowercase, number, and special character (@$!%*?&)",
           variant: "destructive"
         });
         return;
       }
 
+      
       if (!firstName?.trim() || !lastName?.trim()) {
         toast({
           title: "Name required",
-          description: "Please enter your first and last name.",
+          description: "Please enter your fi
+            rst and last name.",
           variant: "destructive"
         });
         return;
@@ -123,13 +131,16 @@ export default function Auth({ defaultMode = "signin" }: { defaultMode?: "signin
           variant: "destructive"
         });
         return;
+        
       }
-    }
+ 
+  }
 
     if (mode === "forgot") {
       setLoading(true);
       try {
         const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+          
           redirectTo: `${window.location.origin}/auth/reset-password`
         });
 
@@ -189,6 +200,7 @@ export default function Auth({ defaultMode = "signin" }: { defaultMode?: "signin
         
         if (!result.error) {
           setShowEmailConfirmation(true);
+  
         } else if (result.error.message.includes("User already registered")) {
           toast({
             title: "Account already exists",
