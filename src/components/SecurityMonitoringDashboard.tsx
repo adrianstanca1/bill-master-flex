@@ -43,6 +43,13 @@ export function SecurityMonitoringDashboard() {
   const { toast } = useToast();
   const { logSecurityEvent } = useEnhancedSecurityLogging();
 
+  const determineSeverity = useCallback((action: string, details: any): 'low' | 'medium' | 'high' | 'critical' => {
+    if (action.includes('FAILED') || action.includes('SUSPICIOUS')) return 'high';
+    if (action.includes('RATE_LIMIT_BLOCK')) return 'medium';
+    if (action.includes('CONCURRENT_SESSION')) return 'critical';
+    return 'low';
+  }, []);
+
   const loadSecurityData = useCallback(async () => {
     try {
       // Load recent security events
@@ -94,20 +101,13 @@ export function SecurityMonitoringDashboard() {
       });
       setLoading(false);
     }
-  }, [toast]);
+  }, [toast, determineSeverity]);
 
   useEffect(() => {
     loadSecurityData();
     const interval = setInterval(loadSecurityData, 30000); // Refresh every 30 seconds
     return () => clearInterval(interval);
   }, [loadSecurityData]);
-
-  const determineSeverity = (action: string, details: any): 'low' | 'medium' | 'high' | 'critical' => {
-    if (action.includes('FAILED') || action.includes('SUSPICIOUS')) return 'high';
-    if (action.includes('RATE_LIMIT_BLOCK')) return 'medium';
-    if (action.includes('CONCURRENT_SESSION')) return 'critical';
-    return 'low';
-  };
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
