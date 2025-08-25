@@ -9,9 +9,9 @@ import { PasswordSecurityBannerFixed } from "@/components/PasswordSecurityBanner
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
-import { Eye, EyeOff, Mail, Loader2, Shield } from "lucide-react";
+import { Eye, EyeOff, Mail, Loader2, Shield, Github, Apple } from "lucide-react";
 
-export default function Auth() {
+export default function Auth({ defaultMode = "signin" }: { defaultMode?: "signin" | "signup" | "forgot" }) {
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation() as any;
@@ -19,7 +19,7 @@ export default function Auth() {
   const { isAuthenticated, signIn, signUp, signInWithOAuth, loading: authLoading } = useAuthContext();
   const { enabledProviders, loading: providersLoading } = useOAuthProviders();
 
-  const [mode, setMode] = useState<"signin"|"signup"|"forgot">("signin");
+  const [mode, setMode] = useState<"signin"|"signup"|"forgot">(defaultMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -40,7 +40,7 @@ export default function Auth() {
   }, [isAuthenticated, authLoading, navigate, redirectTo]);
 
   // Enhanced OAuth handler with proper error handling
-  const handleOAuthProvider = async (provider: 'google' | 'azure') => {
+  const handleOAuthProvider = async (provider: 'google' | 'github' | 'apple') => {
     setLoading(true);
     try {
       const { error } = await signInWithOAuth(provider);
@@ -350,7 +350,43 @@ export default function Auth() {
                   </Button>
                 )}
 
-                {!enabledProviders.google && !enabledProviders.azure && (
+                {enabledProviders.github && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full h-12 text-sm font-medium hover:bg-muted/50 transition-colors"
+                    onClick={() => handleOAuthProvider('github')}
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Github className="w-5 h-5 mr-2" />
+                    )}
+                    Continue with GitHub
+                  </Button>
+                )}
+
+                {enabledProviders.apple && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full h-12 text-sm font-medium hover:bg-muted/50 transition-colors"
+                    onClick={() => handleOAuthProvider('apple')}
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Apple className="w-5 h-5 mr-2" />
+                    )}
+                    Continue with iCloud
+                  </Button>
+                )}
+
+                {!enabledProviders.google &&
+                 !enabledProviders.github &&
+                 !enabledProviders.apple && (
                   <div className="text-center py-4">
                     <p className="text-sm text-muted-foreground">OAuth providers not configured</p>
                   </div>

@@ -1,13 +1,30 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import AgentChat from "@/components/AgentChat";
 import SmartOpsPanel from "@/components/SmartOpsPanel";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import SEO from "@/components/SEO";
 import { GuestBanner } from "@/components/GuestBanner";
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
+  const [stats, setStats] = useState({ projects: 0, clients: 0 });
+
+  useEffect(() => {
+    const loadStats = async () => {
+      const [projectRes, clientRes] = await Promise.all([
+        supabase.from('projects').select('*', { count: 'exact', head: true }),
+        supabase.from('clients').select('*', { count: 'exact', head: true })
+      ]);
+      setStats({
+        projects: projectRes.count ?? 0,
+        clients: clientRes.count ?? 0,
+      });
+    };
+    loadStats();
+  }, []);
+
   return (
     <>
       <SEO
@@ -31,8 +48,11 @@ const Index = () => {
           <h1 className="text-5xl md:text-7xl font-bold text-gradient mb-6">
             AS Agents
           </h1>
-          <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-8">
+          <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-2">
             Professional construction management platform for modern businesses
+          </p>
+          <p className="text-sm text-muted-foreground max-w-3xl mx-auto mb-8">
+            Managing {stats.projects} projects and {stats.clients} clients.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/dashboard">
@@ -43,6 +63,11 @@ const Index = () => {
             <Link to="/agents">
               <button className="btn-secondary">
                 AI Agents
+              </button>
+            </Link>
+            <Link to="/register">
+              <button className="btn-secondary">
+                Register
               </button>
             </Link>
           </div>
