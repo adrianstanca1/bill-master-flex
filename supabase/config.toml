@@ -1,1 +1,9 @@
-project_id = "zwxyoeqsbntsogvgwily"
+const data = await fetch('https://zwxyoeqsbntsogvgwily.supabase.co/rest/v1/countries', {
+  headers: {
+    'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp3eHlvZXFzYm50c29ndmd3aWx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU5ODQ4NzksImV4cCI6MjA3MTU2MDg3OX0.hGZQHoXS_3RaoKpZcz6W8BNNYBt6QnyJMpTJ9HCvpW8'
+  }
+})
+  .then(res => res.json())
+  .catch(error => {
+    // Handle error
+  });
