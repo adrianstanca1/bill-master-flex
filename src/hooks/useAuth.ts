@@ -1,294 +1,154 @@
-import { useState, useEffect, useCallback } from 'react';
-import { User, Session, AuthError } from '@supabase/supabase-js';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import type { User, Session, AuthError, OAuthResponse } from '@supabase/supabase-js';
 
-interface AuthState {
-  user: User | null;
-  session: Session | null;
-  loading: boolean;
-  isAuthenticated: boolean;
+export interface AuthResult<T> {
+  data: T | null;
+  error: AuthError | null;
 }
 
-interface AuthActions {
-  signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
-  signUp: (email: string, password: string, userData?: any) => Promise<{ error: AuthError | null }>;
-  signOut: () => Promise<{ error: AuthError | null }>;
-  resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
-}
-
-export function useAuth(): AuthState & AuthActions {
+export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
 
-  const isAuthenticated = !!session?.user;
-
-  // Initialize auth state
-  useEffect(() => {
-    let mounted = true;
-
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.email);
-        
-        if (!mounted) return;
-
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-
-        // Log authentication events for security monitoring
-        if (session?.user && event === 'SIGNED_IN') {
-          setTimeout(async () => {
-            try {
-              await supabase.from('security_audit_log').insert({
-                action: 'SIGN_IN',
-                resource_type: 'auth',
-                details: { 
-                  sign_in_time: new Date().toISOString(),
-                  user_agent: navigator.userAgent,
-                  location: window.location.pathname
-                }
-              });
-            } catch (error) {
-              console.warn('Failed to log sign in event:', error);
-            }
-          }, 0);
-        }
+  const ensureUserProfile = async (user: User, meta?: Record<string, any>) => {
+    try {
+      const { data: existing } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', user.id)
+        .maybeSingle();
+      if (!existing) {
+        const metadata = { ...user.user_metadata, ...meta };
+        const fullName =
+          metadata.full_name ||
+          [metadata.first_name, metadata.last_name].filter(Boolean).join(' ') ||
+          null;
+        await supabase.from('profiles').insert({
+          id: user.id,
+          email: user.email,
+          full_name: fullName,
+        });
       }
-    );
+    } catch (err) {
+      console.warn('Failed to ensure user profile', err);
+    }
+  };
 
-    // THEN check for existing session
+  useEffect(() => {
+    let active = true;
+
     const getInitialSession = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error('Session check error:', error);
-        }
-        
-        if (mounted) {
+        if (!active) return;
+        if (!error) {
           setSession(session);
           setUser(session?.user ?? null);
-          setLoading(false);
+          if (session?.user) {
+            await ensureUserProfile(session.user);
+          }
         }
-      } catch (err) {
-        console.error('Failed to get session:', err);
-        if (mounted) {
-          setLoading(false);
-        }
+      } finally {
+        if (active) setLoading(false);
       }
     };
 
     getInitialSession();
 
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (!active) return;
+        setSession(session);
+        setUser(session?.user ?? null);
+        if (session?.user && (event === 'SIGNED_IN' || event === 'SIGNED_UP')) {
+          await ensureUserProfile(session.user);
+        }
+      }
+    );
+
     return () => {
-      mounted = false;
+      active = false;
       subscription.unsubscribe();
     };
   }, []);
 
-  const signIn = useCallback(async (email: string, password: string) => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password
-      });
-
-      if (error) {
-        let message = 'An error occurred during sign in';
-        
-        if (error.message.includes('Invalid login credentials')) {
-          message = 'Invalid email or password. Please check your credentials and try again.';
-        } else if (error.message.includes('Email not confirmed')) {
-          message = 'Please check your email and confirm your account before signing in.';
-        } else if (error.message.includes('Too many requests')) {
-          message = 'Too many sign in attempts. Please wait a moment and try again.';
-        }
-
-        toast({
-          title: "Sign In Error",
-          description: message,
-          variant: "destructive"
-        });
-      } else if (data.session) {
-        toast({
-          title: "Welcome back!",
-          description: "Successfully signed in."
-        });
+  const signIn = async (email: string, password: string): Promise<AuthResult<User>> => {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (!error) {
+      setSession(data.session);
+      setUser(data.user);
+      if (data.user) {
+        await ensureUserProfile(data.user);
       }
-
-      return { error };
-    } catch (err: any) {
-      console.error('Sign in error:', err);
-      toast({
-        title: "Sign In Error",
-        description: "An unexpected error occurred. Please try again.",
-        variant: "destructive"
-      });
-      return { error: err };
-    } finally {
-      setLoading(false);
     }
-  }, [toast]);
+    return { data: data?.user ?? null, error };
+  };
 
-  const signUp = useCallback(async (email: string, password: string, userData: any = {}) => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase.auth.signUp({
-        email: email.trim(),
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`,
-          data: {
-            first_name: userData.firstName || '',
-            last_name: userData.lastName || '',
-            ...userData
-          }
-        }
-      });
-
-      if (error) {
-        let message = 'An error occurred during sign up';
-        
-        if (error.message.includes('User already registered')) {
-          message = 'This email is already registered. Try signing in instead.';
-        } else if (error.message.includes('Password should be at least')) {
-          message = 'Password should be at least 6 characters long.';
-        } else if (error.message.includes('Invalid email')) {
-          message = 'Please enter a valid email address.';
-        }
-
-        toast({
-          title: "Sign Up Error",
-          description: message,
-          variant: "destructive"
-        });
-      } else if (data.session) {
-        toast({
-          title: "Welcome!",
-          description: "Account created successfully."
-        });
-
-        // Send welcome email
-        setTimeout(async () => {
-          try {
-            await supabase.functions.invoke('welcome-email', {
-              body: {
-                email: email.trim(),
-                firstName: userData.firstName || '',
-                lastName: userData.lastName || '',
-                userId: data.user?.id
-              }
-            });
-          } catch (emailError) {
-            console.warn('Failed to send welcome email:', emailError);
-          }
-        }, 0);
-      } else if (data.user && !data.session) {
-        toast({
-          title: "Check your email",
-          description: "Please check your email to confirm your account before signing in."
-        });
+  const signUp = async (
+    email: string,
+    password: string,
+    userData?: Record<string, any>
+  ): Promise<AuthResult<User>> => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/`,
+        ...(userData ? { data: userData } : {})
+      },
+    });
+    if (!error && data.session) {
+      setSession(data.session);
+      setUser(data.user);
+      if (data.user) {
+        await ensureUserProfile(data.user, userData);
       }
-
-      return { error };
-    } catch (err: any) {
-      console.error('Sign up error:', err);
-      toast({
-        title: "Sign Up Error",
-        description: "An unexpected error occurred. Please try again.",
-        variant: "destructive"
-      });
-      return { error: err };
-    } finally {
-      setLoading(false);
     }
-  }, [toast]);
+    return { data: data?.user ?? null, error };
+  };
 
-  const signOut = useCallback(async () => {
-    try {
-      // Log sign out event
-      if (user?.id) {
-        try {
-          await supabase.from('security_audit_log').insert({
-            action: 'SIGN_OUT',
-            resource_type: 'auth',
-            details: { 
-              sign_out_time: new Date().toISOString(),
-              user_agent: navigator.userAgent
-            }
-          });
-        } catch (logError) {
-          console.warn('Failed to log sign out event:', logError);
-        }
-      }
-
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        toast({
-          title: "Sign Out Error",
-          description: "Failed to sign out. Please try again.",
-          variant: "destructive"
-        });
-      }
-
-      return { error };
-    } catch (err: any) {
-      console.error('Sign out error:', err);
-      toast({
-        title: "Sign Out Error",
-        description: "An unexpected error occurred during sign out.",
-        variant: "destructive"
-      });
-      return { error: err };
+  const signOut = async (): Promise<AuthResult<null>> => {
+    const { error } = await supabase.auth.signOut();
+    if (!error) {
+      setSession(null);
+      setUser(null);
     }
-  }, [user?.id, toast]);
+    return { data: null, error };
+  };
 
-  const resetPassword = useCallback(async (email: string) => {
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-        redirectTo: `${window.location.origin}/reset-password`
-      });
+  const resetPassword = async (
+    email: string,
+    redirectTo: string = `${window.location.origin}/auth/reset-password`
+  ): Promise<AuthResult<null>> => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo,
+    });
+    return { data: null, error };
+  };
 
-      if (error) {
-        toast({
-          title: "Reset Password Error",
-          description: error.message,
-          variant: "destructive"
-        });
-      } else {
-        toast({
-          title: "Reset Email Sent",
-          description: "Please check your email for password reset instructions."
-        });
-      }
-
-      return { error };
-    } catch (err: any) {
-      console.error('Reset password error:', err);
-      toast({
-        title: "Reset Password Error",
-        description: "An unexpected error occurred. Please try again.",
-        variant: "destructive"
-      });
-      return { error: err };
-    }
-  }, [toast]);
+  const signInWithOAuth = async (
+    provider: 'google' | 'github' | 'apple',
+    redirectTo: string = window.location.origin
+  ): Promise<AuthResult<any>> => {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: { redirectTo },
+    });
+    return { data, error };
+  };
 
   return {
     user,
     session,
     loading,
-    isAuthenticated,
+    isAuthenticated: !!session,
     signIn,
     signUp,
     signOut,
-    resetPassword
+    resetPassword,
+    signInWithOAuth,
   };
 }
+

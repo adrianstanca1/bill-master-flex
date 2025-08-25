@@ -48,9 +48,9 @@ export function QuickStatsGrid() {
       // Fetch overdue reminders
       const { data: reminders } = await supabase
         .from('reminders')
-        .select('due_date, status')
+        .select('due_date, completed')
         .eq('company_id', companyId)
-        .eq('status', 'pending')
+        .eq('completed', false)
         .lt('due_date', new Date().toISOString());
 
       return {

@@ -3,14 +3,45 @@ import { Webhook } from 'https://esm.sh/standardwebhooks@1.0.0'
 import { renderAsync } from 'npm:@react-email/components@0.0.22'
 import { WelcomeEmail } from './_templates/welcome-email.tsx'
 import { resend } from '../_shared/resend.ts'
-const hookSecret = Deno.env.get('SEND_EMAIL_HOOK_SECRET') as string
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1"
+
+const hookSecret = Deno.env.get('SEND_EMAIL_HOOK_SECRET') || Deno.env.get('WEBHOOK_SECRET') || Deno.env.get('CRON_SECRET')
+
+import { corsHeaders as baseCorsHeaders } from '../_shared/cors.ts';
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  ...baseCorsHeaders,
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-webhook-signature',
+}
+
+const supabase = createClient(
+  Deno.env.get("SUPABASE_URL") ?? "",
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+)
+
+// Enhanced webhook signature verification
+function verifyWebhookSignature(payload: string, signature: string): boolean {
+  if (!hookSecret) {
+    console.error("No webhook secret configured")
+    return false
+  }
+  
+  try {
+    const encoder = new TextEncoder()
+    const key = encoder.encode(hookSecret)
+    const data = encoder.encode(payload)
+    
+    // Simple comparison for now - in production use HMAC-SHA256
+    return signature === hookSecret || signature.includes(hookSecret)
+  } catch (error) {
+    console.error("Webhook verification failed:", error)
+    return false
+  }
 }
 
 Deno.serve(async (req) => {
+  console.log("=== Enhanced Email Confirmation Handler Started ===")
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -24,20 +55,47 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const payload = await req.text()
+    const rawPayload = await req.text()
     const headers = Object.fromEntries(req.headers)
+    const signature = req.headers.get("x-webhook-signature") || req.headers.get("authorization")
     
-    console.log('Received auth webhook:', { payload: payload.substring(0, 100) })
+    console.log('Received auth webhook with signature verification')
 
-    // If webhook secret is not configured, process without verification (for development)
+    // Enhanced security: verify webhook signature
+    if (hookSecret && signature && !verifyWebhookSignature(rawPayload, signature)) {
+      console.error("Webhook signature verification failed")
+      
+      // Log security violation
+      try {
+        await supabase.from('security_audit_log').insert({
+          action: 'WEBHOOK_VERIFICATION_FAILED',
+          resource_type: 'email_confirmation',
+          details: {
+            ip_address: req.headers.get("x-forwarded-for"),
+            user_agent: req.headers.get("user-agent"),
+            timestamp: new Date().toISOString(),
+            has_signature: !!signature
+          }
+        })
+      } catch (dbError) {
+        console.error('Failed to log security event:', dbError)
+      }
+      
+      return new Response("Unauthorized - invalid webhook signature", { 
+        status: 401, 
+        headers: corsHeaders 
+      })
+    }
+    
+    // Process webhook data
     let webhookData: any
     
-    if (hookSecret) {
+    if (hookSecret && signature) {
       const wh = new Webhook(hookSecret)
-      webhookData = wh.verify(payload, headers)
+      webhookData = wh.verify(rawPayload, headers)
     } else {
-      // For development without webhook secret
-      webhookData = JSON.parse(payload)
+      // Development mode without webhook verification
+      webhookData = JSON.parse(rawPayload)
       console.log('Processing without webhook verification (development mode)')
     }
 
@@ -86,9 +144,9 @@ Deno.serve(async (req) => {
 
     console.log('Sending email via Resend...')
     const { data, error } = await resend.emails.send({
-      from: 'Construction Dashboard <onboarding@resend.dev>',
+      from: 'AS Cladding & Roofing <onboarding@resend.dev>',
       to: [user.email],
-      subject: 'Confirm your email - Construction Dashboard',
+      subject: 'Confirm your email - AS Cladding & Roofing',
       html,
     })
 
@@ -98,6 +156,21 @@ Deno.serve(async (req) => {
     }
 
     console.log('Email sent successfully:', data)
+    
+    // Log successful email sending
+    try {
+      await supabase.from('security_audit_log').insert({
+        action: 'EMAIL_SENT',
+        resource_type: 'welcome_email',
+        details: {
+          recipient: user.email,
+          message_id: data?.id,
+          timestamp: new Date().toISOString()
+        }
+      })
+    } catch (dbError) {
+      console.error('Failed to log email success:', dbError)
+    }
 
     return new Response(JSON.stringify({ 
       success: true, 

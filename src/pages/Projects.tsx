@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ResponsiveLayout } from '@/components/ResponsiveLayout';
-import { ProjectTracker } from '@/components/ProjectTracker';
+import { EnhancedProjectTracker } from '@/components/EnhancedProjectTracker';
 import { ProjectsOverview } from '@/components/ProjectsOverview';
 import { ProjectMetrics } from '@/components/ProjectMetrics';
 import SEO from '@/components/SEO';
@@ -65,7 +65,7 @@ export default function Projects() {
     <div className="min-h-screen bg-background">
       <ResponsiveLayout>
         <SEO 
-          title="Projects | AS PRO" 
+          title="Projects | AS Agents" 
           description="Comprehensive project management for your construction business - track progress, manage timelines, and monitor budgets"
         />
         
@@ -109,7 +109,7 @@ export default function Projects() {
             </TabsContent>
 
             <TabsContent value="tracker" className="space-y-6">
-              <ProjectTracker />
+              <EnhancedProjectTracker />
             </TabsContent>
 
             <TabsContent value="timeline" className="space-y-6">

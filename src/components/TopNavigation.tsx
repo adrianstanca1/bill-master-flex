@@ -35,7 +35,7 @@ import {
   Bot,
   Shield,
   Settings,
-  HardHat,
+  Zap,
   Calculator,
   PieChart,
   Clock,
@@ -127,8 +127,9 @@ export function TopNavigation() {
   };
 
   const getUserInitials = () => {
-    if (profile?.first_name && profile?.last_name) {
-      return `${profile.first_name.charAt(0)}${profile.last_name.charAt(0)}`.toUpperCase();
+    if (profile?.full_name) {
+      const names = profile.full_name.split(' ');
+      return names.length > 1 ? `${names[0].charAt(0)}${names[names.length - 1].charAt(0)}`.toUpperCase() : names[0].charAt(0).toUpperCase();
     }
     return session?.user?.email?.charAt(0).toUpperCase() || 'U';
   };
@@ -142,10 +143,12 @@ export function TopNavigation() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between px-4">
         {/* Logo */}
-        <Link to="/" className="flex items-center space-x-2">
-          <HardHat className="h-8 w-8 text-primary" />
-          <span className="font-bold text-xl bg-gradient-primary bg-clip-text text-transparent">
-            AS PRO
+        <Link to="/" className="flex items-center space-x-3 group">
+          <div className="relative">
+            <Zap className="h-8 w-8 text-primary group-hover:text-primary/80 transition-colors duration-200" />
+          </div>
+          <span className="font-bold text-xl text-gradient">
+            AS Agents
           </span>
         </Link>
 
@@ -239,7 +242,7 @@ export function TopNavigation() {
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">
-                      {profile?.first_name ? `${profile.first_name} ${profile.last_name || ''}`.trim() : 'User'}
+                      {profile?.full_name || 'User'}
                     </p>
                     <p className="text-xs leading-none text-muted-foreground">
                       {session.user?.email}

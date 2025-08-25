@@ -11,17 +11,18 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Trash2, Save, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { sanitizeInput } from '@/lib/sanitization';
 
 const itemSchema = z.object({
-  description: z.string().min(1, 'Description is required'),
-  quantity: z.number().min(0, 'Quantity must be positive'),
-  unitPrice: z.number().min(0, 'Unit price must be positive'),
+  description: z.string().min(1, 'Description is required').max(500, 'Description too long').transform((val) => sanitizeInput(val, { maxLength: 500 })),
+  quantity: z.number().min(0, 'Quantity must be positive').max(99999, 'Quantity too large'),
+  unitPrice: z.number().min(0, 'Unit price must be positive').max(999999, 'Unit price too large'),
 });
 
 const formSchema = z.object({
-  title: z.string().min(1, 'Title is required'),
-  items: z.array(itemSchema).min(1, 'At least one item is required'),
-  notes: z.string().optional().or(z.literal('')),
+  title: z.string().min(1, 'Title is required').max(200, 'Title too long').transform((val) => sanitizeInput(val, { maxLength: 200 })),
+  items: z.array(itemSchema).min(1, 'At least one item is required').max(50, 'Too many items'),
+  notes: z.string().optional().or(z.literal('')).transform((val) => val ? sanitizeInput(val, { maxLength: 1000 }) : ''),
 });
 
 type FormValues = z.infer<typeof formSchema>;

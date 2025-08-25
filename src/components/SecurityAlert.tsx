@@ -12,15 +12,20 @@ export function SecurityAlert() {
   const navigate = useNavigate();
 
   const handleSecurityAction = async () => {
-    // If user has no company association, redirect to setup
-    if (violations.includes('User has no company association - security isolation compromised')) {
-      navigate('/setup');
-      return;
-    }
+    try {
+      // If user has no company association, redirect to setup
+      if (violations.some(v => v.includes('setup required'))) {
+        navigate('/setup');
+        return;
+      }
 
-    // For other violations, sign out for safety
-    await supabase.auth.signOut();
-    navigate('/auth');
+      // For other violations, sign out for safety
+      await supabase.auth.signOut();
+      navigate('/auth');
+    } catch (error) {
+      console.error('Security action failed:', error);
+      navigate('/auth');
+    }
   };
 
   if (isValid) {

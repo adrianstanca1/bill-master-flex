@@ -1,28 +1,9 @@
-project_id = "tjgbyygllssqsywxpxqe"
-
-[auth]
-enabled = true
-site_url = "https://5295eab3-6497-4c88-8ecf-70d77bf6640d.sandbox.lovable.dev"
-additional_redirect_urls = ["https://5295eab3-6497-4c88-8ecf-70d77bf6640d.sandbox.lovable.dev/**"]
-jwt_expiry = 3600
-refresh_token_rotation_enabled = true
-security_update_password_require_reauthentication = true
-security_captcha_enabled = false
-
-[auth.email]
-enable_signup = true
-double_confirm_changes = true
-enable_confirmations = true
-secure_email_change_enabled = true
-max_frequency = "1m"
-
-[auth.email.smtp]
-enabled = false
-
-# Auth webhook for email confirmation
-[auth.hook.send_email]
-enabled = true
-uri = "https://tjgbyygllssqsywxpxqe.supabase.co/functions/v1/send-confirmation"
-
-[functions.send-confirmation]
-verify_jwt = false
+const data = await fetch('https://zwxyoeqsbntsogvgwily.supabase.co/rest/v1/countries', {
+  headers: {
+    'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp3eHlvZXFzYm50c29ndmd3aWx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU5ODQ4NzksImV4cCI6MjA3MTU2MDg3OX0.hGZQHoXS_3RaoKpZcz6W8BNNYBt6QnyJMpTJ9HCvpW8'
+  }
+})
+  .then(res => res.json())
+  .catch(error => {
+    // Handle error
+  });

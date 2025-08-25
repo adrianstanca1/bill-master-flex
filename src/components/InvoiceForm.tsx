@@ -9,6 +9,8 @@ import { Label } from '@/components/ui/label';
 import { Trash2, Plus, Upload } from 'lucide-react';
 import { FormValues } from './InvoiceGenerator';
 import { useToast } from '@/hooks/use-toast';
+import { validateAndSanitizeField, sanitizeFileUpload } from '@/lib/sanitization';
+import { secureStorage } from '@/lib/SecureStorage';
 
 interface InvoiceFormProps {
   register: UseFormRegister<FormValues>;
@@ -32,25 +34,38 @@ export function InvoiceForm({
 }: InvoiceFormProps) {
   const { toast } = useToast();
 
-  const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      if (file.size > 2 * 1024 * 1024) { // 2MB limit
+      // Enhanced file validation with MIME type verification
+      const { isValid, errors } = sanitizeFileUpload(file);
+      if (!isValid) {
         toast({
-          title: "File too large",
-          description: "Please select a logo under 2MB",
+          title: "Invalid file",
+          description: errors.join(', '),
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Additional MIME type verification
+      const allowedMimeTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+      if (!allowedMimeTypes.includes(file.type)) {
+        toast({
+          title: "Invalid file type",
+          description: "Only PNG, JPEG, JPG, and WebP images are allowed",
           variant: "destructive"
         });
         return;
       }
       
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = async (e) => {
         const logoUrl = e.target?.result as string;
-        localStorage.setItem('company-logo', logoUrl);
+        await secureStorage.setItem('company-logo', logoUrl);
         toast({
           title: "Logo uploaded",
-          description: "Your company logo has been saved",
+          description: "Your company logo has been saved securely",
         });
       };
       reader.readAsDataURL(file);
@@ -89,11 +104,16 @@ export function InvoiceForm({
               <div>
                 <Label className="text-text-secondary font-medium">Your Company</Label>
                 <div className="mt-2 space-y-3">
-                  <Input 
-                    placeholder="Company name" 
-                    className="bg-input border-border text-text-primary"
-                    {...register('company.name')} 
-                  />
+                   <Input 
+                     placeholder="Company name" 
+                     className="bg-input border-border text-text-primary"
+                     {...register('company.name', {
+                       validate: (value) => {
+                         const { isValid, errors } = validateAndSanitizeField(value || '', 'company');
+                         return isValid || errors[0];
+                       }
+                     })} 
+                   />
                   <Textarea 
                     placeholder="Company address (multi-line)" 
                     rows={4}
@@ -101,17 +121,29 @@ export function InvoiceForm({
                     {...register('company.address')}
                   />
                   <div className="grid grid-cols-2 gap-3">
-                    <Input 
-                      placeholder="Email" 
-                      type="email"
-                      className="bg-input border-border text-text-primary"
-                      {...register('company.email')} 
-                    />
-                    <Input 
-                      placeholder="Phone" 
-                      className="bg-input border-border text-text-primary"
-                      {...register('company.phone')} 
-                    />
+                   <Input 
+                     placeholder="Email" 
+                     type="email"
+                     className="bg-input border-border text-text-primary"
+                     {...register('company.email', {
+                       validate: (value) => {
+                         if (!value) return true;
+                         const { isValid, errors } = validateAndSanitizeField(value, 'email');
+                         return isValid || errors[0];
+                       }
+                     })} 
+                   />
+                   <Input 
+                     placeholder="Phone" 
+                     className="bg-input border-border text-text-primary"
+                     {...register('company.phone', {
+                       validate: (value) => {
+                         if (!value) return true;
+                         const { isValid, errors } = validateAndSanitizeField(value, 'phone');
+                         return isValid || errors[0];
+                       }
+                     })} 
+                   />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <Input 

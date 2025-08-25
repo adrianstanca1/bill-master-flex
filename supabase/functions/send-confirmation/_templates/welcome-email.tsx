@@ -7,6 +7,9 @@ import {
   Link,
   Preview,
   Text,
+  Button,
+  Section,
+  Hr,
 } from 'npm:@react-email/components@0.0.22'
 import * as React from 'npm:react@18.3.1'
 
@@ -26,112 +29,189 @@ export const WelcomeEmail = ({
   redirect_to,
   token_hash,
   user_email,
-}: WelcomeEmailProps) => (
-  <Html>
-    <Head />
-    <Preview>Confirm your email to get started</Preview>
-    <Body style={main}>
-      <Container style={container}>
-        <Heading style={h1}>Welcome to Construction Dashboard!</Heading>
-        <Text style={text}>
-          Thanks for signing up! Please confirm your email address to get started with managing your construction business.
-        </Text>
-        <Link
-          href={`${supabase_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${redirect_to}`}
-          target="_blank"
-          style={{
-            ...link,
-            display: 'block',
-            marginBottom: '16px',
-            backgroundColor: '#007bff',
-            color: 'white',
-            padding: '12px 24px',
-            textDecoration: 'none',
-            borderRadius: '6px',
-            textAlign: 'center' as const,
-          }}
-        >
-          Confirm Email Address
-        </Link>
-        <Text style={{ ...text, marginBottom: '14px' }}>
-          Or, copy and paste this temporary confirmation code:
-        </Text>
-        <code style={code}>{token}</code>
-        <Text
-          style={{
-            ...text,
-            color: '#ababab',
-            marginTop: '14px',
-            marginBottom: '16px',
-          }}
-        >
-          If you didn&apos;t create an account, you can safely ignore this email.
-        </Text>
-        <Text style={footer}>
-          <Link
-            href={redirect_to}
-            target="_blank"
-            style={{ ...link, color: '#898989' }}
-          >
-            Construction Dashboard
-          </Link>
-          - Your complete business management solution
-        </Text>
-      </Container>
-    </Body>
-  </Html>
-)
+}: WelcomeEmailProps) => {
+  const confirmationUrl = `${supabase_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${redirect_to}`;
+
+  return (
+    <Html>
+      <Head />
+      <Preview>Welcome to AS Cladding & Roofing - Confirm your account</Preview>
+      <Body style={main}>
+        <Container style={container}>
+          <Section style={headerSection}>
+            <Heading style={h1}>Welcome to AS Cladding & Roofing!</Heading>
+            <Text style={subtitle}>
+              Your professional construction management platform
+            </Text>
+          </Section>
+
+          <Section style={contentSection}>
+            <Text style={text}>
+              Hi there! 👋
+            </Text>
+            <Text style={text}>
+              Thank you for signing up for AS Cladding & Roofing. We're excited to help you manage your construction business more efficiently.
+            </Text>
+            
+            <Text style={text}>
+              To get started, please confirm your email address by clicking the button below:
+            </Text>
+
+            <Section style={buttonSection}>
+              <Button style={button} href={confirmationUrl}>
+                Confirm Email Address
+              </Button>
+            </Section>
+
+            <Text style={smallText}>
+              If the button doesn't work, you can copy and paste this link into your browser:
+            </Text>
+            <Link href={confirmationUrl} style={link}>
+              {confirmationUrl}
+            </Link>
+
+            <Hr style={hr} />
+
+            <Text style={text}>
+              Once confirmed, you'll be able to:
+            </Text>
+            <Text style={featureText}>
+              ✅ Create and manage professional invoices<br/>
+              ✅ Track projects and monitor progress<br/>
+              ✅ Generate quotes and variations<br/>
+              ✅ Access AI-powered business insights<br/>
+              ✅ Manage your team and clients
+            </Text>
+
+            <Hr style={hr} />
+
+            <Text style={smallText}>
+              This confirmation link will expire in 24 hours. If you didn't create an account with AS Cladding & Roofing, you can safely ignore this email.
+            </Text>
+          </Section>
+
+          <Section style={footerSection}>
+            <Text style={footer}>
+              Best regards,<br/>
+              The AS Cladding & Roofing Team
+            </Text>
+            <Text style={footerSmall}>
+              Professional Construction Management Platform
+            </Text>
+          </Section>
+        </Container>
+      </Body>
+    </Html>
+  )
+}
 
 export default WelcomeEmail
 
 const main = {
   backgroundColor: '#ffffff',
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif',
+  fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
 }
 
 const container = {
   margin: '0 auto',
   padding: '20px 0 48px',
-  maxWidth: '560px',
+  maxWidth: '600px',
+}
+
+const headerSection = {
+  textAlign: 'center' as const,
+  padding: '20px 0 40px',
+}
+
+const contentSection = {
+  padding: '0 20px',
+}
+
+const buttonSection = {
+  textAlign: 'center' as const,
+  margin: '32px 0',
+}
+
+const footerSection = {
+  textAlign: 'center' as const,
+  padding: '40px 20px 20px',
+  borderTop: '1px solid #eaeaea',
+  marginTop: '40px',
 }
 
 const h1 = {
-  color: '#333',
-  fontSize: '24px',
+  color: '#1a1a1a',
+  fontSize: '32px',
   fontWeight: 'bold',
-  margin: '40px 0',
-  padding: '0',
+  margin: '0 0 10px',
+  textAlign: 'center' as const,
 }
 
-const link = {
-  color: '#2754C5',
-  fontSize: '14px',
-  textDecoration: 'underline',
+const subtitle = {
+  color: '#666666',
+  fontSize: '18px',
+  margin: '0',
+  textAlign: 'center' as const,
 }
 
 const text = {
-  color: '#333',
-  fontSize: '14px',
-  lineHeight: '26px',
+  color: '#333333',
+  fontSize: '16px',
+  lineHeight: '24px',
   margin: '16px 0',
 }
 
-const footer = {
-  color: '#898989',
-  fontSize: '12px',
-  lineHeight: '22px',
-  marginTop: '12px',
-  marginBottom: '24px',
+const featureText = {
+  color: '#333333',
+  fontSize: '16px',
+  lineHeight: '28px',
+  margin: '16px 0',
+  paddingLeft: '10px',
 }
 
-const code = {
-  display: 'inline-block',
-  padding: '16px 4.5%',
-  width: '90.5%',
-  backgroundColor: '#f4f4f4',
-  borderRadius: '5px',
-  border: '1px solid #eee',
-  color: '#333',
+const smallText = {
+  color: '#666666',
   fontSize: '14px',
-  fontFamily: 'Monaco, Consolas, "Lucida Console", monospace',
+  lineHeight: '20px',
+  margin: '16px 0',
+}
+
+const button = {
+  backgroundColor: '#2563eb',
+  borderRadius: '8px',
+  color: '#ffffff',
+  fontSize: '16px',
+  fontWeight: 'bold',
+  textDecoration: 'none',
+  textAlign: 'center' as const,
+  display: 'inline-block',
+  padding: '14px 28px',
+  margin: '0',
+}
+
+const link = {
+  color: '#2563eb',
+  fontSize: '14px',
+  textDecoration: 'underline',
+  wordBreak: 'break-all' as const,
+}
+
+const hr = {
+  border: 'none',
+  borderTop: '1px solid #eaeaea',
+  margin: '32px 0',
+}
+
+const footer = {
+  color: '#333333',
+  fontSize: '16px',
+  margin: '0 0 10px',
+  textAlign: 'center' as const,
+}
+
+const footerSmall = {
+  color: '#898989',
+  fontSize: '12px',
+  margin: '0',
+  textAlign: 'center' as const,
 }

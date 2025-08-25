@@ -11,6 +11,7 @@ import { InvoiceList } from './InvoiceList';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from "@/integrations/supabase/client";
 import { useCompanyId } from '@/hooks/useCompanyId';
+import { secureStorage } from '@/lib/SecureStorage';
 
 const itemSchema = z.object({
   description: z.string().min(1, 'Description is required'),
@@ -50,13 +51,13 @@ const formSchema = z.object({
 
 export type FormValues = z.infer<typeof formSchema>;
 
-function loadDefaults(): Partial<FormValues> {
+async function loadDefaults(): Promise<Partial<FormValues>> {
   if (typeof window === 'undefined') return getInitialDefaults();
   
-  const saved = localStorage.getItem('as-invoice-defaults');
+  const saved = await secureStorage.getItem('as-invoice-defaults');
   if (saved) {
     try { 
-      return JSON.parse(saved); 
+      return saved; 
     } catch {
       return getInitialDefaults();
     }
@@ -102,10 +103,13 @@ function getInitialDefaults(): Partial<FormValues> {
 export function InvoiceGenerator() {
   const [currentView, setCurrentView] = useState<'list' | 'create' | 'edit' | 'preview'>('list');
   const [editingInvoice, setEditingInvoice] = useState<any>(null);
+  const [defaults, setDefaults] = useState<Partial<FormValues>>(getInitialDefaults());
   const { toast } = useToast();
   const companyId = useCompanyId();
   
-  const defaults = loadDefaults();
+  React.useEffect(() => {
+    loadDefaults().then(setDefaults);
+  }, []);
   const { control, register, watch, setValue, reset } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: defaults as FormValues
@@ -119,11 +123,11 @@ export function InvoiceGenerator() {
   const values = watch();
   const totals = computeTotals(values as InvoiceData);
 
-  function saveDefaults() {
-    localStorage.setItem('as-invoice-defaults', JSON.stringify(values));
+  async function saveDefaults() {
+    await secureStorage.setItem('as-invoice-defaults', values, { encrypt: true });
     toast({
       title: "Defaults saved",
-      description: "Your default values have been saved locally.",
+      description: "Your default values have been saved securely.",
     });
   }
 

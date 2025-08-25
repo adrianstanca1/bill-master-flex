@@ -54,7 +54,7 @@ export function ProjectTracker() {
         .eq('company_id', companyId)
         .order('created_at', { ascending: false });
       if (error) throw error;
-      return data as Project[];
+      return data?.map(project => ({ ...project, meta: project.meta || {} })) as Project[];
     },
     enabled: !!companyId,
   });

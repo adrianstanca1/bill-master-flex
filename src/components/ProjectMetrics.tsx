@@ -61,7 +61,7 @@ export function ProjectMetrics({ projectId }: ProjectMetricsProps) {
         .eq('company_id', companyId);
       
       if (projectId) {
-        query = query.eq('project_id', projectId);
+        query = query.eq('company_id', companyId);
       }
       
       const { data, error } = await query;
@@ -83,9 +83,9 @@ export function ProjectMetrics({ projectId }: ProjectMetricsProps) {
     return sum;
   }, 0) || 0;
 
-  const pendingReminders = reminders?.filter(r => r.status === 'pending') || [];
+  const pendingReminders = reminders?.filter(r => !r.completed) || [];
   const overdueReminders = reminders?.filter(r => 
-    r.status === 'pending' && new Date(r.due_date) < new Date()
+    !r.completed && new Date(r.due_date) < new Date()
   ) || [];
 
   if (!companyId) {

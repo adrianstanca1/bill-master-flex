@@ -32,6 +32,7 @@ import {
   BarChart3,
   Camera,
   Clock,
+  Lock,
 } from "lucide-react";
 
 const navigationItems = [
@@ -73,6 +74,7 @@ const navigationItems = [
     items: [
       { title: "HR Management", url: "/hr", icon: UserCheck },
       { title: "Security", url: "/security", icon: Shield },
+      { title: "Auth Config", url: "/auth-config", icon: Lock },
       { title: "Settings", url: "/settings", icon: Settings },
     ],
   },

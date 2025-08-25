@@ -17,10 +17,10 @@ serve(async (req) => {
     const { action, webhookId, secretValue, payload } = await req.json();
 
     switch (action) {
-      case 'create_secret':
+      case 'create_secret': {
         // Generate cryptographically secure secret
         const secret = crypto.randomUUID() + '-' + Date.now();
-        
+
         // Store encrypted secret
         const { data, error } = await supabase
           .from('webhook_secrets')
@@ -31,52 +31,53 @@ serve(async (req) => {
 
         if (error) throw error;
 
-        return new Response(JSON.stringify({ 
-          success: true, 
+        return new Response(JSON.stringify({
+          success: true,
           secretId: data[0]?.id,
           secret: secret // Only return once for initial setup
         }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
-
-      case 'validate_webhook':
+      }
+      case 'validate_webhook': {
         const signature = req.headers.get('x-webhook-signature');
         if (!signature) {
           throw new Error('Missing webhook signature');
         }
 
-        // Validate HMAC signature
-        const encoder = new TextEncoder();
-        const data = encoder.encode(JSON.stringify(payload));
-        
-        // Get webhook secret
-        const { data: secretData, error: secretError } = await supabase
-          .from('webhook_secrets')
-          .select('encrypted_secret')
+        // Rate limiting check
+        const clientIP = req.headers.get('x-forwarded-for') || 'unknown';
+        const { data: rateLimitData } = await supabase
+          .from('webhook_rate_limits')
+          .select('request_count, window_start')
           .eq('webhook_id', webhookId)
+          .eq('ip_address', clientIP)
+          .gte('window_start', new Date(Date.now() - 3600000).toISOString()) // Last hour
           .single();
 
-        if (secretError || !secretData) {
-          throw new Error('Invalid webhook configuration');
+        if (rateLimitData && rateLimitData.request_count > 100) {
+          throw new Error('Rate limit exceeded');
         }
 
-        const secret = atob(secretData.encrypted_secret);
-        const key = await crypto.subtle.importKey(
-          'raw',
-          encoder.encode(secret),
-          { name: 'HMAC', hash: 'SHA-256' },
-          false,
-          ['sign', 'verify']
+        // Update rate limiting
+        await supabase.from('webhook_rate_limits').upsert({
+          webhook_id: webhookId,
+          ip_address: clientIP,
+          request_count: (rateLimitData?.request_count || 0) + 1,
+          window_start: rateLimitData?.window_start || new Date().toISOString()
+        });
+
+        // Enhanced HMAC signature validation using database function
+        const { data: isValid, error: validationError } = await supabase.rpc(
+          'validate_webhook_signature',
+          {
+            webhook_id: webhookId,
+            payload: JSON.stringify(payload),
+            signature: signature
+          }
         );
 
-        const expectedSignature = await crypto.subtle.sign('HMAC', key, data);
-        const expectedHex = Array.from(new Uint8Array(expectedSignature))
-          .map(b => b.toString(16).padStart(2, '0'))
-          .join('');
-
-        const providedSignature = signature.replace('sha256=', '');
-        
-        if (expectedHex !== providedSignature) {
+        if (validationError || !isValid) {
           throw new Error('Invalid webhook signature');
         }
 
@@ -91,13 +92,13 @@ serve(async (req) => {
           }
         });
 
-        return new Response(JSON.stringify({ 
-          success: true, 
-          validated: true 
+        return new Response(JSON.stringify({
+          success: true,
+          validated: true
         }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
-
+      }
       default:
         throw new Error('Invalid action');
     }

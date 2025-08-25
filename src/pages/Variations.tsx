@@ -1,124 +1,135 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import SEO from "@/components/SEO";
 import { ResponsiveLayout } from "@/components/ResponsiveLayout";
-
-import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
+import { Label } from "@/components/ui/label";
 
-interface Project { id: string; name: string; company_id: string; }
-interface Variation { id: string; project_id: string; title: string; total: number; status: string; created_at: string; }
+interface Variation {
+  id: string;
+  project_id: string;
+  title: string;
+  total: number;
+  status: string;
+  created_at: string;
+}
 
-const Variations: React.FC = () => {
-  const { toast } = useToast();
-  const [companyId, setCompanyId] = useState<string | null>(null);
-  const [projects, setProjects] = useState<Project[]>([]);
+const VariationsPage: React.FC = () => {
   const [variations, setVariations] = useState<Variation[]>([]);
-  const [form, setForm] = useState({ projectId: "", title: "", total: "" });
+  const [title, setTitle] = useState("");
+  const [total, setTotal] = useState("");
 
+  // Simplified mock data for demonstration
   useEffect(() => {
-    const init = async () => {
-      const { data: companies } = await supabase.from("companies").select("id, name").order("created_at", { ascending: true });
-      const id = companies?.[0]?.id || null;
-      setCompanyId(id);
-    };
-    init();
+    setVariations([
+      {
+        id: "1",
+        project_id: "proj-1",
+        title: "Additional electrical work",
+        total: 2500,
+        status: "approved",
+        created_at: new Date().toISOString()
+      }
+    ]);
   }, []);
 
-  const load = async (company: string) => {
-    const { data: ps } = await supabase.from("projects").select("id, name, company_id").eq("company_id", company).order("created_at", { ascending: false });
-    setProjects((ps || []) as Project[]);
-    const { data: vs, error } = await supabase
-      .from("variations")
-      .select("id, project_id, title, total, status, created_at")
-      .order("created_at", { ascending: false });
-    if (!error && vs) setVariations(vs as Variation[]);
+  const handleAdd = () => {
+    if (!title.trim() || !total) return;
+    
+    const newVariation: Variation = {
+      id: Date.now().toString(),
+      project_id: "proj-1",
+      title: title.trim(),
+      total: parseFloat(total),
+      status: "pending",
+      created_at: new Date().toISOString()
+    };
+    
+    setVariations(prev => [newVariation, ...prev]);
+    setTitle("");
+    setTotal("");
   };
-
-  useEffect(() => { if (companyId) load(companyId); }, [companyId]);
-
-  const add = async () => {
-    if (!form.projectId || !form.title.trim()) return;
-    const { data, error } = await supabase
-      .from("variations")
-      .insert({ project_id: form.projectId, title: form.title.trim(), total: Number(form.total || 0), status: "proposed", items: [] })
-      .select("id, project_id, title, total, status, created_at")
-      .single();
-    if (error) return toast({ title: "Could not create variation", description: error.message, variant: "destructive" });
-    setVariations([data as Variation, ...variations]);
-    setForm({ projectId: "", title: "", total: "" });
-    toast({ title: "Variation created" });
-  };
-
-  const jsonLd = useMemo(() => ({
-    "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    name: "Variations & Change Orders",
-    description: "Create and manage variations/change orders",
-  }), []);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      
+    <div className="min-h-screen bg-background">
       <ResponsiveLayout>
-        <SEO title="Variations & Change Orders | AS PRO" description="Create and manage variations/change orders." jsonLd={jsonLd} />
+        <SEO 
+          title="Project Variations | AS Cladding" 
+          description="Manage project variations and change orders" 
+        />
+        
         <div className="space-y-6">
           <div>
-            <h1 className="text-3xl font-bold">Variations & Change Orders</h1>
-            <p className="text-muted-foreground mt-2">
-              Create and manage project variations and change orders
-            </p>
+            <h1 className="text-3xl font-bold text-foreground">Project Variations</h1>
+            <p className="text-muted-foreground">Manage project variations and change orders</p>
           </div>
+          
           <Card>
             <CardHeader>
-              <CardTitle>New Variation</CardTitle>
+              <CardTitle>Add New Variation</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="grid gap-2 md:grid-cols-3">
-                <Select value={form.projectId} onValueChange={(v) => setForm((s) => ({ ...s, projectId: v }))}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select project" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {projects.map((p) => (
-                      <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Input placeholder="Title" value={form.title} onChange={(e) => setForm((s) => ({ ...s, title: e.target.value }))} />
-                <Input placeholder="Total (£)" type="number" inputMode="decimal" value={form.total} onChange={(e) => setForm((s) => ({ ...s, total: e.target.value }))} />
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="title">Variation Title</Label>
+                <Input
+                  id="title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="e.g., Additional electrical work"
+                />
               </div>
-              <Button onClick={add}>Add Variation</Button>
+              <div>
+                <Label htmlFor="total">Total Amount (£)</Label>
+                <Input
+                  id="total"
+                  type="number"
+                  value={total}
+                  onChange={(e) => setTotal(e.target.value)}
+                  placeholder="0.00"
+                />
+              </div>
+              <Button onClick={handleAdd} disabled={!title.trim() || !total}>
+                Add Variation
+              </Button>
             </CardContent>
           </Card>
-
-          <div className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>All Variations</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2">
-                  {variations.map((v) => (
-                    <li key={v.id} className="flex items-center justify-between border rounded-md p-3">
-                      <div>
-                        <div className="font-medium">{v.title}</div>
-                        <div className="text-sm text-muted-foreground">£{(v.total ?? 0).toFixed(2)} • {new Date(v.created_at).toLocaleDateString()} • {v.status}</div>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>Variations List</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {variations.length === 0 ? (
+                <p className="text-muted-foreground">No variations found.</p>
+              ) : (
+                <div className="space-y-4">
+                  {variations.map((variation) => (
+                    <div key={variation.id} className="border rounded-lg p-4">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-medium">{variation.title}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            Date: {new Date(variation.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-medium">£{variation.total.toLocaleString()}</p>
+                          <p className="text-sm text-muted-foreground capitalize">
+                            {variation.status}
+                          </p>
+                        </div>
                       </div>
-                    </li>
+                    </div>
                   ))}
-                  {variations.length === 0 && <div className="text-sm text-muted-foreground">No variations yet.</div>}
-                </ul>
-              </CardContent>
-            </Card>
-          </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </ResponsiveLayout>
     </div>
   );
 };
 
-export default Variations;
+export default VariationsPage;

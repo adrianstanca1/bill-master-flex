@@ -56,7 +56,7 @@ export function ProjectDashboard({ projectId, onBack }: ProjectDashboardProps) {
         .eq('id', projectId)
         .single();
       if (error) throw error;
-      return data as Project;
+      return { ...data, meta: data.meta || {} } as Project;
     },
     enabled: !!projectId,
   });
@@ -76,19 +76,19 @@ export function ProjectDashboard({ projectId, onBack }: ProjectDashboardProps) {
     enabled: !!projectId,
   });
 
-  // Fetch project expenses
+  // Fetch project expenses - Skip if project_id doesn't exist in expenses table
   const { data: expenses } = useQuery({
     queryKey: ['project-expenses', projectId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('expenses')
         .select('*')
-        .eq('project_id', projectId)
+        .eq('company_id', companyId)
         .order('created_at', { ascending: false });
       if (error) throw error;
       return data;
     },
-    enabled: !!projectId,
+    enabled: !!projectId && !!companyId,
   });
 
   // Fetch project photos
@@ -111,12 +111,7 @@ export function ProjectDashboard({ projectId, onBack }: ProjectDashboardProps) {
     mutationFn: async (progress: number) => {
       const { data, error } = await supabase
         .from('projects')
-        .update({ 
-          meta: { 
-            ...project?.meta, 
-            progress: Math.max(0, Math.min(100, progress))
-          }
-        })
+        .update({ meta: { ...project?.meta, progress: Math.max(0, Math.min(100, progress)) } })
         .eq('id', projectId)
         .select()
         .single();

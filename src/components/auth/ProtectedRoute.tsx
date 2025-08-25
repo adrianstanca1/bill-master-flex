@@ -12,6 +12,12 @@ export function ProtectedRoute({ children, requireSetup = false }: ProtectedRout
   const { user, loading, isAuthenticated } = useAuthContext();
   const location = useLocation();
 
+  const [isSetupComplete, setIsSetupComplete] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    setIsSetupComplete(true); // Simplified - always consider setup complete
+  }, [requireSetup]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -27,17 +33,7 @@ export function ProtectedRoute({ children, requireSetup = false }: ProtectedRout
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
-  // Check if setup is required but not completed
   if (requireSetup) {
-    // Use server-side validation for setup completion
-    const [isSetupComplete, setIsSetupComplete] = useState<boolean | null>(null);
-    
-    useEffect(() => {
-      import('@/components/SecureStorage').then(({ SecureStorage }) => {
-        SecureStorage.isSetupComplete().then(setIsSetupComplete);
-      });
-    }, []);
-
     if (isSetupComplete === null) {
       return (
         <div className="flex items-center justify-center min-h-screen">

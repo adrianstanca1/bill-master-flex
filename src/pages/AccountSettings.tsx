@@ -4,6 +4,7 @@ import { Key, User, Building, Save, Eye, EyeOff, ExternalLink } from "lucide-rea
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import SEO from "@/components/SEO";
+import { secureStorage } from "@/lib/SecureStorage";
 
 
 const LS = "as-settings";
@@ -59,17 +60,28 @@ export default function AccountSettings() {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Load existing settings
-    try {
-      const raw = localStorage.getItem(LS);
-      if (raw) {
-        setData({ ...defaults, ...(JSON.parse(raw) as AccountData) });
+    const loadSettings = async () => {
+      try {
+        // Load from secure storage first, fallback to localStorage
+        const secureData = await secureStorage.getItem('account-settings');
+        if (secureData) {
+          setData({ ...defaults, ...secureData });
+        } else {
+          const raw = localStorage.getItem(LS);
+          if (raw) {
+            const legacyData = JSON.parse(raw) as AccountData;
+            setData({ ...defaults, ...legacyData });
+            // Migrate to secure storage
+            await secureStorage.setItem('account-settings', legacyData);
+            localStorage.removeItem(LS);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load account settings', err);
       }
-    } catch (err) {
-      console.error('Failed to load account settings', err);
-    }
+    };
 
-    // Check API key statuses
+    loadSettings();
     checkApiKeyStatuses();
   }, []);
 
@@ -111,17 +123,28 @@ export default function AccountSettings() {
     }
   };
 
-  const save = () => {
+  const save = async () => {
     setSaving(true);
-    localStorage.setItem(LS, JSON.stringify(data));
-    
-    setTimeout(() => {
+    try {
+      await secureStorage.setItem('account-settings', data);
+      // Remove legacy localStorage data if it exists
+      localStorage.removeItem(LS);
+      
+      setTimeout(() => {
+        setSaving(false);
+        toast({
+          title: "Settings Saved",
+          description: "Your account settings have been updated securely."
+        });
+      }, 500);
+    } catch (error) {
       setSaving(false);
       toast({
-        title: "Settings Saved",
-        description: "Your account settings have been updated successfully."
+        title: "Save Failed",
+        description: "Failed to save settings securely. Please try again.",
+        variant: "destructive"
       });
-    }, 500);
+    }
   };
 
   const toggleKeyVisibility = (keyName: string) => {

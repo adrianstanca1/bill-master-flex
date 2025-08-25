@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { secureStorage } from '@/lib/SecureStorage';
 
 export const BankingConnections: React.FC = () => {
   const { toast } = useToast();
@@ -11,7 +12,7 @@ export const BankingConnections: React.FC = () => {
   const connect = async () => {
     try {
       setBusy(true);
-      const settings = (() => { try { return JSON.parse(localStorage.getItem('as-settings')||'{}'); } catch { return {}; } })();
+      const settings = await secureStorage.getItem('as-settings') || {};
       const details = {
         truelayerClientId: settings?.truelayerClientId,
         truelayerRedirectUri: settings?.truelayerRedirectUri,

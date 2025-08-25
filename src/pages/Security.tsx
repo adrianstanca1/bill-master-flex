@@ -2,9 +2,10 @@
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SecurityPolicyEnforcer } from '@/components/SecurityPolicyEnforcer';
-import { SecurityMonitor } from '@/components/SecurityMonitor';
-import { EnhancedSecurityDashboard } from '@/components/EnhancedSecurityDashboard';
-import { ThreatDetection } from '@/components/ThreatDetection';
+import { TemporarySecurityStub } from '@/components/TemporarySecurityStub';
+import { SimplifiedSecurityDashboard } from '@/components/SimplifiedSecurityDashboard';
+import { SecurityConfigurationManager } from '@/components/SecurityConfigurationManager';
+import { SecurityEnhancementsPanel } from '@/components/SecurityEnhancementsPanel';
 import SEO from '@/components/SEO';
 
 export default function Security() {
@@ -24,28 +25,43 @@ export default function Security() {
           </p>
         </div>
 
-        <Tabs defaultValue="dashboard" className="w-full">
+        <Tabs defaultValue="enhancements" className="w-full">
           <TabsList>
+            <TabsTrigger value="enhancements">Security Enhancements</TabsTrigger>
+            <TabsTrigger value="configuration">Configuration</TabsTrigger>
+            <TabsTrigger value="compliance">Security Compliance</TabsTrigger>
             <TabsTrigger value="dashboard">Security Dashboard</TabsTrigger>
             <TabsTrigger value="monitoring">Live Monitoring</TabsTrigger>
             <TabsTrigger value="threats">Threat Detection</TabsTrigger>
             <TabsTrigger value="policies">Security Policies</TabsTrigger>
           </TabsList>
           
+          <TabsContent value="enhancements" className="space-y-6">
+            <SecurityEnhancementsPanel />
+          </TabsContent>
+          
+          <TabsContent value="configuration" className="space-y-6">
+            <SecurityConfigurationManager />
+          </TabsContent>
+          
+          <TabsContent value="compliance" className="space-y-6">
+            <TemporarySecurityStub />
+          </TabsContent>
+          
           <TabsContent value="dashboard" className="space-y-6">
-            <EnhancedSecurityDashboard />
+            <SimplifiedSecurityDashboard />
           </TabsContent>
           
           <TabsContent value="monitoring" className="space-y-6">
-            <SecurityMonitor />
+            <TemporarySecurityStub />
           </TabsContent>
           
           <TabsContent value="threats" className="space-y-6">
-            <ThreatDetection />
+            <TemporarySecurityStub />
           </TabsContent>
           
           <TabsContent value="policies" className="space-y-6">
-            <SecurityPolicyEnforcer />
+            <SecurityConfigurationManager />
           </TabsContent>
         </Tabs>
       </div>
