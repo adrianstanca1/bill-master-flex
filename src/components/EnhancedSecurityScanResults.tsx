@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -24,11 +24,7 @@ export function EnhancedSecurityScanResults() {
   const { toast } = useToast();
   const { logSecurityEvent } = useEnhancedSecurityLogging();
 
-  useEffect(() => {
-    performSecurityScan();
-  }, []);
-
-  const performSecurityScan = async () => {
+  const performSecurityScan = useCallback(async () => {
     setScanning(true);
     
     try {
@@ -171,7 +167,11 @@ export function EnhancedSecurityScanResults() {
     } finally {
       setScanning(false);
     }
-  };
+  }, [logSecurityEvent, toast]);
+
+  useEffect(() => {
+    performSecurityScan();
+  }, [performSecurityScan]);
 
   const getStatusIcon = (status: SecurityCheck['status']) => {
     switch (status) {
