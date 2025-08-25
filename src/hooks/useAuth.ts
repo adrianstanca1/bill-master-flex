@@ -86,9 +86,9 @@ export function useAuth() {
   };
 
   const signInWithOAuth = async (
-    provider: 'google' | 'azure' | 'github',
+    provider: 'google' | 'github' | 'apple',
     redirectTo: string = window.location.origin
-  ): Promise<AuthResult<any>> => {
+  ): Promise<AuthResult<OAuthResponse>> => {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider,
       options: { redirectTo },

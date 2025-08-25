@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, ReactNode } from 'react';
 import { useAuth, AuthResult } from '@/hooks/useAuth';
-import { User, Session, AuthError, OAuthResponse } from '@supabase/supabase-js';
+import { User, Session, OAuthResponse } from '@supabase/supabase-js';
 
 interface AuthContextType {
   user: User | null;
@@ -17,9 +17,9 @@ interface AuthContextType {
   signOut: () => Promise<AuthResult<null>>;
   resetPassword: (email: string) => Promise<AuthResult<null>>;
   signInWithOAuth: (
-    provider: 'google' | 'azure' | 'github',
+    provider: 'google' | 'github' | 'apple',
     redirectTo?: string,
-  ) => Promise<AuthResult<any>>;
+  ) => Promise<AuthResult<OAuthResponse>>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);

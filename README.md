@@ -44,6 +44,13 @@ This project uses [Resend](https://resend.com) for transactional emails. To enab
 export VITE_RESEND_API_KEY="your_resend_api_key"
 ```
 
+Supabase powers authentication and realtime data. You'll need to configure your project's URL and public anon key:
+
+```sh
+export VITE_SUPABASE_URL="https://your-project.supabase.co"
+export VITE_SUPABASE_PUBLISHABLE_KEY="your_public_anon_key"
+```
+
 **Edit a file directly in GitHub**
 
 - Navigate to the desired file(s).

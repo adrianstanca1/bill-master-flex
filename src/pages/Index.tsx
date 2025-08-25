@@ -6,8 +6,11 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import SEO from "@/components/SEO";
 import { GuestBanner } from "@/components/GuestBanner";
+import { useSupabaseStats } from "@/hooks/useSupabaseStats";
 
 const Index = () => {
+  const { data: stats, isLoading, isError } = useSupabaseStats();
+
   return (
     <>
       <SEO
@@ -31,19 +34,25 @@ const Index = () => {
           <h1 className="text-5xl md:text-7xl font-bold text-gradient mb-6">
             AS Agents
           </h1>
-          <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-8">
+          <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-2">
             Professional construction management platform for modern businesses
+          </p>
+          <p className="text-sm text-muted-foreground max-w-3xl mx-auto mb-8">
+            {isLoading
+              ? "Loading stats..."
+              : isError
+                ? "Failed to load stats."
+                : `Managing ${stats?.projects ?? 0} projects and ${stats?.clients ?? 0} clients.`}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/dashboard">
-              <button className="btn-primary">
-                Enter Dashboard
-              </button>
+              <Button>Enter Dashboard</Button>
             </Link>
             <Link to="/agents">
-              <button className="btn-secondary">
-                AI Agents
-              </button>
+              <Button variant="secondary">AI Agents</Button>
+            </Link>
+            <Link to="/register">
+              <Button variant="secondary">Register</Button>
             </Link>
           </div>
         </div>
